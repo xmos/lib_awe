@@ -21,7 +21,7 @@ void awe_xcore_init();
  *
  * \param c_control channelend over which control packets arrive
  */
-void awe_hid_control_thread(chanend_t c_control);
+void awe_tuning_thread(chanend_t c_control);
 
 /** Thread that implements data transport between the AWE DSP tasks and
  * the rest of the system. This function does not return

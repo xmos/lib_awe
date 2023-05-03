@@ -1,3 +1,4 @@
+#if 0
 #include <xcore/channel.h>
 #include "awe_xcore_internal.h"
 
@@ -5,7 +6,7 @@
 // TODO: cleanup stacksize
 
 #pragma stackfunction 2048
-void awe_control(chanend_t c_control) {
+void awe_tuning_thread(chanend_t c_control) {
     while(1) {
         int input_message_word_count = 0;
         int full_packet_in_words = 0;
@@ -58,6 +59,7 @@ void awe_usb_hid(chanend c_hid_to_host, chanend c_hid_from_host, chanend c_hid_c
     xc_ptr hid_from_host_buffer = array_to_xc_ptr(g_hid_from_host_buffer);
     
 
+    
     /* Mark OUT endpoints ready to receive data from host */
     XUD_SetReady_OutPtr(ep_hid_from_host, hid_from_host_buffer);
 
@@ -110,4 +112,5 @@ void awe_usb_hid(chanend c_hid_to_host, chanend c_hid_from_host, chanend c_hid_c
     }
 }
 
+#endif
 #endif
