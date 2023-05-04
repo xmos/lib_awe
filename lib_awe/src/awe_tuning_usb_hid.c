@@ -1,3 +1,5 @@
+#include <xcore/channel.h>
+#include <xcore/select.h>
 #include "awe_xcore_internal.h"
 
 #if defined(AWE_TUNING_OVER_USB_HID)

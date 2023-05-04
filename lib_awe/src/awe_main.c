@@ -4,7 +4,7 @@
 #include "awe_xcore_internal.h"
 
 DECLARE_JOB(awe_dsp_thread, (uint32_t, chanend_t));
-DECLARE_JOB(awe_tuning_thread, (chanend_t));
+DECLARE_JOB(awe2_tuning_thread, (chanend_t));
 DECLARE_JOB(awe_data_transport_thread, (chanend_t, chanend_t*));
 
 /** Function that spawns all the child threads
@@ -22,6 +22,8 @@ DECLARE_JOB(awe_data_transport_thread, (chanend_t, chanend_t*));
  * the tuning packet is handled by AWE and a reply is sent back over the same
  * channel-end.
  */
+extern void awe2_tuning_thread(chanend_t c_control);
+
 void awe_xcore_main(chanend_t c_tuning, chanend_t c_data) {
     channel_t t[AWE_DSP_THREAD_NUM];
     chanend_t t_end_b[AWE_DSP_THREAD_NUM];
@@ -47,6 +49,6 @@ void awe_xcore_main(chanend_t c_tuning, chanend_t c_data) {
 #endif
 #endif
 #endif
-        PJOB(awe_tuning_thread, (c_tuning)),
+        PJOB(awe2_tuning_thread, (c_tuning)),
         PJOB(awe_data_transport_thread, (c_data, t_end_b)));
 }
