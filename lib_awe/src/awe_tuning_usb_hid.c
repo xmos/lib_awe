@@ -29,7 +29,7 @@ void awe_usb_hid(chanend_t c_hid_to_host, chanend_t c_hid_from_host, chanend_t c
         CASE_THEN(c_hid_to_host, xud_hid_input)
         )
     {
-    input_from_awe: /* Data frmo the AWE stack */
+    input_from_awe: /* Reply packet from the AWE stack */
         chanend_check_end_token(c_tuning);
         chanend_out_word(c_tuning, 13);
         chanend_out_end_token(c_tuning);

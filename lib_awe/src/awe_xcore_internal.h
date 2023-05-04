@@ -3,14 +3,13 @@
 
 #include <xcore/chanend.h>
 #include "AWECore.h"
+#include "Errors.h"
 #include "awe_xcore.h"
 
 // The global AWE instance.
 
 extern AWEInstance2 g_AWEInstance;
 extern UINT32 AWE_Packet_Buffer[AWE_HID_PACKET_BUFFER_SIZE];
-// TODO: delete the reply buffer and share it with input buffer
-extern UINT32 AWE_Packet_Buffer_Reply[AWE_HID_PACKET_BUFFER_SIZE];
 
 /** Function that initialises all global data structures
  */

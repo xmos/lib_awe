@@ -5,7 +5,7 @@
 // TODO: cleanup stacksize
 
 #pragma stackfunction 2048
-void awe2_tuning_thread(chanend_t c_control) {
+void awe_tuning_thread(chanend_t c_control) {
     while(1) {
         int input_message_word_count = 0;
         int full_packet_in_words = 0;
@@ -25,7 +25,7 @@ void awe2_tuning_thread(chanend_t c_control) {
             chanend_check_end_token(c_control);
         } while(input_message_word_count < full_packet_in_words);
         awe_packetProcess((AWEInstance *)&g_AWEInstance);
-        full_packet_in_words = AWE_Packet_Buffer_Reply[0]>>16;
+        full_packet_in_words = AWE_Packet_Buffer[0]>>16;
         if (full_packet_in_words > AWE_HID_PACKET_BUFFER_SIZE) {
             full_packet_in_words = AWE_HID_PACKET_BUFFER_SIZE;
         }
@@ -40,7 +40,7 @@ void awe2_tuning_thread(chanend_t c_control) {
             }
             chanend_out_word(c_control, num_words);
             for(int i = 0; i < num_words; i++) {
-                int x = AWE_Packet_Buffer_Reply[output_message_word_count++];
+                int x = AWE_Packet_Buffer[output_message_word_count++];
                 chanend_out_word(c_control, x);
             }
             chanend_out_end_token(c_control);

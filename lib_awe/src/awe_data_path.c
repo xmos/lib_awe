@@ -3,8 +3,6 @@
 #include "assert.h"
 #include "awe_xcore_internal.h"
 
-// TODO: remove alll printf
-
 void awe_offload_data_to_dsp_engine(chanend_t c_to_dspc, unsigned sampstoAWE[], unsigned fromAWE[])
 {
     // TODO: reroll these loops
@@ -74,6 +72,7 @@ static void data_to_and_from_awe(
     int32_t data_from_awe[AWE_BLOCK_SIZE][AWE_OUTPUT_CHANNELS],
     int32_t data_to_awe  [AWE_BLOCK_SIZE][AWE_INPUT_CHANNELS],
     chanend_t c_dsp_threads[]) {
+    int passthrough = 0;
 
     for(int i = 0; i < AWE_INPUT_CHANNELS; i++) {
         // Call this for each input channel in your system.
@@ -81,24 +80,30 @@ static void data_to_and_from_awe(
                                          &data_to_awe[0][i],
                                          AWE_INPUT_CHANNELS, i,
                                          Sample24bit_high);
-        if (res != 0 && res != -93) {
-            // TODO: on 93 don't pump
-            // On all other non 0 ASSERT
-//            printf("AIS %d\n", res);
+        if (res == E_AUDIO_NOT_STARTED) {
+            passthrough = 1;
+            break;
         }
+        assert(res == E_SUCCESS);
     }
     for(int i = 0; i < AWE_OUTPUT_CHANNELS; i++) {
         // Call this for each output channel in your system.
         int res = awe_audioExportSamples((AWEInstance *)&g_AWEInstance, &data_from_awe[0][i],
                                          AWE_OUTPUT_CHANNELS, i,
                                          Sample24bit_high);
-        if (res != 0 && res != -93) {
-            // TODO: on -93 don't pump
-            // On all other non 0 ASSERT
-//            printf("AES %d\n", res);
+        if (res == E_AUDIO_NOT_STARTED) {
+            passthrough = 1;
+            break;
         }
+        assert(res == E_SUCCESS);
     }
-    // TODO: only pump on success, otherwise simply copy input to output
+    if (passthrough) {
+        int channels_to_copy = (AWE_OUTPUT_CHANNELS < AWE_INPUT_CHANNELS ?
+                                AWE_OUTPUT_CHANNELS :
+                                AWE_INPUT_CHANNELS);
+        memcpy(data_from_awe, data_to_awe, channels_to_copy * AWE_BLOCK_SIZE * sizeof(int32_t));
+        return;
+    }
     unsigned layoutMask = awe_audioGetPumpMask((AWEInstance *)&g_AWEInstance);
     for( int i = 0; i < AWE_DSP_THREAD_NUM; i++) {
         if (layoutMask & 1) {
@@ -137,7 +142,7 @@ void awe_data_transport_thread(chanend_t c_data, chanend_t c_children[]) {
         }
         chanend_out_end_token(c_data);
         frame++;
-        if (frame == AWE_BLOCK_SIZE) {
+        if (frame == AWE_BLOCK_SIZE) { // TODO: this may not fit between samples
             frame = 0;
             data_to_and_from_awe(output_data, input_data, c_children);
         }
@@ -149,9 +154,6 @@ void awe_dsp_thread(uint32_t thread_number, chanend_t c_parent) {
     while(1) {
         chanend_check_end_token(c_parent);
         int res = awe_audioPump((AWEInstance *)&g_AWEInstance, thread_number);
-        if (res != 0 && res != -26) {
-            printf("%lu:: %d\n", thread_number, res);
-//        TODO:  on anything non -26 or 0 assert.
-        }
+        assert(res == E_SUCCESS || res == E_NO_LAYOUTS); // TODO: delete this assert
     }
 }
