@@ -817,8 +817,6 @@
                 awe_modConvolveClass, \
                 awe_modCorrelateClass, \
                 awe_modCorrelationFract32Class, \
-                awe_modCycleBurnerClass, \
-                awe_modCycleBurnerSetClass, \
                 awe_modDateTimeClass, \
                 awe_modDeadBandClass, \
                 awe_modDelay16Class, \
@@ -869,6 +867,8 @@
                 awe_modFractionalDelayV2Class
 #define ADVANCED2_LIST \
           .word awe_modFractionalDelayV2Fract32Class, \
+                awe_modCycleBurnerClass, \
+                awe_modCycleBurnerSetClass, \
                 awe_modGetWirePropertiesClass, \
                 awe_modGraphicEQBandHPClass, \
                 awe_modGraphicEQBandHpFract32Class, \
@@ -1040,7 +1040,7 @@
     .align 4
 g_module_descriptor_table:  
     STANDARD_LIST
-    ADVANCED2_LIST
+    ADVANCED_LIST
     INTERNAL_LIST
     DEPRECATED_LIST
 g_module_descriptor_table_end:  
