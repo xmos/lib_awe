@@ -4,7 +4,7 @@
 
 // TODO: cleanup stacksize
 
-#pragma stackfunction 2048
+#pragma stackfunction 1024
 void awe_tuning_thread(chanend_t c_control) {
     while(1) {
         int input_message_word_count = 0;

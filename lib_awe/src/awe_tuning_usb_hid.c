@@ -18,13 +18,13 @@ void awe_usb_hid(chanend_t c_hid_to_host, chanend_t c_hid_from_host, chanend_t c
     /* Mark the OUT endpoint to be ready to receive data from host */
     XUD_SetReady_Out(ep_hid_from_host, (unsigned char*)g_hid_from_host_buffer);
 
-    int ready_for_next_out_packet = 1;
+    int ready_for_next_reply_packlet = 1;
     XUD_Result_t result;
     unsigned length;
         
     /* Wait for response from XUD and service relevant EP */
     SELECT_RES(
-        CASE_GUARD_THEN(c_tuning, ready_for_next_out_packet, input_from_awe),
+        CASE_GUARD_THEN(c_tuning, ready_for_next_reply_packlet, input_from_awe),
         CASE_THEN(c_hid_from_host, xud_hid_output),
         CASE_THEN(c_hid_to_host, xud_hid_input)
         )
@@ -41,7 +41,7 @@ void awe_usb_hid(chanend_t c_hid_to_host, chanend_t c_hid_from_host, chanend_t c
         chanend_out_end_token(c_tuning);
         chanend_check_end_token(c_tuning);
         XUD_SetReady_In(ep_hid_to_host, (unsigned char *)g_hid_to_host_buffer, 56);
-        ready_for_next_out_packet = 0;
+        ready_for_next_reply_packlet = 0;
         continue;
     xud_hid_output: /* HID OUT from host */
         XUD_GetData_Select(c_hid_from_host, ep_hid_from_host, &length, &result);
@@ -60,7 +60,7 @@ void awe_usb_hid(chanend_t c_hid_to_host, chanend_t c_hid_from_host, chanend_t c
         continue;
     xud_hid_input:  /* HID IN to host */
         XUD_SetData_Select(c_hid_to_host, ep_hid_to_host, &result);
-        ready_for_next_out_packet = 1;
+        ready_for_next_reply_packlet = 1;
         continue;
 
     }
