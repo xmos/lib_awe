@@ -152,6 +152,8 @@
 #define HID_CONTROLS       (0)
 #endif
 
+#define HID_OUT_REQUIRED   (1)
+
 #include "user_main.h"
 
 #endif
