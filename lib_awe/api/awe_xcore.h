@@ -25,10 +25,12 @@
  * (AWE_INPUT_CHANNELS, AWE_OUTPUT_CHANNELS), and the number of threads that
  * should be used for DSP (AWE_DSP_THREAD_NUM).
  *
- * \param c_tuning    The channel end over which tuning packets arrive. Over
+ * \param c_tuning_from_host
+ *                    The channel end over which tuning packets arrive. Over
  *                    this channel you will send a sequence [N, N words, CT_END],
  *                    and then receive an [CT_END] empty message as ack. You do
  *                    this until all data has been sent through.
+ * \param c_tuning_to_host
  *                    A [CT_END] empty message will be sent back over c_tuning,
  *                    which you must acknowledge with a word M for the maximum
  *                    packet size you are willing to accept, whereupon you will
@@ -41,7 +43,9 @@
  *                    [ AUDIO_INPUT_CHANNELS words, CT_END] over c_data, then
  *                    input [ AUDIO_OUTPUT_CHANNELS, CT_END ] from c_data.
  */
-extern void awe_xcore_main(chanend_t c_control, chanend_t c_data);
+extern void awe_xcore_main(chanend_t c_control_from_host,
+                           chanend_t c_tuning_to_host,
+                           chanend_t c_data);
 
 /** Convenience function that pushes an audio frame stored in an array to the
  * AWE stack. This function may be avoided and instead data can be pushed

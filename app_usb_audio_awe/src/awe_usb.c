@@ -13,8 +13,8 @@ void UserBufferManagement(unsigned sampsFromUsbToAudio[], unsigned sampsFromAudi
 }
 
 
-void dsp_main(chanend_t c_control) {
+void dsp_main(chanend_t c_control_from_host, chanend_t c_control_to_host) {
     channel_t c_data = chan_alloc();
     g_c_to_dspc = c_data.end_a;
-    awe_xcore_main(c_control, c_data.end_b);
+    awe_xcore_main(c_control_from_host, c_control_to_host, c_data.end_b);
 }

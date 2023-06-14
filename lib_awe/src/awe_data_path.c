@@ -101,7 +101,7 @@ static void data_to_and_from_awe(
         int channels_to_copy = (AWE_OUTPUT_CHANNELS < AWE_INPUT_CHANNELS ?
                                 AWE_OUTPUT_CHANNELS :
                                 AWE_INPUT_CHANNELS);
-        memcpy(data_from_awe, data_to_awe, channels_to_copy * AWE_BLOCK_SIZE * sizeof(int32_t));
+        memset(data_from_awe, 0, channels_to_copy * AWE_BLOCK_SIZE * sizeof(int32_t));
         return;
     }
     unsigned layoutMask = awe_audioGetPumpMask((AWEInstance *)&g_AWEInstance);
