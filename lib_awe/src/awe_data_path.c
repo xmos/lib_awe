@@ -1,4 +1,5 @@
 #include <xcore/channel.h>
+#include <xcore/select.h>
 #include <stdio.h>
 #include "assert.h"
 #include "awe_xcore_internal.h"
@@ -101,7 +102,7 @@ static void data_to_and_from_awe(
         int channels_to_copy = (AWE_OUTPUT_CHANNELS < AWE_INPUT_CHANNELS ?
                                 AWE_OUTPUT_CHANNELS :
                                 AWE_INPUT_CHANNELS);
-        memcpy(data_from_awe, data_to_awe, channels_to_copy * AWE_BLOCK_SIZE * sizeof(int32_t));
+        memset(data_from_awe, 0, channels_to_copy * AWE_BLOCK_SIZE * sizeof(int32_t));
         return;
     }
     unsigned layoutMask = awe_audioGetPumpMask((AWEInstance *)&g_AWEInstance);
@@ -150,10 +151,26 @@ void awe_data_transport_thread(chanend_t c_data, chanend_t c_children[]) {
 }
 
 #pragma stackfunction 1024
-void awe_dsp_thread(uint32_t thread_number, chanend_t c_parent) {
-    while(1) {
+void awe_dsp_thread(uint32_t thread_number,
+                    chanend_t c_parent,
+                    chanend_t c_deferred_work) {
+    int no_deferred_work = 1;
+    SELECT_RES(
+        CASE_THEN(c_parent,        go),
+        CASE_THEN(c_deferred_work, clear_deferred_work)
+        )
+    {
+    go:
         chanend_check_end_token(c_parent);
         int res = awe_audioPump((AWEInstance *)&g_AWEInstance, thread_number);
-        assert(res == E_SUCCESS || res == E_NO_LAYOUTS); // TODO: delete this assert
+        if (res && no_deferred_work) {
+            chanend_out_end_token(c_deferred_work);
+            no_deferred_work = 0;
+        }
+        continue;      // TODO: CONTINUE_NO_RESET
+    clear_deferred_work:
+        chanend_check_end_token(c_deferred_work);
+        no_deferred_work = 1;
+        continue;      // TODO: CONTINUE_NO_RESET
     }
 }
