@@ -21,7 +21,8 @@ void awe_xcore_init();
  * \param c_control channelend over which control packets arrive
  */
 void awe_tuning_thread(chanend_t c_control_from_host,
-                       chanend_t c_tuning_to_host);
+                       chanend_t c_tuning_to_host,
+                       chanend_t c_deferred_work[AWE_DSP_MAX_THREAD_NUM]);
 
 /** Thread that implements data transport between the AWE DSP tasks and
  * the rest of the system. This function does not return
@@ -41,7 +42,13 @@ void awe_data_transport_thread(chanend_t c_data, chanend_t c_children[]);
  * \param c_parent      channelend to the main task. a single CT_END token
  *                      must be posted on this channelend for the DSP
  *                      thread to jump into action.
+ *
+ * \param c_deferred_work channelend to a task that can perform deferred work.
+ *                      Anytime deferred work is due, an END token is popped into
+ *                      it to require deferred work to be computed.
+ *                      This is acknowledged from the other side.
  */
-void awe_dsp_thread(uint32_t thread_number, chanend_t c_parent);
+void awe_dsp_thread(uint32_t thread_number, chanend_t c_parent,
+                    chanend_t c_deferred_work);
 
 #endif

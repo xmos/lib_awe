@@ -66,7 +66,7 @@ extern void awe_offload_data_to_dsp_engine(chanend_t c_to_awe,
                                            unsigned toAWE[],
                                            unsigned fromAWE[]);
 
-
+#define AWE_DSP_MAX_THREAD_NUM        5
 
 
 #if defined(__awe_conf_h_exists__)
@@ -75,6 +75,10 @@ extern void awe_offload_data_to_dsp_engine(chanend_t c_to_awe,
 
 #ifndef AWE_DSP_THREAD_NUM
 #define AWE_DSP_THREAD_NUM              2
+#endif
+
+#if AWE_DSP_THREAD_NUM > AWE_DSP_MAX_THREAD_NUM
+#error "AWE_DSP_THREAD_NUM too high, max " ## AWE_DSP_MAX_THREAD_NUM
 #endif
 
 #ifndef AWE_INPUT_CHANNELS
