@@ -9,7 +9,21 @@ void UserBufferManagementInit()
 
 void UserBufferManagement(unsigned sampsFromUsbToAudio[], unsigned sampsFromAudioToUsb[])
 {
-    awe_offload_data_to_dsp_engine(g_c_to_dspc, sampsFromUsbToAudio, sampsFromAudioToUsb);
+    #if(I2S_ONLY)
+        #pragma unroll loop(8)
+        for(int i = 0; i < AUDIO_OUTPUT_CHANNELS; i++) {            // These are ADC
+            chanend_out_word(g_c_to_dspc, sampsFromAudioToUsb[i]);
+        }
+        chanend_out_end_token(g_c_to_dspc);
+        #pragma unroll loop(8)
+        for(int i = 0; i < AUDIO_INPUT_CHANNELS; i++) {           // These go to DAC
+            sampsFromUsbToAudio[i] = chanend_in_word(g_c_to_dspc);
+        }
+        chanend_check_end_token(g_c_to_dspc);
+    #else
+        awe_offload_data_to_dsp_engine(g_c_to_dspc, sampsFromUsbToAudio, sampsFromAudioToUsb);
+    #endif // I2S_ONLY
+
 }
 
 
