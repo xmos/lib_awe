@@ -12,8 +12,10 @@ extern AWEInstance2 g_AWEInstance;
 extern UINT32 AWE_Packet_Buffer[AWE_HID_PACKET_BUFFER_SIZE];
 
 /** Function that initialises all global data structures
+ *
+ * \param  heap   pointer to heap
  */
-void awe_xcore_init();
+void awe_xcore_init(uint32_t *heap);
 
 /** Thread that implements control over a HID endpoint. This function does
  * not return

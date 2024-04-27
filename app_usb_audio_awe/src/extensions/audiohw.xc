@@ -1,6 +1,7 @@
 #include <xs1.h>
 #include <assert.h>
 #include <platform.h>
+#include <stdio.h>
 #include "xassert.h"
 #include "i2c.h"
 #include "xua.h"
@@ -397,5 +398,38 @@ void AudioHwConfig(unsigned samFreq, unsigned mClk, unsigned dsdMode, unsigned s
         // Stand-by release
         WriteAllDacRegs(0x02, 0x00);
     }
-}
+#if 0
+    uint8_t a_data[18] = {7, 1, 9, 0, 0, 0, 0x21, 0x43, 0x65, 0x87, 0xFF, 0xFF, 0xFF, 0xFF, 1, 2, 3, 4};
+    size_t n;
+    int device_addr = 4;
+    uint8_t data[19];
 
+    unsafe
+    {
+        i_i2c_client.write(device_addr, a_data, 18, n, 1);
+    }
+    printf("Sent %d\n", n);
+    uint8_t b_data[19] = {4, 1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,6};
+
+    unsafe
+    {
+        i_i2c_client.write(device_addr, b_data, 19, n, 1);
+    }
+    printf("Sent %d\n", n);
+    unsafe
+    {
+        i_i2c_client.write(device_addr, b_data, 1, n, 0);
+        if (n != 1) {
+            i_i2c_client.send_stop_bit();
+            printf("Bad\n");
+        } else {
+            printf("Firing off big read\n");
+            i_i2c_client.read(device_addr, data, 18, 1);
+        }
+        for(int i = 0; i < 18; i++) {
+            printf("%d ", data[i]);
+        }
+        printf("\n");
+    }
+#endif
+}

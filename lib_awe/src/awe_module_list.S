@@ -1,4 +1,8 @@
-    // This replaces some dodgy typing
+// This replaces some dodgy typing
+    
+#if defined(__awe_conf_h_exists__)
+#include "awe_conf.h"
+#endif
     
 // Standard Modules
     .globl awe_modAGCCoreClass
@@ -520,7 +524,7 @@
 
 
 #define STANDARD_LIST \
-	.word	awe_modWAVInterp16OneShotSourceFract32Class, \
+		awe_modWAVInterp16OneShotSourceFract32Class, \
 		awe_modAGCCoreClass, \
 		awe_modAGCLimiterCoreClass, \
 		awe_modAGCNoiseGateCoreClass, \
@@ -669,7 +673,7 @@
 		awe_modZeroSourceClass
 
 #define ADVANCED_LIST \
-	.word	awe_modAGCAttackReleaseClass, \
+		awe_modAGCAttackReleaseClass, \
 		awe_modAGCCompressorCoreClass, \
 		awe_modAGCVariableAttackReleaseClass, \
 		awe_modAllpassDelayClass, \
@@ -845,7 +849,7 @@
 		awe_modZeroPaddingClass \
 
 #define INTERNAL_LIST \
-	.word	awe_modCompiledSubsystemClass, \
+		awe_modCompiledSubsystemClass, \
 		awe_modProxyGetSetClass
 
 
@@ -859,10 +863,15 @@
     .globl g_module_descriptor_table
     .globl g_module_descriptor_table_end
     .align 4
-g_module_descriptor_table:  
-    STANDARD_LIST
-    ADVANCED_LIST
-    INTERNAL_LIST
+g_module_descriptor_table:
+#ifdef AWE_MODULE_LIST
+    .word  AWE_MODULE_LIST          // Application defined
+#else
+    .word  STANDARD_LIST
+    .word  ADVANCED_LIST
+    .word  INTERNAL_LIST
+#endif
 g_module_descriptor_table_end:  
 
         .cc_bottom g_module_descriptor_table.data
+

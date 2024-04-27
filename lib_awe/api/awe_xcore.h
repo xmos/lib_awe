@@ -3,6 +3,12 @@
 
 #include <stdint.h>
 #include <xcore/channel.h>
+#include <xcore/port.h>
+
+
+#if defined(__awe_conf_h_exists__)
+#include "awe_conf.h"
+#endif
 
 /** Function that spawns all the child threads. This function does not return.
  * It always spawns at least one tuning thread, one data-transport
@@ -45,7 +51,13 @@
  */
 extern void awe_xcore_main(chanend_t c_control_from_host,
                            chanend_t c_tuning_to_host,
-                           chanend_t c_data);
+                           chanend_t c_data
+#ifdef AWE_I2C_CONTROL
+                           , port_t p_i2c_scl
+                           , port_t p_i2c_sda
+                           , uint8_t i2c_address
+#endif
+    );
 
 /** Convenience function that pushes an audio frame stored in an array to the
  * AWE stack. This function may be avoided and instead data can be pushed
@@ -68,10 +80,6 @@ extern void awe_offload_data_to_dsp_engine(chanend_t c_to_awe,
 
 #define AWE_DSP_MAX_THREAD_NUM        5
 
-
-#if defined(__awe_conf_h_exists__)
-#include "awe_conf.h"
-#endif
 
 #ifndef AWE_DSP_THREAD_NUM
 #define AWE_DSP_THREAD_NUM              2

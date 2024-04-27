@@ -1,11 +1,15 @@
 #include <xcore/channel.h>
 #include <xcore/chanend.h>
 #include <xcore/parallel.h>
+#include <xcore/port.h>
 #include "awe_xcore_internal.h"
 
 DECLARE_JOB(awe_dsp_thread, (uint32_t, chanend_t, chanend_t));
 DECLARE_JOB(awe_tuning_thread, (chanend_t, chanend_t, chanend_t*));
 DECLARE_JOB(awe_data_transport_thread, (chanend_t, chanend_t*));
+#ifdef AWE_I2C_CONTROL
+DECLARE_JOB(awe_i2c_main,              (port_t, port_t, int));
+#endif
 
 /** Function that spawns all the child threads
  * It always spawns at least one tuning thread, one data-transport
@@ -24,18 +28,26 @@ DECLARE_JOB(awe_data_transport_thread, (chanend_t, chanend_t*));
  */
 void awe_xcore_main(chanend_t c_tuning_from_host,
                     chanend_t c_tuning_to_host,
-                    chanend_t c_data) {
+                    chanend_t c_data
+#ifdef AWE_I2C_CONTROL
+                    , port_t p_i2c_scl
+                    , port_t p_i2c_sda
+                    , uint8_t i2c_address
+#endif
+    ) {
     channel_t t[AWE_DSP_THREAD_NUM];
     channel_t d[AWE_DSP_THREAD_NUM];
     chanend_t t_end_b[AWE_DSP_THREAD_NUM];
     chanend_t d_end_b[AWE_DSP_THREAD_NUM];
+    uint32_t *AWEHeap = malloc(4*AWE_HEAP_SIZE);  // # Workaround bug 18804
+
     for(int i = 0; i < AWE_DSP_THREAD_NUM; i++) {
         t[i] = chan_alloc();
         t_end_b[i] = t[i].end_b;
         d[i] = chan_alloc();
         d_end_b[i] = d[i].end_b;
     }
-    awe_xcore_init();
+    awe_xcore_init(AWEHeap);
     PAR_JOBS(
         PJOB(awe_dsp_thread, (0, t[0].end_a, d[0].end_a)),
 #if AWE_DSP_THREAD_NUM > 1
@@ -54,5 +66,9 @@ void awe_xcore_main(chanend_t c_tuning_from_host,
 #endif
 #endif
         PJOB(awe_tuning_thread, (c_tuning_from_host, c_tuning_to_host, d_end_b)),
-        PJOB(awe_data_transport_thread, (c_data, t_end_b)));
+        PJOB(awe_data_transport_thread, (c_data, t_end_b))
+#ifdef AWE_I2C_CONTROL
+        , PJOB(awe_i2c_main, (p_i2c_scl, p_i2c_sda, i2c_address))
+#endif
+        );
 }

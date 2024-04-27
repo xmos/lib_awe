@@ -9,37 +9,13 @@ void awe_offload_data_to_dsp_engine(chanend_t c_to_dspc, unsigned sampstoAWE[], 
     // TODO: reroll these loops
     chanend_out_word(c_to_dspc, sampstoAWE[0]);
     chanend_out_word(c_to_dspc, sampstoAWE[1]);
-    chanend_out_word(c_to_dspc, sampstoAWE[2]);
-    chanend_out_word(c_to_dspc, sampstoAWE[3]);
-    chanend_out_word(c_to_dspc, sampstoAWE[4]);
-    chanend_out_word(c_to_dspc, sampstoAWE[5]);
-    chanend_out_word(c_to_dspc, sampstoAWE[6]);
-    chanend_out_word(c_to_dspc, sampstoAWE[7]);
     chanend_out_word(c_to_dspc, fromAWE[0]);
     chanend_out_word(c_to_dspc, fromAWE[1]);
-    chanend_out_word(c_to_dspc, fromAWE[2]);
-    chanend_out_word(c_to_dspc, fromAWE[3]);
-    chanend_out_word(c_to_dspc, fromAWE[4]);
-    chanend_out_word(c_to_dspc, fromAWE[5]);
-    chanend_out_word(c_to_dspc, fromAWE[6]);
-    chanend_out_word(c_to_dspc, fromAWE[7]);
     chanend_out_end_token(c_to_dspc);
     sampstoAWE[0] = chanend_in_word(c_to_dspc);
     sampstoAWE[1] = chanend_in_word(c_to_dspc);
-    sampstoAWE[2] = chanend_in_word(c_to_dspc);
-    sampstoAWE[3] = chanend_in_word(c_to_dspc);
-    sampstoAWE[4] = chanend_in_word(c_to_dspc);
-    sampstoAWE[5] = chanend_in_word(c_to_dspc);
-    sampstoAWE[6] = chanend_in_word(c_to_dspc);
-    sampstoAWE[7] = chanend_in_word(c_to_dspc);
     fromAWE[0] = chanend_in_word(c_to_dspc);
     fromAWE[1] = chanend_in_word(c_to_dspc);
-    fromAWE[2] = chanend_in_word(c_to_dspc);
-    fromAWE[3] = chanend_in_word(c_to_dspc);
-    fromAWE[4] = chanend_in_word(c_to_dspc);
-    fromAWE[5] = chanend_in_word(c_to_dspc);
-    fromAWE[6] = chanend_in_word(c_to_dspc);
-    fromAWE[7] = chanend_in_word(c_to_dspc);
     chanend_check_end_token(c_to_dspc);
     /*
 #pragma unroll loop(8)

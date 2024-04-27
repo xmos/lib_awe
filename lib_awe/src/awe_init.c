@@ -11,11 +11,11 @@ static IOPinDescriptor2 g_OutputPin;
 extern const void* g_module_descriptor_table[];
 extern const void* g_module_descriptor_table_end[];
 
-static UINT32 g_AWEHeap[AWE_HEAP_SIZE];
+//static UINT32 g_AWEHeap[AWE_HEAP_SIZE];
 
 UINT32 AWE_Packet_Buffer[AWE_HID_PACKET_BUFFER_SIZE];
 
-void awe_xcore_init() {
+void awe_xcore_init(uint32_t *AWEHeap) {
     g_AWEInstance.instanceId = 0;
     g_AWEInstance.pInputPin = (IOPinDescriptor *)&g_InputPin;
     g_AWEInstance.pOutputPin = (IOPinDescriptor *)&g_OutputPin;
@@ -33,7 +33,7 @@ void awe_xcore_init() {
     g_AWEInstance.fastHeapASize = AWE_HEAP_SIZE;
     g_AWEInstance.fastHeapBSize = 0;
     g_AWEInstance.slowHeapSize  = 0;
-    g_AWEInstance.pFastHeapA    = g_AWEHeap;
+    g_AWEInstance.pFastHeapA    = (UINT32 *)AWEHeap;
     g_AWEInstance.pFastHeapB    = NULL;
     g_AWEInstance.pSlowHeap     = NULL;
     
