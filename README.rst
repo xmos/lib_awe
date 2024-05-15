@@ -1,3 +1,0 @@
-XCORE Audio Weaver Interface
-============================
-
