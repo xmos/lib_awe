@@ -3,7 +3,7 @@ include($ENV{XMOS_CMAKE_PATH}/xcommon.cmake)
 project(app_usb_audio_awe)
 
 set(APP_HW_TARGET xk-audio-316-mc.xn)
-set(APP_DEPENDENT_MODULES "lib_xua(develop)"
+set(APP_DEPENDENT_MODULES "lib_xua(4.0.0)"
                           "lib_i2c(6.2.0)"
                           "lib_awe(0.1.0)")
 
@@ -27,12 +27,10 @@ set(APP_COMPILER_FLAGS ${EXTRA_BUILD_FLAGS} -fcomment-asm
                                             -DI2S_ONLY=1
 )
 
-# We need to manually glob for sources
-set(APP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-file(GLOB_RECURSE APP_C_SRCS ${APP_ROOT_DIR}/src/*.c)
-file(GLOB_RECURSE APP_ASM_SRCS ${APP_ROOT_DIR}/src/*.S)
 set(APP_INCLUDES src src/core src/extensions)
+
 # Workaround until xcommon cmake supports mixed archive and source libs
+set(APP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 include(../lib_awe/lib_build_info_sources.cmake)
 
 set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)

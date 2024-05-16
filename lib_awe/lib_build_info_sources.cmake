@@ -11,6 +11,10 @@ function(replace_substring_in_list list result substring_to_replace replacement_
     set(${result} ${temp_list} PARENT_SCOPE)
 endfunction()
 
+
+file(GLOB_RECURSE APP_C_SRCS ${APP_ROOT_DIR}/src/*.c)
+file(GLOB_RECURSE APP_ASM_SRCS ${APP_ROOT_DIR}/src/*.S)
+
 replace_substring_in_list(APP_C_SRCS APP_C_SRCS ${APP_ROOT_DIR}/ "")
 replace_substring_in_list(APP_ASM_SRCS APP_ASM_SRCS ${APP_ROOT_DIR}/ "")
 
