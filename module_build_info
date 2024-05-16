@@ -1,9 +1,0 @@
-LIBRARY = awe
-
-MODULE_XCC_FLAGS = 
-
-VERSION = 0.1
-
-OPTIONAL_HEADERS += awe_conf.h
-
-EXPORTED = 1

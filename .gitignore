@@ -3,3 +3,5 @@ lib_awe/src/include_internal/
 app_usb_audio_awe/.build/
 app_usb_audio_awe/bin/
 
+examples/*/.build
+examples/*/.metadata

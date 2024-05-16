@@ -1,0 +1,440 @@
+Cleaning /Users/davidb/XMOS/Development/sw_usb_audio-[sw]_7.3.1-AudioWeaver/sw_usb_audio/app_usb_audio_awe
+rm -rf './bin/'
+rm -rf '.build'
+Checking build modules
+Using build modules: lib_xua(3.5.1) lib_i2c(6.1.1) lib_awe(0.1) lib_locks(2.1.0) lib_logging(3.1.1) lib_mic_array(4.5.0) lib_spdif(5.0.1) lib_xassert(4.1.0) lib_xud(2.2.3) lib_adat(1.0.1) lib_dsp(6.2.1)
+Rebuild .build/_iflag.rsp
+Analyzing awe_usb.c
+Analyzing xua_buffman_default.c
+Analyzing decouple_interrupt.c
+Analyzing get_adc_counts.c
+Analyzing vendorrequests.c
+Analyzing xua_endpoint0.c
+Analyzing pdm_mic_user.c
+Analyzing audioports.c
+Analyzing audiostream.c
+Analyzing hostactive.c
+Analyzing xuduser.c
+Analyzing flash_interface.c
+Analyzing flashlib_user.c
+Analyzing hid_report.c
+Analyzing awe_data_path.c
+Analyzing awe_init.c
+Analyzing awe_main.c
+Analyzing awe_tuning.c
+Analyzing awe_tuning_usb_hid.c
+Analyzing hwlock.c
+Analyzing swlock.c
+Analyzing debug_printf.c
+Analyzing XUD_HAL.c
+Analyzing XUD_SetCrcTableAddr.c
+Analyzing XUD_User.c
+Analyzing XUD_EpFunctions.c
+Analyzing dsp_adaptive.c
+Analyzing dsp_design.c
+Analyzing dsp_filters.c
+Analyzing dsp_math.c
+Analyzing dsp_matrix.c
+Analyzing dsp_statistics.c
+Analyzing dsp_tables.c
+Analyzing dsp_vector.c
+Analyzing poly_eval.c
+Analyzing dsp_bfp.c
+Analyzing dsp_bfp_vector.c
+Analyzing dsp_filters_fp.c
+Analyzing dsp_fp_vector.c
+Analyzing dsp_poly_eval_fp.c
+Analyzing dsp_testing_conv.c
+Analyzing dsp_testing_diff.c
+Analyzing dsp_testing_print.c
+Analyzing dsp_testing_rand.c
+Analyzing XUD_HAL.xc
+Analyzing audiohw.xc
+Analyzing audiostream.xc
+Analyzing main.xc
+Analyzing warnings.xc
+Analyzing audiohub_initport.xc
+Analyzing xua_audiohub.xc
+Analyzing decouple.xc
+Analyzing ep_buffer.xc
+Analyzing testct_byref.xc
+Analyzing clockgen.xc
+Analyzing dbcalc.xc
+Analyzing xua_ep0_uacreqs.xc
+Analyzing mixer.xc
+Analyzing pdm_mic.xc
+Analyzing audioports.xc
+Analyzing reboot.xc
+Analyzing xc_ptr.xc
+Analyzing dfu.xc
+Analyzing hid.xc
+Analyzing midiinparse.xc
+Analyzing midioutparse.xc
+Analyzing queue.xc
+Analyzing usb_midi.xc
+Analyzing usb_midi_support.xc
+Analyzing i2c_master.xc
+Analyzing i2c_master_async.xc
+Analyzing i2c_master_ext.xc
+Analyzing i2c_master_single_port.xc
+Analyzing i2c_slave.xc
+Analyzing decimator_interface.xc
+Analyzing hires_delay.xc
+Analyzing mic_array_dual.xc
+Analyzing pdm.xc
+Analyzing fir_coefs.xc
+Analyzing fir_coefs_dual.xc
+Analyzing SpdifTransmit.xc
+Analyzing spdif_rx.xc
+Analyzing xassert.xc
+Analyzing XUD_DeviceAttach.xc
+Analyzing XUD_HAL.xc
+Analyzing XUD_Main.xc
+Analyzing XUD_Signalling.xc
+Analyzing XUD_Support.xc
+Analyzing XUD_TestMode.xc
+Analyzing XUD_USBTile_Support.xc
+Analyzing XUD_EpFunctions.xc
+Analyzing xud_device.xc
+Analyzing xud_std_requests.xc
+Analyzing adat_lookups.xc
+Analyzing adat_rx.xc
+Analyzing adat_tx.xc
+Analyzing adat_tx_port.xc
+Analyzing dsp_complex.xc
+Analyzing dsp_dct.xc
+Analyzing dsp_fast_float.xc
+Analyzing dsp_idct.xc
+Analyzing dsp_math_int.xc
+Analyzing dsp_sqrt.xc
+Analyzing dsp_fft.xc
+Analyzing dsp_fft_real.xc
+Analyzing floating_fft.xc
+Analyzing crc32_c.xc
+Analyzing fastmix.S
+Analyzing awe_module_list.S
+Analyzing swlock_asm.S
+Analyzing decimate_to_pcm_4ch.S
+Analyzing pdm_rx.S
+Analyzing SpdifReceive.S
+Analyzing XUD_CRC5_Table.S
+Analyzing XUD_CRC5_Table_Addr.S
+Analyzing XUD_IoLoop.S
+Analyzing XUD_TestMode.S
+Analyzing XUD_USBTile_Support.S
+Analyzing XUD_EpFuncs.S
+Analyzing dsp_biquad.S
+Analyzing dsp_complex_add_vector.S
+Analyzing dsp_complex_fir.S
+Analyzing dsp_complex_hann.S
+Analyzing dsp_complex_mul_vector.S
+Analyzing dsp_fast_atan.S
+Analyzing dsp_logistics.S
+Analyzing dsp_min_vector.S
+Analyzing dsp_poly_eval.S
+Analyzing dsp_sqrt_xs2.S
+Analyzing dsp_bfp_bit_reverse_shl.S
+Analyzing dsp_bfp_cls.S
+Analyzing dsp_bfp_shl.S
+Analyzing dsp_fft_bit_reverse.S
+Analyzing dsp_fft_forward.S
+Analyzing dsp_fft_gc.S
+Analyzing dsp_fft_inverse.S
+Analyzing dsp_fft_inverse_DIF.S
+Analyzing dsp_fft_merge_spectra.S
+Analyzing dsp_fft_real_fix.S
+Analyzing dsp_fft_split_spectrum.S
+Analyzing dsp_fft_zero_reverse_forward.S
+Analyzing dsp_long_short_conversion.S
+Rebuild .build/_pca.rsp
+Propagating analysis
+Creating dependencies for dsp_long_short_conversion.S
+Creating dependencies for dsp_fft_zero_reverse_forward.S
+Creating dependencies for dsp_fft_split_spectrum.S
+Creating dependencies for dsp_fft_real_fix.S
+Creating dependencies for dsp_fft_merge_spectra.S
+Creating dependencies for dsp_fft_inverse_DIF.S
+Creating dependencies for dsp_fft_inverse.S
+Creating dependencies for dsp_fft_gc.S
+Creating dependencies for dsp_fft_forward.S
+Creating dependencies for dsp_fft_bit_reverse.S
+Creating dependencies for dsp_bfp_shl.S
+Creating dependencies for dsp_bfp_cls.S
+Creating dependencies for dsp_bfp_bit_reverse_shl.S
+Creating dependencies for dsp_sqrt_xs2.S
+Creating dependencies for dsp_poly_eval.S
+Creating dependencies for dsp_min_vector.S
+Creating dependencies for dsp_logistics.S
+Creating dependencies for dsp_fast_atan.S
+Creating dependencies for dsp_complex_mul_vector.S
+Creating dependencies for dsp_complex_hann.S
+Creating dependencies for dsp_complex_fir.S
+Creating dependencies for dsp_complex_add_vector.S
+Creating dependencies for dsp_biquad.S
+Creating dependencies for XUD_EpFuncs.S
+Creating dependencies for XUD_USBTile_Support.S
+Creating dependencies for XUD_TestMode.S
+Creating dependencies for XUD_IoLoop.S
+Creating dependencies for XUD_CRC5_Table_Addr.S
+Creating dependencies for XUD_CRC5_Table.S
+Creating dependencies for SpdifReceive.S
+Creating dependencies for pdm_rx.S
+Creating dependencies for decimate_to_pcm_4ch.S
+Creating dependencies for swlock_asm.S
+Creating dependencies for awe_module_list.S
+Creating dependencies for fastmix.S
+Creating dependencies for crc32_c.xc
+Creating dependencies for floating_fft.xc
+Creating dependencies for dsp_fft_real.xc
+Creating dependencies for dsp_fft.xc
+Creating dependencies for dsp_sqrt.xc
+Creating dependencies for dsp_math_int.xc
+Creating dependencies for dsp_idct.xc
+Creating dependencies for dsp_fast_float.xc
+Creating dependencies for dsp_dct.xc
+Creating dependencies for dsp_complex.xc
+Creating dependencies for adat_tx_port.xc
+Creating dependencies for adat_tx.xc
+Creating dependencies for adat_rx.xc
+Creating dependencies for adat_lookups.xc
+Creating dependencies for xud_std_requests.xc
+Creating dependencies for xud_device.xc
+Creating dependencies for XUD_EpFunctions.xc
+Creating dependencies for XUD_USBTile_Support.xc
+Creating dependencies for XUD_TestMode.xc
+Creating dependencies for XUD_Support.xc
+Creating dependencies for XUD_Signalling.xc
+Creating dependencies for XUD_Main.xc
+Creating dependencies for XUD_HAL.xc
+Creating dependencies for XUD_DeviceAttach.xc
+Creating dependencies for xassert.xc
+Creating dependencies for spdif_rx.xc
+Creating dependencies for SpdifTransmit.xc
+Creating dependencies for fir_coefs_dual.xc
+Creating dependencies for fir_coefs.xc
+Creating dependencies for pdm.xc
+Creating dependencies for mic_array_dual.xc
+Creating dependencies for hires_delay.xc
+Creating dependencies for decimator_interface.xc
+Creating dependencies for i2c_slave.xc
+Creating dependencies for i2c_master_single_port.xc
+Creating dependencies for i2c_master_ext.xc
+Creating dependencies for i2c_master_async.xc
+Creating dependencies for i2c_master.xc
+Creating dependencies for usb_midi_support.xc
+Creating dependencies for usb_midi.xc
+Creating dependencies for queue.xc
+Creating dependencies for midioutparse.xc
+Creating dependencies for midiinparse.xc
+Creating dependencies for hid.xc
+Creating dependencies for dfu.xc
+Creating dependencies for xc_ptr.xc
+Creating dependencies for reboot.xc
+Creating dependencies for audioports.xc
+Creating dependencies for pdm_mic.xc
+Creating dependencies for mixer.xc
+Creating dependencies for xua_ep0_uacreqs.xc
+Creating dependencies for dbcalc.xc
+Creating dependencies for clockgen.xc
+Creating dependencies for testct_byref.xc
+Creating dependencies for ep_buffer.xc
+Creating dependencies for decouple.xc
+Creating dependencies for xua_audiohub.xc
+Creating dependencies for audiohub_initport.xc
+Creating dependencies for warnings.xc
+Creating dependencies for main.xc
+Creating dependencies for audiostream.xc
+Creating dependencies for audiohw.xc
+Creating dependencies for XUD_HAL.xc
+Creating dependencies for dsp_testing_rand.c
+Creating dependencies for dsp_testing_print.c
+Creating dependencies for dsp_testing_diff.c
+Creating dependencies for dsp_testing_conv.c
+Creating dependencies for dsp_poly_eval_fp.c
+Creating dependencies for dsp_fp_vector.c
+Creating dependencies for dsp_filters_fp.c
+Creating dependencies for dsp_bfp_vector.c
+Creating dependencies for dsp_bfp.c
+Creating dependencies for poly_eval.c
+Creating dependencies for dsp_vector.c
+Creating dependencies for dsp_tables.c
+Creating dependencies for dsp_statistics.c
+Creating dependencies for dsp_matrix.c
+Creating dependencies for dsp_math.c
+Creating dependencies for dsp_filters.c
+Creating dependencies for dsp_design.c
+Creating dependencies for dsp_adaptive.c
+Creating dependencies for XUD_EpFunctions.c
+Creating dependencies for XUD_User.c
+Creating dependencies for XUD_SetCrcTableAddr.c
+Creating dependencies for XUD_HAL.c
+Creating dependencies for debug_printf.c
+Creating dependencies for swlock.c
+Creating dependencies for hwlock.c
+Creating dependencies for awe_tuning_usb_hid.c
+Creating dependencies for awe_tuning.c
+Creating dependencies for awe_main.c
+Creating dependencies for awe_init.c
+Creating dependencies for awe_data_path.c
+Creating dependencies for hid_report.c
+Creating dependencies for flashlib_user.c
+Creating dependencies for flash_interface.c
+Creating dependencies for xuduser.c
+Creating dependencies for hostactive.c
+Creating dependencies for audiostream.c
+Creating dependencies for audioports.c
+Creating dependencies for pdm_mic_user.c
+Creating dependencies for xua_endpoint0.c
+Creating dependencies for vendorrequests.c
+Creating dependencies for get_adc_counts.c
+Creating dependencies for decouple_interrupt.c
+Creating dependencies for xua_buffman_default.c
+Creating dependencies for awe_usb.c
+Compiling awe_usb.c
+Compiling xua_buffman_default.c
+Compiling decouple_interrupt.c
+Compiling get_adc_counts.c
+Compiling vendorrequests.c
+Compiling xua_endpoint0.c
+Compiling pdm_mic_user.c
+Compiling audioports.c
+Compiling audiostream.c
+Compiling hostactive.c
+Compiling xuduser.c
+Compiling flash_interface.c
+Compiling flashlib_user.c
+Compiling hid_report.c
+Compiling awe_data_path.c
+Compiling awe_init.c
+Compiling awe_main.c
+Compiling awe_tuning.c
+Compiling awe_tuning_usb_hid.c
+Compiling hwlock.c
+Compiling swlock.c
+Compiling debug_printf.c
+Compiling XUD_HAL.c
+Compiling XUD_SetCrcTableAddr.c
+Compiling XUD_User.c
+Compiling XUD_EpFunctions.c
+Compiling dsp_adaptive.c
+Compiling dsp_design.c
+Compiling dsp_filters.c
+Compiling dsp_math.c
+Compiling dsp_matrix.c
+Compiling dsp_statistics.c
+Compiling dsp_tables.c
+Compiling dsp_vector.c
+Compiling poly_eval.c
+Compiling dsp_bfp.c
+Compiling dsp_bfp_vector.c
+Compiling dsp_filters_fp.c
+Compiling dsp_fp_vector.c
+Compiling dsp_poly_eval_fp.c
+Compiling dsp_testing_conv.c
+Compiling dsp_testing_diff.c
+Compiling dsp_testing_print.c
+Compiling dsp_testing_rand.c
+Compiling XUD_HAL.xc
+Compiling audiohw.xc
+Compiling audiostream.xc
+Compiling main.xc
+Compiling warnings.xc
+Compiling audiohub_initport.xc
+Compiling xua_audiohub.xc
+Compiling decouple.xc
+Compiling ep_buffer.xc
+Compiling testct_byref.xc
+Compiling clockgen.xc
+Compiling dbcalc.xc
+Compiling xua_ep0_uacreqs.xc
+Compiling mixer.xc
+Compiling pdm_mic.xc
+Compiling audioports.xc
+Compiling reboot.xc
+Compiling xc_ptr.xc
+Compiling dfu.xc
+Compiling hid.xc
+Compiling midiinparse.xc
+Compiling midioutparse.xc
+Compiling queue.xc
+Compiling usb_midi.xc
+Compiling usb_midi_support.xc
+Compiling i2c_master.xc
+Compiling i2c_master_async.xc
+Compiling i2c_master_ext.xc
+Compiling i2c_master_single_port.xc
+Compiling i2c_slave.xc
+Compiling decimator_interface.xc
+Compiling hires_delay.xc
+Compiling mic_array_dual.xc
+Compiling pdm.xc
+Compiling fir_coefs.xc
+Compiling fir_coefs_dual.xc
+Compiling SpdifTransmit.xc
+Compiling spdif_rx.xc
+Compiling xassert.xc
+Compiling XUD_DeviceAttach.xc
+Compiling XUD_HAL.xc
+Compiling XUD_Main.xc
+Compiling XUD_Signalling.xc
+Compiling XUD_Support.xc
+Compiling XUD_TestMode.xc
+Compiling XUD_USBTile_Support.xc
+Compiling XUD_EpFunctions.xc
+Compiling xud_device.xc
+Compiling xud_std_requests.xc
+Compiling adat_lookups.xc
+Compiling adat_rx.xc
+Compiling adat_tx.xc
+Compiling adat_tx_port.xc
+Compiling dsp_complex.xc
+Compiling dsp_dct.xc
+Compiling dsp_fast_float.xc
+Compiling dsp_idct.xc
+Compiling dsp_math_int.xc
+Compiling dsp_sqrt.xc
+Compiling dsp_fft.xc
+Compiling dsp_fft_real.xc
+Compiling floating_fft.xc
+Compiling crc32_c.xc
+Compiling fastmix.S
+Compiling awe_module_list.S
+Compiling swlock_asm.S
+Compiling decimate_to_pcm_4ch.S
+Compiling pdm_rx.S
+Compiling SpdifReceive.S
+Compiling XUD_CRC5_Table.S
+Compiling XUD_CRC5_Table_Addr.S
+Compiling XUD_IoLoop.S
+Compiling XUD_TestMode.S
+Compiling XUD_USBTile_Support.S
+Compiling XUD_EpFuncs.S
+Compiling dsp_biquad.S
+Compiling dsp_complex_add_vector.S
+Compiling dsp_complex_fir.S
+Compiling dsp_complex_hann.S
+Compiling dsp_complex_mul_vector.S
+Compiling dsp_fast_atan.S
+Compiling dsp_logistics.S
+Compiling dsp_min_vector.S
+Compiling dsp_poly_eval.S
+Compiling dsp_sqrt_xs2.S
+Compiling dsp_bfp_bit_reverse_shl.S
+Compiling dsp_bfp_cls.S
+Compiling dsp_bfp_shl.S
+Compiling dsp_fft_bit_reverse.S
+Compiling dsp_fft_forward.S
+Compiling dsp_fft_gc.S
+Compiling dsp_fft_inverse.S
+Compiling dsp_fft_inverse_DIF.S
+Compiling dsp_fft_merge_spectra.S
+Compiling dsp_fft_real_fix.S
+Compiling dsp_fft_split_spectrum.S
+Compiling dsp_fft_zero_reverse_forward.S
+Compiling dsp_long_short_conversion.S
+Rebuild .build/_obj.rsp
+Creating app_usb_audio_awe.xe
+Constraint check for tile[0]:
+  Memory available:       524288,   used:      48836 .  OKAY
+    (Stack: 2964, Code: 25488, Data: 20384)
+Constraints checks PASSED.
