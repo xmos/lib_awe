@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 include($ENV{XMOS_CMAKE_PATH}/xcommon.cmake)
 project(app_usb_audio_awe_small_qf60)
 
-set(APP_HW_TARGET xk-audio-316-qf60.xn)
+set(APP_HW_TARGET xk-audio-316-qf60-700.xn)
 set(APP_DEPENDENT_MODULES "lib_xua(4.0.0)"
                           "lib_i2c(6.2.0)"
                           "lib_awe(0.1.0)")
