@@ -56,6 +56,7 @@ pipeline {
           dir("tools_released") {
             sh "echo ${params.TOOLS_VERSION} > REQUIRED_TOOLS_VERSION"
           }
+          println "Library checks not active yet"
           // withEnv(["REPO=${REPO}"]) {
           //   xcoreLibraryChecks("${REPO}", false)
           // }
@@ -73,7 +74,7 @@ pipeline {
                 for(String app : apps.split()) {
                   dir("${app}") {
                     sh "cmake  -G \"Unix Makefiles\" -B build"
-                    sh "xmake -C build"
+                    sh "xmake -C build -j"
                   }
                 } // for loop
               } // script
