@@ -64,7 +64,7 @@ pipeline {
               def apps = sh(script: "ls -d app_*", returnStdout: true).trim()
               for(String app : apps.split()) {
                 dir("${app}") {
-                  sh "cmake  -G "Unix Makefiles" -B build"
+                  sh "cmake  -G \"Unix Makefiles\" -B build"
                   sh "xmake -C build"
                 }
               } // for loop
