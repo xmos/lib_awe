@@ -55,17 +55,21 @@ pipeline {
         }
       }
     }  // Library checks
-    stage('Build examples') {
+    stage('Build examples XCCM') {
       steps {
         withTools(params.TOOLS_VERSION) {
-          dir("${REPO}/examples") {
-            // script {
-            //   // Build all apps in the examples directory
-            //   def apps = sh(script: "ls -d app_*", returnStdout: true).trim()
-            //   for(String app : apps.split()) {
-            //     sh "xmake -C ${app}"
-            //   }
-            // }
+          dir("${REPO}") {
+            script {
+              // Build all apps in the examples directory
+              def apps = sh(script: "ls -d app_*", returnStdout: true).trim()
+              for(String app : apps.split()) {
+                dir("${app}") {
+                  sh "cmake  -G "Unix Makefiles" -B build"
+                  sh "xmake -C build"
+                }
+              } // for loop
+            } // script
+            archiveArtifacts artifacts: "${REPO}/**/bin/*.xe", allowEmptyArchive: false
           }
         }
       }
