@@ -18,6 +18,7 @@ pipeline {
     )
   }
   environment {
+    REPO = 'lib_awe'
     PIP_VERSION = "24.0"
     PYTHON_VERSION = "3.12.1"
   }
@@ -29,7 +30,7 @@ pipeline {
         sh "git clone -b v1.2.1 git@github.com:xmos/infr_scripts_py"
         sh "git clone -b v1.5.0 git@github.com:xmos/infr_apps"
 
-        dir("lib_awe") {
+        dir("${REPO}") {
           checkout scm
 
           createVenv()
@@ -48,8 +49,8 @@ pipeline {
           dir("tools_released") {
             sh "echo ${params.TOOLS_VERSION} > REQUIRED_TOOLS_VERSION"
           }
-          // withEnv(["REPO=lib_awe"]) {
-          //   xcoreLibraryChecks("lib_awe", false)
+          // withEnv(["REPO=${REPO}"]) {
+          //   xcoreLibraryChecks("${REPO}", false)
           // }
         }
       }
@@ -57,14 +58,14 @@ pipeline {
     stage('Build examples') {
       steps {
         withTools(params.TOOLS_VERSION) {
-          dir("lib_awe/examples") {
+          dir("${REPO}/examples") {
             // script {
             //   // Build all apps in the examples directory
             //   def apps = sh(script: "ls -d app_*", returnStdout: true).trim()
             //   for(String app : apps.split()) {
             //     sh "xmake -C ${app}"
             //   }
-            }
+            // }
           }
         }
       }
@@ -74,7 +75,7 @@ pipeline {
         sh "echo hello"
       }
     }  // Build documentation
-  }
+  } // Stages
   post {
     cleanup {
       xcoreCleanSandbox()
