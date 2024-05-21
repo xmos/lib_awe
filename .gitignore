@@ -1,5 +1,4 @@
 *.a
-**/include_internal
 **/.build*
 **/build
 
