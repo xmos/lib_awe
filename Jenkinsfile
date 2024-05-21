@@ -68,16 +68,19 @@ pipeline {
         withTools(params.TOOLS_VERSION) {
           withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
             dir("${REPO}") {
-              script {
-                // Build all apps in the examples directory
-                def apps = sh(script: "ls -d app_*", returnStdout: true).trim()
-                for(String app : apps.split()) {
-                  dir("${app}") {
-                    sh "cmake  -G \"Unix Makefiles\" -B build"
-                    sh "xmake -C build -j"
-                  }
-                } // for loop
-              } // script
+              withCredentials([file(credentialsId: 'DSPCAWE_8.D.1.1', variable: 'DSPC_AWE_LIB')] {
+                sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a"
+                script {
+                  // Build all apps in the examples directory
+                  def apps = sh(script: "ls -d app_*", returnStdout: true).trim()
+                  for(String app : apps.split()) {
+                    dir("${app}") {
+                      sh "cmake  -G \"Unix Makefiles\" -B build"
+                      sh "xmake -C build -j"
+                    }
+                  } // for loop
+                } // script
+              } // credentials
             } // dir
             archiveArtifacts artifacts: "${REPO}/**/bin/*.xe", allowEmptyArchive: false
           } // withEnv
@@ -102,6 +105,19 @@ pipeline {
         } // withTools
       } // steps
     }  // Build examples
+    stage('Tests') {
+      steps {
+        dir("${REPO}/tests") {
+          withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
+            withVenv {
+              withTools(params.TOOLS_VERSION) {
+                // sh 'python -m pytest --junitxml=pytest_result.xml'
+              } // withTools
+            } // withVenv
+          } // withEnv
+        }
+      }
+    }  // Library checks
     stage('Build documentation') {
       steps {
         sh "echo hello"
