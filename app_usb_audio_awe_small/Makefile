@@ -11,12 +11,13 @@ APP_NAME =
 USED_MODULES = lib_xua lib_i2c lib_awe
 
 # Audio Class 2, Async, I2S Master, 8xInput, 8xOutput
-XCC_FLAGS= -fcomment-asm -O3 -report -lquadflash -g -DUSB_TILE=tile[0] -DADAT_TX_USE_SHARED_BUFF=1 -DQUAD_SPI_FLASH=1 -DMIXER=0 #  -fxscope
+#XCC_FLAGS= -fcomment-asm -O3 -report -lquadflash -g -DUSB_TILE=tile[0] -DADAT_TX_USE_SHARED_BUFF=1 -DQUAD_SPI_FLASH=1 -DMIXER=0 #  -fxscope
 
 # Audio Class 2, Async, I2S Slave, 8xInput, 8xOutput I2S ONLY
-# XCC_FLAGS= -fcomment-asm -O3 -report -lquadflash -g -DUSB_TILE=tile[0] -DADAT_TX_USE_SHARED_BUFF=1 -DQUAD_SPI_FLASH=1 \
-# -DCODEC_MASTER=1 -DMIXER=0 -DI2S_CHANS_DAC=8 -DI2S_CHANS_ADC=8  -DAUDIO_CLASS=1 \
-# -DNUM_USB_CHAN_OUT=0 -DNUM_USB_CHAN_IN=0 -DI2S_ONLY=1
+XCC_FLAGS= -fcomment-asm -O3 -report -lquadflash -g -DUSB_TILE=tile[0] -DADAT_TX_USE_SHARED_BUFF=1 -DQUAD_SPI_FLASH=1 \
+-DCODEC_MASTER=1 -DMIXER=0 -DI2S_CHANS_DAC=8 -DI2S_CHANS_ADC=8  -DAUDIO_CLASS=1 \
+-DMIN_FREQ=48000 -DMAX_FREQ=48000 \
+-DNUM_USB_CHAN_OUT=0 -DNUM_USB_CHAN_IN=0 -DI2S_ONLY=1 -DMINSIZEREL -mcmodel=large
 
 #=============================================================================
 # The following part of the Makefile includes the common build infrastructure

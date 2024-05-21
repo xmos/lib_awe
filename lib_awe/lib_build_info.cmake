@@ -1,0 +1,8 @@
+set(LIB_NAME lib_awe)
+set(LIB_VERSION 0.1.0)
+
+set(LIB_ARCH xs3a)
+set(LIB_INCLUDES api)
+
+
+XMOS_REGISTER_STATIC_LIB()
