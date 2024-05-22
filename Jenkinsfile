@@ -51,15 +51,18 @@ pipeline {
     stage('Library checks') {
       steps {
         withTools(params.TOOLS_VERSION) {
-          // creation of tools_released and REPO environment variable are workarounds
-          // to allow xcoreLibraryChecks to run without a viewfile-based sandbox
-          dir("tools_released") {
-            sh "echo ${params.TOOLS_VERSION} > REQUIRED_TOOLS_VERSION"
+          withVenv {
+            // creation of tools_released and REPO environment variable are workarounds
+            // to allow xcoreLibraryChecks to run without a viewfile-based sandbox
+            dir("tools_released") {
+              sh "echo ${params.TOOLS_VERSION} > REQUIRED_TOOLS_VERSION"
+            }
+            withEnv(["REPO=${REPO}"]) {
+              println "Library checks not active yet"
+              // xcoreLibraryChecks("${REPO}", false)
+              sh "python -m pytest -k \"lib\" --junitxml=pytest_result.xml"
+            }
           }
-          println "Library checks not active yet"
-          // withEnv(["REPO=${REPO}"]) {
-          //   xcoreLibraryChecks("${REPO}", false)
-          // }
         }
       }
     }  // Library checks
@@ -69,7 +72,7 @@ pipeline {
           withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
             dir("${REPO}") {
               withCredentials([file(credentialsId: 'DSPCAWE_8.D.1.1', variable: 'DSPC_AWE_LIB')]) {
-                sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a"
+                sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
                 script {
                   // Build all apps in the examples directory
                   def apps = sh(script: "ls -d app_*", returnStdout: true).trim()
@@ -111,7 +114,7 @@ pipeline {
           withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
             withVenv {
               withTools(params.TOOLS_VERSION) {
-                // sh 'python -m pytest --junitxml=pytest_result.xml'
+                sh "python -m pytest -k \"not lib\" --junitxml=pytest_result.xml"
               } // withTools
             } // withVenv
           } // withEnv
