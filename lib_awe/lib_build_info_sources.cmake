@@ -23,11 +23,22 @@ replace_substring_in_list(APP_ASM_SRCS APP_ASM_SRCS ${APP_ROOT_DIR}/ "")
 file(GLOB LIB_AWE_C_SRCS ${CMAKE_CURRENT_LIST_DIR}/src/*.c)
 file(GLOB LIB_AWE_ASM_SRCS ${CMAKE_CURRENT_LIST_DIR}/src/*.S)
 set(LIB_AWE_INCLUDES    ${CMAKE_CURRENT_LIST_DIR}/api
+                        ${CMAKE_CURRENT_LIST_DIR}/src
                         ${CMAKE_CURRENT_LIST_DIR}/src/include_internal)
 
-# modify path relative to app
-replace_substring_in_list(LIB_AWE_C_SRCS LIB_AWE_C_SRCS ${CMAKE_CURRENT_LIST_DIR}/ "../lib_awe/")
-replace_substring_in_list(LIB_AWE_ASM_SRCS LIB_AWE_ASM_SRCS ${CMAKE_CURRENT_LIST_DIR}/ "../lib_awe/")
+
+replace_substring_in_list(XMOS_SANDBOX_DIR RELATIVE_XMOS_SANDBOX_DIR ${APP_ROOT_DIR}/ "")
+message(STATUS RELATIVE_XMOS_SANDBOX_DIR ${RELATIVE_XMOS_SANDBOX_DIR})
+message(STATUS APP_ROOT_DIR ${APP_ROOT_DIR})
+message(STATUS LIB_AWE_ASM_SRCS ${LIB_AWE_ASM_SRCS})
+message(STATUS XMOS_SANDBOX_DIR ${XMOS_SANDBOX_DIR})
+message(STATUS CMAKE_CURRENT_LIST_DIR ${CMAKE_CURRENT_LIST_DIR})
+
+# modify path of lib sources relative to app
+replace_substring_in_list(LIB_AWE_C_SRCS LIB_AWE_C_SRCS ${CMAKE_CURRENT_LIST_DIR} ${RELATIVE_XMOS_SANDBOX_DIR}/lib_awe/lib_awe)
+replace_substring_in_list(LIB_AWE_ASM_SRCS LIB_AWE_ASM_SRCS ${CMAKE_CURRENT_LIST_DIR} ${RELATIVE_XMOS_SANDBOX_DIR}/lib_awe/lib_awe)
+message(STATUS LIB_AWE_ASM_SRCS ${LIB_AWE_ASM_SRCS})
+
 # replace_substring_in_list(LIB_AWE_INCLUDES LIB_AWE_INCLUDES ${CMAKE_CURRENT_LIST_DIR}/ "../lib_awe/")
 
 # Add them all together for XCCM
@@ -35,10 +46,10 @@ list(APPEND APP_C_SRCS ${LIB_AWE_C_SRCS})
 list(APPEND APP_ASM_SRCS ${LIB_AWE_ASM_SRCS})
 list(APPEND APP_INCLUDES ${LIB_AWE_INCLUDES})
 
+
+
 # Here pending optional_includes support for lib
 list(APPEND APP_COMPILER_FLAGS -D__awe_conf_h_exists__=1)
-
-
 
 
 

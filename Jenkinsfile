@@ -61,6 +61,7 @@ pipeline {
               withEnv(["REPO=${REPO}"]) {
                 println "Library checks not active yet"
                 // xcoreLibraryChecks("${REPO}", false)
+                // Need to run this test on the repo source only before we do a build and grab the .a
                 sh "python -m pytest -k \"lib\" --junitxml=junit_lib.xml"
                 junit "junit_lib.xml"
               } // withEnv
@@ -119,9 +120,7 @@ pipeline {
             withVenv {
               withTools(params.TOOLS_VERSION) {
                 sh "python -m pytest -k \"not lib\" --junitxml=junit_main.xml"
-                // if (fileExists("junit_main.xml")) {
-                //   junit "junit_main.xml"
-                // }
+                junit "junit_main.xml"
               } // withTools
             } // withVenv
           } // withEnv

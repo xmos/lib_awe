@@ -33,10 +33,11 @@ set(APP_COMPILER_FLAGS ${EXTRA_BUILD_FLAGS}     -fcomment-asm
 
 set(APP_INCLUDES src src/core src/extensions)
 
+set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
+
 # Workaround until xcommon cmake supports mixed archive and source libs
 set(APP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 include(../lib_awe/lib_build_info_sources.cmake)
 
-set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 
 XMOS_REGISTER_APP()
