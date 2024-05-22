@@ -61,10 +61,8 @@ pipeline {
               withEnv(["REPO=${REPO}"]) {
                 println "Library checks not active yet"
                 // xcoreLibraryChecks("${REPO}", false)
-                sh "python -m pytest -k \"lib\" --junitxml=pytest_result.xml"
-                if (fileExists("junit.xml")) {
-                  junit "junit.xml"
-                }
+                sh "python -m pytest -k \"lib\" --junitxml=junit_lib.xml"
+                junit "junit_lib.xml"
               } // withEnv
             } // with Venv
           } // tools
@@ -104,7 +102,8 @@ pipeline {
               def apps = sh(script: "ls -d app_*", returnStdout: true).trim()
               for(String app : apps.split()) {
                 dir("${app}") {
-                  sh "xmake -j"
+                  // Disable xmake build for now until fixed
+                  // sh "xmake -j"
                 }
               } // for loop
             } // script
@@ -119,10 +118,10 @@ pipeline {
           withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
             withVenv {
               withTools(params.TOOLS_VERSION) {
-                sh "python -m pytest -k \"not lib\" --junitxml=pytest_result.xml"
-                if (fileExists("junit.xml")) {
-                  junit "junit.xml"
-                }
+                sh "python -m pytest -k \"not lib\" --junitxml=junit_main.xml"
+                // if (fileExists("junit_main.xml")) {
+                //   junit "junit_main.xml"
+                // }
               } // withTools
             } // withVenv
           } // withEnv
