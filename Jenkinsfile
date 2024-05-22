@@ -62,11 +62,14 @@ pipeline {
                 println "Library checks not active yet"
                 // xcoreLibraryChecks("${REPO}", false)
                 sh "python -m pytest -k \"lib\" --junitxml=pytest_result.xml"
-              }
-            }
-          }
-        }
-      }
+                if (fileExists("junit.xml")) {
+                  junit "junit.xml"
+                }
+              } // withEnv
+            } // with Venv
+          } // tools
+        } // dir
+      } //step
     }  // Library checks
     stage('Build examples XCCM') {
       steps {
@@ -117,11 +120,14 @@ pipeline {
             withVenv {
               withTools(params.TOOLS_VERSION) {
                 sh "python -m pytest -k \"not lib\" --junitxml=pytest_result.xml"
+                if (fileExists("junit.xml")) {
+                  junit "junit.xml"
+                }
               } // withTools
             } // withVenv
           } // withEnv
-        }
-      }
+        } // dir
+      } // steps
     }  // Library checks
     stage('Build documentation') {
       steps {

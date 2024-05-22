@@ -10,13 +10,13 @@ APP_NAME =
 # Modules are expected to be in the directory above the BASE_DIR directory.
 USED_MODULES = lib_xua lib_i2c lib_awe
 
+COMPILER_FLAGS_COMMON = -fcomment-asm -O3 -report -lquadflash -g -DUSB_TILE=tile[0] -DADAT_TX_USE_SHARED_BUFF=1 -DQUAD_SPI_FLASH=1 -DMIXER=0
+
 # Audio Class 2, Async, I2S Master, 8xInput, 8xOutput
-XCC_FLAGS= -fcomment-asm -O3 -report -lquadflash -g -DUSB_TILE=tile[0] -DADAT_TX_USE_SHARED_BUFF=1 -DQUAD_SPI_FLASH=1 -DMIXER=0 #  -fxscope
+XCC_FLAGS_UA = ${COMPILER_FLAGS_COMMON}
 
 # Audio Class 2, Async, I2S Slave, 8xInput, 8xOutput I2S ONLY
-# XCC_FLAGS= -fcomment-asm -O3 -report -lquadflash -g -DUSB_TILE=tile[0] -DADAT_TX_USE_SHARED_BUFF=1 -DQUAD_SPI_FLASH=1 \
-# -DCODEC_MASTER=1 -DMIXER=0 -DI2S_CHANS_DAC=8 -DI2S_CHANS_ADC=8  -DAUDIO_CLASS=1 \
-# -DNUM_USB_CHAN_OUT=0 -DNUM_USB_CHAN_IN=0 -DI2S_ONLY=1
+XCC_FLAGS_I2S = ${COMPILER_FLAGS_COMMON} -DCODEC_MASTER=1 -DI2S_CHANS_DAC=8 -DI2S_CHANS_ADC=8  -DAUDIO_CLASS=1 -DNUM_USB_CHAN_OUT=0 -DNUM_USB_CHAN_IN=0 -DI2S_ONLY=1
 
 #=============================================================================
 # The following part of the Makefile includes the common build infrastructure
