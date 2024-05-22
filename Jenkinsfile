@@ -61,7 +61,9 @@ pipeline {
               withEnv(["REPO=${REPO}"]) {
                 println "Library checks not active yet"
                 // xcoreLibraryChecks("${REPO}", false)
-                sh "python -m pytest -k \"lib\" --junitxml=pytest_result.xml"
+                dir("${REPO}") {
+                  sh "python -m pytest -k \"lib\" --junitxml=pytest_result.xml"
+                }
               }
             }
           }
