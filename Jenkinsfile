@@ -50,17 +50,19 @@ pipeline {
     }  // Get sandbox
     stage('Library checks') {
       steps {
-        withTools(params.TOOLS_VERSION) {
-          withVenv {
-            // creation of tools_released and REPO environment variable are workarounds
-            // to allow xcoreLibraryChecks to run without a viewfile-based sandbox
-            dir("tools_released") {
-              sh "echo ${params.TOOLS_VERSION} > REQUIRED_TOOLS_VERSION"
-            }
-            withEnv(["REPO=${REPO}"]) {
-              println "Library checks not active yet"
-              // xcoreLibraryChecks("${REPO}", false)
-              sh "python -m pytest -k \"lib\" --junitxml=pytest_result.xml"
+        dir("${REPO}") {
+          withTools(params.TOOLS_VERSION) {
+            withVenv {
+              // creation of tools_released and REPO environment variable are workarounds
+              // to allow xcoreLibraryChecks to run without a viewfile-based sandbox
+              dir("tools_released") {
+                sh "echo ${params.TOOLS_VERSION} > REQUIRED_TOOLS_VERSION"
+              }
+              withEnv(["REPO=${REPO}"]) {
+                println "Library checks not active yet"
+                // xcoreLibraryChecks("${REPO}", false)
+                sh "python -m pytest -k \"lib\" --junitxml=pytest_result.xml"
+              }
             }
           }
         }
