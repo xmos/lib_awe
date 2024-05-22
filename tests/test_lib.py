@@ -9,6 +9,7 @@ import os
 
 
 def test_lib_not_present():
-    for dirpath, dirnames, filenames in os.walk(".."):
+    for dirpath, dirnames, filenames in os.walk("."):
+        print(dirpath)
         for filename in [f for f in filenames if f.endswith(".a")]:
             pytest.fail(f"Found unexpected archive file in repo: {os.path.join(dirpath, filename)}")
