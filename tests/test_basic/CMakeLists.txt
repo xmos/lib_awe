@@ -1,15 +1,17 @@
 cmake_minimum_required(VERSION 3.21)
 include($ENV{XMOS_CMAKE_PATH}/xcommon.cmake)
-project(app_usb_audio_awe)
+project(test_awe_basic)
 
 set(APP_HW_TARGET XCORE-AI-EXPLORER)
 set(APP_DEPENDENT_MODULES   "lib_awe(0.1.0)" 
                             "lib_xua(4.0.0)"
 )
 
-set(APP_COMPILER_FLAGS ${EXTRA_BUILD_FLAGS}     -O3
+set(APP_COMPILER_FLAGS ${EXTRA_BUILD_FLAGS}     -Os
                                                 -report
                                                 -D__awe_conf_h_exists__=1
+                                                # (8 + 1) * 16 + a bit 
+                                                -fcmdline-buffer-bytes=192
 )
 
 set(APP_INCLUDES src)
