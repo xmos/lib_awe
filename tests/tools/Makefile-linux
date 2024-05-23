@@ -1,6 +1,6 @@
-all: hidtest-hidraw libs
+all: awe_hid_transfer libs
 
-libs: libhidapi-hidraw.so
+libs: libhidapi-awe_hid_transfer.so
 
 CC       ?= gcc
 CFLAGS   ?= -Wall -g -fpic
@@ -16,19 +16,19 @@ INCLUDES ?= -I../../../hidapi/hidapi -I../../../hidapi/linux `pkg-config libusb-
 
 
 # Console Test Program
-hidtest-hidraw: $(COBJS)
-    $(CC) $(LDFLAGS) $^ $(LIBS_UDEV) -o $@
+awe_hid_transfer: $(COBJS)
+	$(CC) $(LDFLAGS) $^ $(LIBS_UDEV) -o $@
 
 # Shared Libs
-libhidapi-hidraw.so: $(COBJS)
-    $(CC) $(LDFLAGS) $(LIBS_UDEV) -shared -fpic -Wl,-soname,$@.0 $^ -o $@
+libhidapi-awe_hid_transfer.so: $(COBJS)
+	$(CC) $(LDFLAGS) $(LIBS_UDEV) -shared -fpic -Wl,-soname,$@.0 $^ -o $@
 
 # Objects
 $(COBJS): %.o: %.c
-    $(CC) $(CFLAGS) -c $(INCLUDES) $< -o $@
+	$(CC) $(CFLAGS) -c $(INCLUDES) $< -o $@
 
 
 clean:
-    rm -f $(OBJS) hidtest-hidraw libhidapi-hidraw.so $(COBJS)
+	rm -f $(OBJS) awe_hid_transfer libhidapi-awe_hid_transfer.so $(COBJS)
 
 .PHONY: clean libs
