@@ -119,6 +119,10 @@ pipeline {
           withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
             withVenv {
               withTools(params.TOOLS_VERSION) {
+                // Build the HID access utility
+                dir("tools"){
+                  sh "make -f Makefile-linux"
+                }
                 dir("test_basic"){
                   sh "cmake  -G \"Unix Makefiles\" -B build"
                   sh "xmake -C build -j"

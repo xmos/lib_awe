@@ -10,6 +10,8 @@ It allows access EVEN on a Mac..
 
 #include <hidapi.h>
 
+const double NSAppKitVersionNumber = 0.0;
+
 // Headers needed for sleeping.
 #ifdef _WIN32
 	#include <windows.h>
@@ -119,13 +121,19 @@ int parse_cmd_line(int argc, char** argv, uint32_t msg_to_awe_buffer[]){
     int count = 0;
 
     if(argc <= 1){
-        fprintf(stderr, "Too few args to command line: %d\n", argc);
+        fprintf(stderr, "Too few args to command line: %d\n", argc - 2);
+        fprintf(stderr, "Use something like  ./awe_hid_transfer 0002000d 0002000d\n");
         exit(1);
     }
     uint32_t header = strtoul(argv[++count], NULL, 16);
     fprintf(stderr, "header\t0x%8x\n", header);
     msg_to_awe_buffer[count - 1] = header;
     int num_words = header >> 16;
+
+    if (num_words > 16 || num_words == 0) {
+        fprintf(stderr, "Error in header, num_words specified (max 16): %u\n", num_words);
+    }
+
     for(int i = 1; i < num_words; i++){
         uint32_t word = strtoul(argv[++count], NULL, 16);
         msg_to_awe_buffer[count - 1] = word;
@@ -222,6 +230,7 @@ int main(int argc, char* argv[])
     unsigned char cmd[64] = {0};
 
     unsigned packet_len = num_words_to_send * sizeof(unsigned int) + sizeof(unsigned int);
+
     unsigned int header = packet_len << 24;
     memcpy(&cmd[1], &header, sizeof(header));
     memcpy(&cmd[5], &cmd_to_send, sizeof(unsigned int) * num_words_to_send);
@@ -244,13 +253,13 @@ int main(int argc, char* argv[])
 		if (res == 0) {
 		}
 		if (res < 0) {
-			printf("Unable to read(): %ls\n", hid_error(handle));
+			fprintf(stderr, "Unable to read(): %ls\n", hid_error(handle));
 			break;
 		}
 
 		i++;
 		if (i >= 10) { /* 10 tries by 500 ms - 5 seconds of waiting*/
-			printf("read() timeout\n");
+			fprintf(stderr, "read() timeout\n");
 			break;
 		}
 
