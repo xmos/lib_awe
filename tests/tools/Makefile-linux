@@ -3,9 +3,9 @@ all: awe_hid_transfer libs
 libs: libhidapi-awe_hid_transfer.so
 
 CC       ?= gcc
-CFLAGS   ?= -Wall -g -fpic
+CFLAGS   ?= -Wall -g -fpic -std=c99 
 
-LDFLAGS  ?= -Wall -g
+LDFLAGS  ?= -Wall -g -std=c99 
 
 
 COBJS     = ../../../hidapi/linux/hid.o awe_hid_transfer.o
