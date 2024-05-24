@@ -9,14 +9,17 @@ void UserBufferManagementInit()
 
 void UserBufferManagement(unsigned sampsFromUsbToAudio[], unsigned sampsFromAudioToUsb[])
 {
-    #if(I2S_ONLY)
+
+
+ 
+
+    #if(1)
         #pragma unroll loop(8)
-        for(int i = 0; i < AUDIO_OUTPUT_CHANNELS; i++) {            // These are ADC
+        for(int i = 0; i < AUDIO_INPUT_CHANNELS; i++) {            // These are USB-OUT
             chanend_out_word(g_c_to_dspc, sampsFromAudioToUsb[i]);
         }
-        chanend_out_end_token(g_c_to_dspc);
         #pragma unroll loop(8)
-        for(int i = 0; i < AUDIO_INPUT_CHANNELS; i++) {           // These go to DAC
+        for(int i = 0; i < AUDIO_OUTPUT_CHANNELS; i++) {           // These go to USB-IN
             sampsFromUsbToAudio[i] = chanend_in_word(g_c_to_dspc);
         }
         chanend_check_end_token(g_c_to_dspc);

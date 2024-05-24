@@ -1,5 +1,5 @@
-lib_awe/lib/
-lib_awe/src/include_internal/
-app_usb_audio_awe/.build/
-app_usb_audio_awe/bin/
+*.a
+**/.build*
+**/build
 
+awe_hid_transfer
