@@ -1,3 +1,5 @@
+// Copyright 2023-2024 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public Licence: Version 1.
     // This replaces some dodgy typing
     
 // Standard Modules

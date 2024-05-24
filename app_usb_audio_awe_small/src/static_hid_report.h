@@ -1,3 +1,5 @@
+// Copyright 2023-2024 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public Licence: Version 1.
 // This is the HID report descriptor - fixed
 
 0x06, 0x00, 0xff,
