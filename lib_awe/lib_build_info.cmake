@@ -4,5 +4,6 @@ set(LIB_VERSION 0.1.0)
 set(LIB_ARCH xs3a)
 set(LIB_INCLUDES api)
 
+set(LIB_OPTIONAL_HEADERS awe_conf.h)
 
 XMOS_REGISTER_STATIC_LIB()

@@ -3,13 +3,12 @@ include($ENV{XMOS_CMAKE_PATH}/xcommon.cmake)
 project(test_awe_basic)
 
 set(APP_HW_TARGET XCORE-AI-EXPLORER)
-set(APP_DEPENDENT_MODULES   "lib_awe(0.1.0)" 
+set(APP_DEPENDENT_MODULES   "lib_awe" 
                             "lib_xua(4.0.0)"
 )
 
 set(APP_COMPILER_FLAGS ${EXTRA_BUILD_FLAGS}     -Os
                                                 -report
-                                                -D__awe_conf_h_exists__=1
                                                 # (8 + 1) * 16 + a bit 
                                                 -fcmdline-buffer-bytes=192
 )

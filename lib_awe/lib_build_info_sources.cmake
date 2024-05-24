@@ -42,7 +42,7 @@ list(APPEND APP_INCLUDES ${LIB_AWE_INCLUDES})
 
 
 # Here pending optional_includes support for lib
-list(APPEND APP_COMPILER_FLAGS -D__awe_conf_h_exists__=1)
+list(APPEND APP_COMPILER_FLAGS "-D __awe_conf_h_exists__=1")
 
 
 
