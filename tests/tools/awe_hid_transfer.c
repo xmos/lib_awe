@@ -123,7 +123,7 @@ int parse_cmd_line(int argc, char** argv, uint32_t msg_to_awe_buffer[]){
     int count = 0;
 
     if(argc <= 1){
-        fprintf(stderr, "Too few args to command line: %d\n", argc - 2);
+        fprintf(stderr, "Too few args to command line: %d\n", argc - 1);
         fprintf(stderr, "Use something like  ./awe_hid_transfer 0002000d 0002000d\n");
         exit(1);
     }
@@ -149,6 +149,70 @@ int parse_cmd_line(int argc, char** argv, uint32_t msg_to_awe_buffer[]){
     return count;
 }
 
+void send_packet_from_word(unsigned int *cmd_to_send, unsigned start, unsigned num_words_to_send, unsigned idx, hid_device *handle){
+    // printf("$sending packet: %u words: %u start: %u\n", idx, num_words_to_send, start);
+
+    int res;
+
+    unsigned char cmd[MAX_WORDS_PER_CMD * (8 + 1)] = {0};
+
+    unsigned packet_len = sizeof(unsigned int) + num_words_to_send * sizeof(unsigned int); // HID header + packet
+
+    unsigned int hid_header = ((packet_len - 4) << 24) + 0x100 * (idx + 1) + 1;
+
+    // Notice we need to skip the first byte !?
+    memcpy(&cmd[1], &hid_header, sizeof(hid_header));
+    memcpy(&cmd[5], &cmd_to_send[start], sizeof(unsigned int) * num_words_to_send);
+
+    packet_len = 56; // AWE seems to do this
+    res = hid_write(handle, cmd, packet_len + 1);
+    if (res < 0) {
+        fprintf(stderr, "Unable to write()/2: %ls\n", hid_error(handle));
+    }
+}
+
+void get_response(hid_device *handle){
+    // Read requested state. hid_read() has been set to be
+    // non-blocking by the call to hid_set_nonblocking() above.
+    // This loop demonstrates the non-blocking nature of hid_read().
+
+    unsigned int response[MAX_WORDS_PER_CMD] = {0};
+
+    int res = 0;
+    int i = 0;
+    while (res == 0) {
+        res = hid_read(handle, (unsigned char*)response, sizeof(response));
+        if (res == 0) {
+        }
+        if (res < 0) {
+            fprintf(stderr, "Unable to read(): %ls\n", hid_error(handle));
+            break;
+        }
+
+        i++;
+        if (i >= 10) { /* 10 tries by 500 ms - 5 seconds of waiting*/
+            fprintf(stderr, "read() timeout\n");
+            break;
+        }
+
+#ifdef _WIN32
+        Sleep(50);
+#else
+        usleep(50*1000);
+#endif
+    }
+
+    if (res > 0) {
+        int num_words_received = response[0] >> (24 + 2);
+        // printf("num_words_received: %d\n", num_words_received);
+        for(int i = 1; i < num_words_received + 1; i++){
+            printf("%x\n", response[i]);
+        }
+    }
+}
+
+
+
 int main(int argc, char* argv[])
 {
     unsigned int cmd_to_send[MAX_WORDS_PER_CMD] = {0};
@@ -159,7 +223,6 @@ int main(int argc, char* argv[])
 	#define MAX_STR 255
 	wchar_t wstr[MAX_STR];
 	hid_device *handle;
-	int i;
 
 	struct hid_device_info *devs;
 
@@ -229,56 +292,17 @@ int main(int argc, char* argv[])
 		// print_devices(info);
 	}
 
-    unsigned char cmd[MAX_WORDS_PER_CMD * (8 + 1)] = {0};
 
-    unsigned packet_len = num_words_to_send * sizeof(unsigned int) + sizeof(unsigned int);
+    unsigned max_words = 13;
+    unsigned num_whole_hid_packets = num_words_to_send / max_words;
+    unsigned remainder_packet_len_words = num_words_to_send % max_words;
+    unsigned total_packets = num_whole_hid_packets + (remainder_packet_len_words > 0 ? 1 : 0);
 
-    unsigned int header = packet_len << 24;
-    memcpy(&cmd[1], &header, sizeof(header));
-    memcpy(&cmd[5], &cmd_to_send, sizeof(unsigned int) * num_words_to_send);
-
-	hid_write(handle, cmd, packet_len + 1);
-	if (res < 0) {
-		fprintf(stderr, "Unable to write()/2: %ls\n", hid_error(handle));
-	}
-
-	// Read requested state. hid_read() has been set to be
-	// non-blocking by the call to hid_set_nonblocking() above.
-	// This loop demonstrates the non-blocking nature of hid_read().
-
-    unsigned int response[MAX_WORDS_PER_CMD] = {0};
-
-	res = 0;
-	i = 0;
-	while (res == 0) {
-		res = hid_read(handle, (unsigned char*)response, sizeof(response));
-		if (res == 0) {
-		}
-		if (res < 0) {
-			fprintf(stderr, "Unable to read(): %ls\n", hid_error(handle));
-			break;
-		}
-
-		i++;
-		if (i >= 10) { /* 10 tries by 500 ms - 5 seconds of waiting*/
-			fprintf(stderr, "read() timeout\n");
-			break;
-		}
-
-#ifdef _WIN32
-		Sleep(50);
-#else
-		usleep(50*1000);
-#endif
-	}
-
-	if (res > 0) {
-        int num_words_received = response[0] >> (24 + 2);
-        // printf("num_words_received: %d\n", num_words_received);
-        for(int i = 1; i < num_words_received + 1; i++){
-            printf("%x\n", response[i]);
-        }
+    for(unsigned i = 0; i < total_packets; i++){
+        unsigned num_words = i < num_whole_hid_packets ? max_words : remainder_packet_len_words;
+        send_packet_from_word(cmd_to_send, i * max_words, num_words, i, handle);
     }
+    get_response(handle);
 
 	hid_close(handle);
 
