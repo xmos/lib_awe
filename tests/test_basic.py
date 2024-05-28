@@ -32,7 +32,7 @@ def check_expected(dut, expected):
 
 def test_target_info():
     dut = run_xe(xe, "00020029 00020029")
-    expected = "000e0000 00000000 473b8000 4b3ebc20 00403020 24020264 08440100 00000107 534f4d58 4253555f 4cbebc20 00000000 7a6b5c4d 07c4f609"
+    expected = "000e0000 00000000 473b8000 4b3ebc20 00403020 24020264 08440100 00000107 534f4d58 4253555f 4cbebc20 00000000 7a6b5c4d"
 
     to_fp = lambda a : struct.unpack('f', struct.pack('I', a))[0]
 

@@ -10,6 +10,8 @@ It allows access EVEN on a Mac..
 
 #include <hidapi.h>
 
+#define MAX_WORDS_PER_CMD   64
+
 const double NSAppKitVersionNumber = 0.0;
 
 // Headers needed for sleeping.
@@ -130,12 +132,12 @@ int parse_cmd_line(int argc, char** argv, uint32_t msg_to_awe_buffer[]){
     msg_to_awe_buffer[count - 1] = header;
     int num_words = header >> 16;
 
-    if (num_words > 16 || num_words == 0) {
-        fprintf(stderr, "Error in header, num_words specified (max 16): %u\n", num_words);
+    if (num_words > MAX_WORDS_PER_CMD || num_words == 0) {
+        fprintf(stderr, "Error in header, num_words specified (max %d): %u\n", MAX_WORDS_PER_CMD, num_words);
     }
 
     for(int i = 1; i < num_words; i++){
-        uint32_t word = strtoul(argv[++count], NULL, 16);
+        uint32_t word = strtoul(argv[++count], NULL, 16); // Convert from hex
         msg_to_awe_buffer[count - 1] = word;
         fprintf(stderr, "payload\t0x%8x\n", word);
     }
@@ -149,7 +151,7 @@ int parse_cmd_line(int argc, char** argv, uint32_t msg_to_awe_buffer[]){
 
 int main(int argc, char* argv[])
 {
-    unsigned int cmd_to_send[16] = {0};
+    unsigned int cmd_to_send[MAX_WORDS_PER_CMD] = {0};
 	int num_words_to_send = parse_cmd_line(argc, argv, cmd_to_send);
 
 	int res;
@@ -227,7 +229,7 @@ int main(int argc, char* argv[])
 		// print_devices(info);
 	}
 
-    unsigned char cmd[64] = {0};
+    unsigned char cmd[MAX_WORDS_PER_CMD * (8 + 1)] = {0};
 
     unsigned packet_len = num_words_to_send * sizeof(unsigned int) + sizeof(unsigned int);
 
@@ -244,7 +246,7 @@ int main(int argc, char* argv[])
 	// non-blocking by the call to hid_set_nonblocking() above.
 	// This loop demonstrates the non-blocking nature of hid_read().
 
-    unsigned int response[16] = {0};
+    unsigned int response[MAX_WORDS_PER_CMD] = {0};
 
 	res = 0;
 	i = 0;
