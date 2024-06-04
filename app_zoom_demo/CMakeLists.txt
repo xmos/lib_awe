@@ -5,7 +5,7 @@ project(app_zoom_demo)
 set(APP_HW_TARGET xk-audio-316-mc.xn)
 set(APP_DEPENDENT_MODULES "lib_xua(4.0.0)"
                           "lib_i2c(6.2.0)"
-                          "lib_awe(0.1.0)")
+                          "lib_awe")
 
 set(APP_PCA_ENABLE ON)
 # Audio Class 2, Async, I2S Master, 8xInput, 8xOutput
