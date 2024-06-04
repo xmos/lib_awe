@@ -7,6 +7,7 @@ It allows access EVEN on a Mac..
 #include <wchar.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include <hidapi.h>
 
