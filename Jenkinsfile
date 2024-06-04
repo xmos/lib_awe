@@ -35,11 +35,11 @@ pipeline {
 
         sh "git clone -b v1.2.1 git@github.com:xmos/infr_scripts_py"
         sh "git clone -b v1.5.0 git@github.com:xmos/infr_apps"
+        sh "git clone git@github.com:libusb/hidapi" // Needed for HID access in tests
         get_xcommon_cmake()
 
         dir("${REPO}") {
           checkout scm
-
           createVenv()
           withVenv {
             sh "pip install -e ${WORKSPACE}/infr_scripts_py"
