@@ -11,9 +11,13 @@ It allows access EVEN on a Mac..
 
 #include <hidapi.h>
 
+// Max number of commands sent to the command line when invoked
 #define MAX_WORDS_PER_CMD   64
 
+// Workaround for missing extern constant
 const double NSAppKitVersionNumber = 0.0;
+
+#define DEBUG_DESCRIPTOR_INFO   0
 
 // Headers needed for sleeping.
 #ifdef _WIN32
@@ -119,31 +123,32 @@ void print_devices_with_descriptor(struct hid_device_info *cur_dev) {
 	}
 }
 
-
+// Turn the command line into a bunch of commands to send over HID
 int parse_cmd_line(int argc, char** argv, uint32_t msg_to_awe_buffer[]){
     int count = 0;
 
     if(argc <= 1){
         fprintf(stderr, "Too few args to command line: %d\n", argc - 1);
-        fprintf(stderr, "Use something like  ./awe_hid_transfer 0002000d 0002000d\n");
+        fprintf(stderr, "Use something like:  ./awe_hid_transfer 0002000d 0002000d\n");
         exit(1);
     }
     uint32_t header = strtoul(argv[++count], NULL, 16);
-    fprintf(stderr, "header\t0x%8x\n", header);
+    // fprintf(stderr, "header\t0x%8x\n", header);
     msg_to_awe_buffer[count - 1] = header;
     int num_words = header >> 16;
 
     if (num_words > MAX_WORDS_PER_CMD || num_words == 0) {
-        fprintf(stderr, "Error in header, num_words specified (max %d): %u\n", MAX_WORDS_PER_CMD, num_words);
+        fprintf(stderr, "Error in parsed command - num_words specified: %u (max %d)\n", num_words, MAX_WORDS_PER_CMD);
     }
 
+    // Skip header and process payload
     for(int i = 1; i < num_words; i++){
         uint32_t word = strtoul(argv[++count], NULL, 16); // Convert from hex
         msg_to_awe_buffer[count - 1] = word;
-        fprintf(stderr, "payload\t0x%8x\n", word);
+        // fprintf(stderr, "payload\t0x%8x\n", word);
     }
     if(count != argc - 1) {
-        fprintf(stderr, "Mismatch in number of commands and header\n");        
+        fprintf(stderr, "Mismatch in number of commands (%d) and length in header (%d)\n", argc - 1, count);        
         exit(1);
     }
 
@@ -161,14 +166,14 @@ void send_packet_from_word(unsigned int *cmd_to_send, unsigned start, unsigned n
 
     unsigned int hid_header = ((packet_len - 4) << 24) + 0x100 * (idx + 1) + 1;
 
-    // Notice we need to skip the first byte !?
+    // Notice we need to skip the first byte !? No idea why but this works.
     memcpy(&cmd[1], &hid_header, sizeof(hid_header));
     memcpy(&cmd[5], &cmd_to_send[start], sizeof(unsigned int) * num_words_to_send);
 
-    packet_len = 56; // AWE seems to do this
+    packet_len = 56; // AWE designer seems to do this and so this util does the same
     res = hid_write(handle, cmd, packet_len + 1);
     if (res < 0) {
-        fprintf(stderr, "Unable to write()/2: %ls\n", hid_error(handle));
+        fprintf(stderr, "Unable to write() to HID: %ls\n", hid_error(handle));
     }
 }
 
@@ -192,7 +197,7 @@ void get_response(hid_device *handle){
 
         i++;
         if (i >= 10) { /* 10 tries by 500 ms - 5 seconds of waiting*/
-            fprintf(stderr, "read() timeout\n");
+            fprintf(stderr, "HID read() timeout\n");
             break;
         }
 
@@ -219,10 +224,7 @@ int main(int argc, char* argv[])
     unsigned int cmd_to_send[MAX_WORDS_PER_CMD] = {0};
 	int num_words_to_send = parse_cmd_line(argc, argv, cmd_to_send);
 
-	int res;
 	unsigned char buf[256];
-	#define MAX_STR 255
-	wchar_t wstr[MAX_STR];
 	hid_device *handle;
 
 	struct hid_device_info *devs;
@@ -255,13 +257,17 @@ int main(int argc, char* argv[])
 
 	// Open the device using the VID, PID,
 	// and optionally the Serial number.
-	////handle = hid_open(0x4d8, 0x3f, L"12345");
 	handle = hid_open(0x20b1, 0x18, NULL);
 	if (!handle) {
 		fprintf(stderr, "unable to open device\n");
 		hid_exit();
  		return 1;
 	}
+
+#if DEBUG_DESCRIPTOR_INFO
+    #define MAX_STR 255
+    wchar_t wstr[MAX_STR];
+    int res;
 
 	// Read the Manufacturer String
 	wstr[0] = 0x0000;
@@ -293,6 +299,7 @@ int main(int argc, char* argv[])
 		// print_devices(info);
 	}
 
+#endif
 
     unsigned max_words = 13;
     unsigned num_whole_hid_packets = num_words_to_send / max_words;
