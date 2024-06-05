@@ -3,7 +3,7 @@ include($ENV{XMOS_CMAKE_PATH}/xcommon.cmake)
 project(app_usb_audio_awe)
 
 set(APP_HW_TARGET xk-audio-316-mc-700.xn)
-set(APP_DEPENDENT_MODULES "lib_xua(4.0.0)"
+set(APP_DEPENDENT_MODULES "lib_xua(4.1.0)"
                           "lib_i2c(6.2.0)"
                           "lib_awe")
 
