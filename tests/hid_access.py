@@ -1,19 +1,23 @@
 import hid
 import struct
 
-devices = hid.enumerate()
-# for device in devices:
-#     print(device)
-
-
 class awe_hid_comms:
     def __init__(self, VID=0x20b1, PID=0x18):
         self.awe_hid_len = 56
+
+        # devices = hid.enumerate()
+        # for device in devices:
+        #     print(device)
 
         self.dev = hid.device()
         self.dev.open(VID, PID)
         print(f"Connected to 0x{VID:x} 0x{PID:x}")
 
+
+    def cmd(self, msg):
+        self.send(msg)
+
+        return self.get_response()
 
     def get_response(self, timeout_ms=1000):
         try:
@@ -34,10 +38,14 @@ class awe_hid_comms:
             print ('Error reading response: {}'.format(e))
             return None
 
+        crc_calc = 0x00000000
+        for word in response[0 : length - 1]:
+            crc_calc ^= word
+        assert crc_calc == response[length - 1]
+
         return response[0:length]
 
     def send(self, msg):
-
         crc = 0x00000000
         for word in msg:
             crc ^= word
@@ -45,8 +53,7 @@ class awe_hid_comms:
 
         max_words = self.awe_hid_len // 4 - 1 # byte count minus HID header
         total_len = len(msg)
-        print(f"total_len: {total_len}")
-        sequence = 0
+        sequence = 0 # For splitting across multiple HID transfers
         num_bytes_written = 0
 
         # Send whole chunks
@@ -91,8 +98,7 @@ class awe_hid_comms:
 if __name__ == '__main__':
     awe = awe_hid_comms()
     msg =  [0x0002000d]
-    awe.send(msg)
-    response = awe.get_response()
+    response = awe.cmd(msg)
 
     for word in response:
         print(hex(word))
