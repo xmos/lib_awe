@@ -1,12 +1,9 @@
-LIBRARY = awe
+VERSION = 3.0.1
 
-MODULE_XCC_FLAGS = $(XCC_FLAGS)
-LIB_DIRS = lib
-VERSION = 0.1.0
-
+DEPENDENT_MODULES = 
+LIBRARY =  _awe # archivbe file is lib/xs3a/lib_awe.a
 OPTIONAL_HEADERS += awe_conf.h
-EXPORT_INCLUDE_DIRS = api \
-                      src/include_internal
-INCLUDE_DIRS = $(EXPORT_INCLUDE_DIRS)
+PREBUILT_LIBRARIES_ONLY = 1
 
-EXPORTED = 1
+EXPORT_SOURCE_DIRS = src
+EXPORT_INCLUDE_DIRS = api src src/include_internal
