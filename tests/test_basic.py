@@ -1,5 +1,5 @@
 # Copyright 2024 XMOS LIMITED.
-# This Software is subject to the terms of the XCORE VocalFusion Licence.
+# This Software is subject to the terms of the XMOS Public Licence: Version 1.
 """
 Test we can bring up AWE and query the lib with some basic commands.
 Runs on xsim and accepts control input on the commandline and prints
