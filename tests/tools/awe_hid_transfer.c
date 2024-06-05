@@ -1,3 +1,5 @@
+// Copyright 2024 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public Licence: Version 1.
 /*******************************************************
 2024 - Program to talk to AWE HID endpoint
 It allows access EVEN on a Mac..
