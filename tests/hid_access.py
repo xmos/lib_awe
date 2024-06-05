@@ -1,50 +1,98 @@
 import hid
+import struct
 
 devices = hid.enumerate()
-for device in devices:
-    print(device)
+# for device in devices:
+#     print(device)
 
-device = hid.device()
-VID = 5824
-PID = 10202
-device.open(VID, PID)
-print('Connected to ADU{}\n'.format(PID))
 
-def read_from_hid(dev, timeout_ms=1000):
-    try:
-        # read a maximum of 8 bytes from the device, with a user specified timeout
-        data = dev.read(56, timeout_ms)
-    except IOError as e:
-        print ('Error reading response: {}'.format(e))
-        return None
+class awe_hid_comms:
+    def __init__(self, VID=0x20b1, PID=0x18):
+        self.awe_hid_len = 56
 
-    byte_str = ''.join(chr(n) for n in data[1:]) # construct a string out of the read values, starting from the 2nd byte
+        self.dev = hid.device()
+        self.dev.open(VID, PID)
+        print(f"Connected to 0x{VID:x} 0x{PID:x}")
 
-    result_str = byte_str.split('\x00',1)[0] # remove the trailing null '\x00' characters
 
-    if len(result_str) == 0:
-        return None
+    def get_response(self, timeout_ms=1000):
+        try:
+            response = []
+            data = bytearray(self.dev.read(self.awe_hid_len, timeout_ms))
+            # print(data)
+            for idx in range(0, self.awe_hid_len, 4):
+                word = struct.unpack('<I', data[idx: idx + 4])[0]
+                if idx == 0:
+                    hdr = data[idx: idx + 4]
+                    num_pckts = hdr[0]
+                    length = hdr[3] // 4
+                    print(f"lenght: {length}")
+                else:
+                    response += [word]
 
-    return result_str
+        except IOError as e:
+            print ('Error reading response: {}'.format(e))
+            return None
 
-def write_to_hid(dev, msg_str):
-    print('Writing command: {}'.format(msg_str))
+        return response[0:length]
 
-    # message structure:
-    #   message is an ASCII string containing the command
-    #   8 bytes in length
-    #   0th byte must always be 0x01 (decimal 1)
-    #   bytes 1 to 7 are ASCII character values representing the command
-    #   remainder of message is padded to 8 bytes with character code 0
+    def send(self, msg):
 
-    byte_str = chr(0x01) + msg_str + chr(0) * max(7 - len(msg_str), 0)
+        crc = 0x00000000
+        for word in msg:
+            crc ^= word
+        msg += [crc]
 
-    try:
-        num_bytes_written = dev.write(byte_str.encode())
-    except IOError as e:
-        print ('Error writing command: {}'.format(e))
-        return None 
+        max_words = self.awe_hid_len // 4 - 1 # byte count minus HID header
+        total_len = len(msg)
+        print(f"total_len: {total_len}")
+        sequence = 0
+        num_bytes_written = 0
 
-    return num_bytes_written
+        # Send whole chunks
+        while total_len > max_words:
+            chunk = [self._gen_header(sequence, max_words)] + msg[max_words * sequence : max_words * sequence + 13]
+            # print(chunk)
+            num_bytes_written += self._send_packet(chunk)
+            total_len -= max_words
+            sequence += 1
 
-print(read_from_hid(device))
+        # Send remainder
+        if total_len > 0:
+            chunk = [self._gen_header(sequence, total_len)] + msg[max_words * sequence : ]
+            # print(chunk)
+            num_bytes_written += self._send_packet(chunk)
+
+        return num_bytes_written
+
+
+    def _gen_header(self, sequence, num_words):
+        header = 0x100 * (sequence + 1) + 1
+        header += (num_words * 4) << 24 # sizeof int
+
+        return header
+
+    def _send_packet(self, chunk):
+        b_msg = bytearray(0) # one padding byte needed
+        for word in chunk:
+            print(hex(word))
+            b_msg += struct.pack('<I', word)
+
+        b_msg += bytearray([0] * (self.awe_hid_len - len(b_msg))) 
+        
+        try:
+            num_bytes_written = self.dev.write(b_msg)
+        except IOError as e:
+            print ('Error writing command: {}'.format(e))
+            num_bytes_written = 0
+
+        return num_bytes_written
+
+if __name__ == '__main__':
+    awe = awe_hid_comms()
+    msg =  [0x0002000d]
+    awe.send(msg)
+    response = awe.get_response()
+
+    for word in response:
+        print(hex(word))
