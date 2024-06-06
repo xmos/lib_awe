@@ -158,6 +158,7 @@ pipeline {
             println "Stage running on ${env.NODE_NAME}"
             dir("${REPO}") {
               checkout scm
+              createVenv()
               withCredentials([file(credentialsId: 'DSPCAWE_8.D.1.1', variable: 'DSPC_AWE_LIB')]) {
                 sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
               }
