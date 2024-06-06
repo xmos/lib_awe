@@ -175,11 +175,12 @@ pipeline {
               checkout scm
 
               sh "tree"
+              sh "pwd"
             
               sh "docker pull ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION"
               sh """docker run -u "\$(id -u):\$(id -g)" \
                       --rm \
-                      -v ${WORKSPACE}:/build \
+                      -v ${WORKSPACE}/${REPO}:/build \
                       ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION -v"""
              archiveArtifacts artifacts: 'doc/_build/**', allowEmptyArchive: false
             }
