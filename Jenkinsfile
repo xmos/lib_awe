@@ -35,7 +35,6 @@ pipeline {
 
         sh "git clone -b v1.2.1 git@github.com:xmos/infr_scripts_py"
         sh "git clone -b v1.5.0 git@github.com:xmos/infr_apps"
-        sh "git clone git@github.com:libusb/hidapi" // Needed for HID access in tests
         get_xcommon_cmake()
 
         dir("${REPO}") {
@@ -118,10 +117,6 @@ pipeline {
           withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
             withVenv {
               withTools(params.TOOLS_VERSION) {
-                // Build the HID access utility
-                dir("tools"){
-                  sh "make -f Makefile-linux"
-                }
                 dir("test_basic"){
                   sh "cmake  -G \"Unix Makefiles\" -B build"
                   sh "xmake -C build -j"
