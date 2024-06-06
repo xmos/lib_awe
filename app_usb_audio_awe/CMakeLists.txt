@@ -2,16 +2,10 @@ cmake_minimum_required(VERSION 3.21)
 include($ENV{XMOS_CMAKE_PATH}/xcommon.cmake)
 project(app_usb_audio_awe)
 
-set(APP_HW_TARGET xk-audio-316-mc-700.xn)
-set(APP_DEPENDENT_MODULES "lib_xua(4.1.0)"
-                          "lib_i2c(6.2.0)"
-                          "lib_awe")
-
-# Grab sw_usb_audio for XU316-MC HW setup files
+# Grab sw_usb_audio for XU316-MC HW setup files and deps
 include(FetchContent)
-
-set(SW_USB_AUDIO_PATH ${CMAKE_CURRENT_LIST_DIR}/../../sw_usb_audio)
-IF(EXISTS ${SW_USB_AUDIO_PATH})
+set(SW_USB_AUDIO_PATH ../../sw_usb_audio)
+IF(EXISTS ${CMAKE_CURRENT_LIST_DIR}/${SW_USB_AUDIO_PATH})
     message(STATUS "Skipping fetch of: sw_usb_audio")
 else()
     message(STATUS "Fetching: sw_usb_audio")
@@ -21,10 +15,16 @@ else()
         GIT_TAG        v8.1.0
         GIT_SHALLOW    FALSE
         GIT_SUBMODULES_RECURSE FALSE
-        SOURCE_DIR     ${SW_USB_AUDIO_PATH}
+        SOURCE_DIR     ${CMAKE_CURRENT_LIST_DIR}/${SW_USB_AUDIO_PATH}
     )
     FetchContent_Populate(sw_usb_audio)
 endif()
+
+set(APP_HW_TARGET xk-audio-316-mc-700.xn)
+
+# Use sw_usb_audio deps and add lib_awe
+include(${CMAKE_CURRENT_LIST_DIR}/${SW_USB_AUDIO_PATH}/deps.cmake)
+list(APPEND APP_DEPENDENT_MODULES "lib_awe")
 
 
 set(APP_PCA_ENABLE ON)
@@ -62,14 +62,13 @@ set(APP_COMPILER_FLAGS_I2S ${EXTRA_BUILD_FLAGS} -fcomment-asm
 
 # Grab the app sources - we will extend these with HW setup from sw_usb_audio
 file(GLOB_RECURSE APP_XC_SRCS ${APP_ROOT_DIR}/src/*.xc)
-list(APPEND APP_XC_SRCS ../../sw_usb_audio/app_usb_aud_xk_316_mc/src/extensions/audiohw.xc)
-
+list(APPEND APP_XC_SRCS ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src/extensions/audiohw.xc)
 
 set(APP_INCLUDES    src
                     src/core
                     src/extensions
-                    ../../sw_usb_audio/app_usb_aud_xk_316_mc/src/extensions
-                    ../../sw_usb_audio/app_usb_aud_xk_316_mc/src)
+                    ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src/extensions
+                    ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src)
 
 set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 
