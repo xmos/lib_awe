@@ -4,7 +4,6 @@ getApproval()
 
 // Get XCommon CMake and log a record of the git commit
 def get_xcommon_cmake() {
-  sh "rm -rf xcommon_cmake"
   sh "git clone -b develop git@github.com:xmos/xcommon_cmake"
   sh "git -C xcommon_cmake rev-parse HEAD"
 }
@@ -120,6 +119,11 @@ pipeline {
           } // steps
         }  // Build examples
       } // stages
+      post {
+        cleanup {
+          xcoreCleanSandbox()
+        }
+      }
     } // on linux
     stage('Tests and docs') {
       parallel {
@@ -140,6 +144,11 @@ pipeline {
               } // XCCM
             } // dir
           } // steps
+          post {
+            cleanup {
+              xcoreCleanSandbox()
+            }
+          }
         } // HW tests
         stage('Sim Tests') {
           agent {
@@ -167,6 +176,11 @@ pipeline {
               } // withEnv
             } // dir
           } // steps
+          post {
+            cleanup {
+              xcoreCleanSandbox()
+            }
+          }
         } // stage
         stage('Documentation') {
           agent {
@@ -187,6 +201,11 @@ pipeline {
               archiveArtifacts artifacts: "lib_awe_docs.zip"
             }
           } // steps
+          post {
+            cleanup {
+              xcoreCleanSandbox()
+            }
+          }
         } // Build documentation
       } // par
     } // Test and docs
