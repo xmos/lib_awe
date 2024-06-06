@@ -9,9 +9,8 @@ def get_xcommon_cmake() {
 }
 
 pipeline {
-  agent {
-    label none
-  }
+  agent none
+  
   options {
     buildDiscarder(xmosDiscardBuildSettings())
     skipDefaultCheckout()
