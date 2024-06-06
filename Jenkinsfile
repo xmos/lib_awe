@@ -154,7 +154,7 @@ pipeline {
                 withVenv {
                   withTools(params.TOOLS_VERSION) {
                     dir("test_basic"){
-                      sh "cmake  -G \"Unix Makefiles\" -B build"
+                      sh "cmake -G \"Unix Makefiles\" -B build"
                       sh "xmake -C build -j"
                     }
                     sh "python -m pytest -k \"not lib\" --junitxml=junit_main.xml"
@@ -173,13 +173,14 @@ pipeline {
             println "Stage running on ${env.NODE_NAME}"
             dir("${REPO}") {
               checkout scm
+            
+              sh "docker pull ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION"
+              sh """docker run -u "\$(id -u):\$(id -g)" \
+                      --rm \
+                      -v ${WORKSPACE}:/build \
+                      ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION -v"""
+             archiveArtifacts artifacts: 'doc/_build/**', allowEmptyArchive: false
             }
-            sh "docker pull ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION"
-            sh """docker run -u "\$(id -u):\$(id -g)" \
-                  --rm \
-                  -v ${WORKSPACE}:/build \
-                  ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION -v"""
-            archiveArtifacts artifacts: 'doc/_build/**', allowEmptyArchive: false
           } // steps
         } // Build documentation
       } // par
