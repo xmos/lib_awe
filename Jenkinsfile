@@ -10,7 +10,7 @@ def get_xcommon_cmake() {
 
 pipeline {
   agent none
-  
+
   options {
     buildDiscarder(xmosDiscardBuildSettings())
     skipDefaultCheckout()
@@ -118,7 +118,32 @@ pipeline {
             } // withTools
           } // steps
         }  // Build examples
+      } // stages
+    } // on linux
+    stage('Tests and docs') {
+      parallel {
+        stage('HW tests') {
+          agent {
+            label 'usb_audio && macos && arm64 && xcore.ai-mcab'
+          }
+          steps {
+            println "Stage running on ${env.NODE_NAME}"
+            dir("${REPO}/tests") {
+              withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
+                withVenv {
+                  withTools(params.TOOLS_VERSION) {
+                    unstash "xe_files"
+                    sh "tree"
+                  } // Tools
+                } // Venv
+              } // XCCM
+            } // dir
+          } // steps
+        } // HW tests
         stage('Sim Tests') {
+          agent {
+            label 'x86_64 && linux'
+          }
           steps {
             dir("${REPO}/tests") {
               withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
@@ -136,40 +161,22 @@ pipeline {
             } // dir
           } // steps
         } // stage
-      } // stages
-    } // on linux
-    stage('HW tests ') {
-      agent {
-        label 'usb_audio && macos && arm64 && xcore.ai-mcab'
-      }
-      steps {
-        println "Stage running on ${env.NODE_NAME}"
-        dir("${REPO}/tests") {
-          withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
-            withVenv {
-              withTools(params.TOOLS_VERSION) {
-                unstash "xe_files"
-                sh "tree"
-              } // Tools
-            } // Venv
-          } // XCCM
-        } // dir
-      } // steps
-    } // Build documentation
-    stage('Documentation') {
-      agent {
-        label 'docker'
-      }
-      steps {
-        println "Stage running on ${env.NODE_NAME}"
-        sh "docker pull ghcr.io/xmos/xmosdoc:${params.XMOSDOC_VERSION}"
-        sh """docker run -u "\$(id -u):\$(id -g)" \
-              --rm \
-              -v ${WORKSPACE}:/build \
-              ghcr.io/xmos/xmosdoc:${params.XMOSDOC_VERSION} -v"""
-        archiveArtifacts artifacts: 'doc/_build/**', allowEmptyArchive: false
-      } // steps
-    } // Build documentation
+        stage('Documentation') {
+          agent {
+            label 'docker'
+          }
+          steps {
+            println "Stage running on ${env.NODE_NAME}"
+            sh "docker pull ghcr.io/xmos/xmosdoc:${params.XMOSDOC_VERSION}"
+            sh """docker run -u "\$(id -u):\$(id -g)" \
+                  --rm \
+                  -v ${WORKSPACE}:/build \
+                  ghcr.io/xmos/xmosdoc:${params.XMOSDOC_VERSION} -v"""
+            archiveArtifacts artifacts: 'doc/_build/**', allowEmptyArchive: false
+          } // steps
+        } // Build documentation
+      } // par
+    } // Test and docs
   } // Stages
   post {
     cleanup {
