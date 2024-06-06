@@ -94,7 +94,7 @@ pipeline {
                     } // script
                   } // credentials
                 } // dir
-                archiveArtifacts artifacts: "${REPO}/**/bin/*.xe", allowEmptyArchive: false
+                archiveArtifacts artifacts: "${REPO}/**/*.xe", allowEmptyArchive: false
                 stash name: "xe_files", includes: "${REPO}/**/*.xe"
               } // withEnv
             } // withTools
