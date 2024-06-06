@@ -1,6 +1,5 @@
 *.a
 **/.build*
 **/build
-
-awe_hid_transfer
 doc/_build
+*.o
