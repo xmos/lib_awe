@@ -132,6 +132,10 @@ pipeline {
             label 'usb_audio && macos && arm64 && xcore.ai-mcab'
           }
           steps {
+            dir("${REPO}") {
+              checkout scm
+              createVenv()
+            }
             println "Stage running on ${env.NODE_NAME}"
             dir("${REPO}/tests") {
               withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
@@ -139,6 +143,7 @@ pipeline {
                   withTools(params.TOOLS_VERSION) {
                     unstash "xe_files"
                     sh "tree"
+                    sh "xrun -l"
                   } // Tools
                 } // Venv
               } // XCCM
