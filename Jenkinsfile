@@ -27,6 +27,7 @@ pipeline {
     REPO = 'lib_awe'
     PIP_VERSION = "24.0"
     PYTHON_VERSION = "3.12.1"
+    XMOSDOC_VERSION = "v4.0"
   }
   stages {
     stage('Linux stages') {
@@ -94,6 +95,7 @@ pipeline {
                   } // credentials
                 } // dir
                 archiveArtifacts artifacts: "${REPO}/**/bin/*.xe", allowEmptyArchive: false
+                stash name: "xe_files", includes: "${REPO}/**/bin/*.xe"
               } // withEnv
             } // withTools
           } // steps
@@ -117,7 +119,7 @@ pipeline {
             } // withTools
           } // steps
         }  // Build examples
-        stage('Tests simulator') {
+        stage('Sim Tests') {
           steps {
             dir("${REPO}/tests") {
               withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
@@ -137,6 +139,16 @@ pipeline {
         } // stage
       } // stages
     } // on linux
+    stage('HW tests ') {
+      agent {
+        label 'usb_audio && macos && arm64 && xcore.ai-mcab'
+      }
+      steps {
+        println "Stage running on ${env.NODE_NAME}"
+        unstash "xe_files"
+        sh "tree"
+      } // steps
+    } // Build documentation
     stage('Documentation') {
       agent {
         label 'docker'
