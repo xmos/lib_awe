@@ -167,11 +167,11 @@ pipeline {
           }
           steps {
             println "Stage running on ${env.NODE_NAME}"
-            sh "docker pull ghcr.io/xmos/xmosdoc:${params.XMOSDOC_VERSION}"
+            sh "docker pull ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION"
             sh """docker run -u "\$(id -u):\$(id -g)" \
                   --rm \
                   -v ${WORKSPACE}:/build \
-                  ghcr.io/xmos/xmosdoc:${params.XMOSDOC_VERSION} -v"""
+                  ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION -v"""
             archiveArtifacts artifacts: 'doc/_build/**', allowEmptyArchive: false
           } // steps
         } // Build documentation
