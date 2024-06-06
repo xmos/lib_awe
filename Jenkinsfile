@@ -39,7 +39,6 @@ pipeline {
 
         dir("${REPO}") {
           checkout scm
-
           createVenv()
           withVenv {
             sh "pip install -e ${WORKSPACE}/infr_scripts_py"
