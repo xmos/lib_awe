@@ -1,4 +1,4 @@
-# python_version 3.11.9
+# python_version 3.11
 
 # dependencies
 flake8==3.8.3
