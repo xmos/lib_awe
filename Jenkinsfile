@@ -145,6 +145,9 @@ pipeline {
             label 'x86_64 && linux'
           }
           steps {
+            dir("${REPO}") {
+              checkout scm
+            }
             dir("${REPO}/tests") {
               withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
                 withVenv {
