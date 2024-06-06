@@ -7,6 +7,26 @@ set(APP_DEPENDENT_MODULES "lib_xua(4.1.0)"
                           "lib_i2c(6.2.0)"
                           "lib_awe")
 
+# Grab sw_usb_audio for XU316-MC HW setup files
+include(FetchContent)
+
+set(SW_USB_AUDIO_PATH ${CMAKE_CURRENT_LIST_DIR}/../../sw_usb_audio)
+IF(EXISTS ${SW_USB_AUDIO_PATH})
+    message(STATUS "Skipped: sw_usb_audio")
+else()
+    message(STATUS "Fetching: sw_usb_audio")
+    FetchContent_Declare(
+        sw_usb_audio
+        GIT_REPOSITORY git@github.com:xmos/sw_usb_audio.git
+        GIT_TAG        v8.1.0
+        GIT_SHALLOW    FALSE
+        GIT_SUBMODULES_RECURSE TRUE
+        SOURCE_DIR     ${SW_USB_AUDIO_PATH}/../../sw_usb_audio
+    )
+    FetchContent_Populate(sw_usb_audio)
+endif()
+
+
 set(APP_PCA_ENABLE ON)
 # Audio Class 2, Async, I2S Master, 8xInput, 8xOutput
 set(APP_COMPILER_FLAGS_UA ${EXTRA_BUILD_FLAGS}  -fcomment-asm
@@ -40,7 +60,17 @@ set(APP_COMPILER_FLAGS_I2S ${EXTRA_BUILD_FLAGS} -fcomment-asm
                                                 -D__awe_conf_h_exists__=1
 )
 
-set(APP_INCLUDES src src/core src/extensions)
+# Grab the app sources - we will extend these with HW setup from sw_usb_audio
+file(GLOB_RECURSE APP_XC_SRCS ${APP_ROOT_DIR}/src/*.xc)
+list(APPEND APP_XC_SRCS ../../sw_usb_audio/app_usb_aud_xk_316_mc/src/extensions/audiohw.xc)
+message(STATUS ${APP_XC_SRCS})
+
+
+set(APP_INCLUDES    src
+                    src/core
+                    src/extensions
+                    ../../sw_usb_audio/app_usb_aud_xk_316_mc/src/extensions
+                    ../../sw_usb_audio/app_usb_aud_xk_316_mc/src)
 
 set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 
