@@ -12,7 +12,7 @@ include(FetchContent)
 
 set(SW_USB_AUDIO_PATH ${CMAKE_CURRENT_LIST_DIR}/../../sw_usb_audio)
 IF(EXISTS ${SW_USB_AUDIO_PATH})
-    message(STATUS "Skipped: sw_usb_audio")
+    message(STATUS "Skipping fetch of: sw_usb_audio")
 else()
     message(STATUS "Fetching: sw_usb_audio")
     FetchContent_Declare(
@@ -20,8 +20,8 @@ else()
         GIT_REPOSITORY git@github.com:xmos/sw_usb_audio.git
         GIT_TAG        v8.1.0
         GIT_SHALLOW    FALSE
-        GIT_SUBMODULES_RECURSE TRUE
-        SOURCE_DIR     ${SW_USB_AUDIO_PATH}/../../sw_usb_audio
+        GIT_SUBMODULES_RECURSE FALSE
+        SOURCE_DIR     ${SW_USB_AUDIO_PATH}
     )
     FetchContent_Populate(sw_usb_audio)
 endif()
@@ -63,7 +63,6 @@ set(APP_COMPILER_FLAGS_I2S ${EXTRA_BUILD_FLAGS} -fcomment-asm
 # Grab the app sources - we will extend these with HW setup from sw_usb_audio
 file(GLOB_RECURSE APP_XC_SRCS ${APP_ROOT_DIR}/src/*.xc)
 list(APPEND APP_XC_SRCS ../../sw_usb_audio/app_usb_aud_xk_316_mc/src/extensions/audiohw.xc)
-message(STATUS ${APP_XC_SRCS})
 
 
 set(APP_INCLUDES    src
