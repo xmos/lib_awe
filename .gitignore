@@ -3,3 +3,5 @@
 **/build
 
 awe_hid_transfer
+*.o
+
