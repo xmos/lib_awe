@@ -31,7 +31,7 @@ pipeline {
   stages {
     stage('Linux stages') {
       agent {
-        'x86_64 && linux'
+        label 'x86_64 && linux'
       }
       stages{
         stage('Get sandbox') {
