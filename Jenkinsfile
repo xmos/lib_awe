@@ -135,6 +135,9 @@ pipeline {
             dir("${REPO}") {
               checkout scm
               createVenv()
+              withVenv {
+                sh 'pip install -r requirements.txt'
+              }
             }
             println "Stage running on ${env.NODE_NAME}"
             dir("${REPO}/tests") {
@@ -164,6 +167,9 @@ pipeline {
             dir("${REPO}") {
               checkout scm
               createVenv()
+              withVenv {
+                sh 'pip install -r requirements.txt'
+              }
               withCredentials([file(credentialsId: 'DSPCAWE_8.D.1.1', variable: 'DSPC_AWE_LIB')]) {
                 sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
               }
@@ -219,9 +225,4 @@ pipeline {
       } // par
     } // Test and docs
   } // Stages
-  post {
-    cleanup {
-      xcoreCleanSandbox()
-    }
-  }
 }
