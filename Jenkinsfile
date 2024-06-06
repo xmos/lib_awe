@@ -173,6 +173,8 @@ pipeline {
             println "Stage running on ${env.NODE_NAME}"
             dir("${REPO}") {
               checkout scm
+
+              sh "tree"
             
               sh "docker pull ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION"
               sh """docker run -u "\$(id -u):\$(id -g)" \
