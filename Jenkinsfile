@@ -10,7 +10,7 @@ def get_xcommon_cmake() {
 
 pipeline {
   agent {
-    label 'x86_64 && linux'
+    label none
   }
   options {
     buildDiscarder(xmosDiscardBuildSettings())
@@ -95,7 +95,7 @@ pipeline {
                   } // credentials
                 } // dir
                 archiveArtifacts artifacts: "${REPO}/**/bin/*.xe", allowEmptyArchive: false
-                stash name: "xe_files", includes: "${REPO}/**/bin/*.xe"
+                stash name: "xe_files", includes: "${REPO}/**/*.xe"
               } // withEnv
             } // withTools
           } // steps
@@ -145,8 +145,16 @@ pipeline {
       }
       steps {
         println "Stage running on ${env.NODE_NAME}"
-        unstash "xe_files"
-        sh "tree"
+        dir("${REPO}/tests") {
+          withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
+            withVenv {
+              withTools(params.TOOLS_VERSION) {
+                unstash "xe_files"
+                sh "tree"
+              } // Tools
+            } // Venv
+          } // XCCM
+        } // dir
       } // steps
     } // Build documentation
     stage('Documentation') {
