@@ -149,6 +149,8 @@ pipeline {
             dir("${REPO}") {
               checkout scm
             }
+            get_xcommon_cmake()
+
             dir("${REPO}/tests") {
               withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
                 withVenv {
