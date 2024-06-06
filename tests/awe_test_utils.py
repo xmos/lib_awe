@@ -181,6 +181,7 @@ def filter_awe_packet_log():
     print(f"Filtered hex values have been written to {output_file}")
 
 
-
-awe = awe_hid_comms()
-awe.send_awb("awb_files/playBasic_3thread.awb")
+# For testing only
+if __name__ == '__main__':
+    awe = awe_hid_comms()
+    awe.send_awb("awb_files/playBasic_3thread.awb")
