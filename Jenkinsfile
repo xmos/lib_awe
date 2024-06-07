@@ -181,6 +181,7 @@ pipeline {
                 withVenv {
                   withTools(params.TOOLS_VERSION) {
                     dir("test_basic"){
+                      sh 'pip freeze'
                       sh "cmake -G \"Unix Makefiles\" -B build"
                       sh "xmake -C build -j"
                     }
