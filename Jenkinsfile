@@ -138,6 +138,7 @@ pipeline {
               createVenv()
               withVenv {
                 sh 'pip install -r requirements.txt'
+                sh 'pip install -r ../../sw_usb_audio/requirements.txt'
               }
             }
             println "Stage running on ${env.NODE_NAME}"
