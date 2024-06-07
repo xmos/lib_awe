@@ -65,12 +65,12 @@
 /*** Defines relating to channel counts ***/
 /* Number of I2S channels to DACs*/
 #ifndef I2S_CHANS_DAC
-#define I2S_CHANS_DAC      (8)
+#define I2S_CHANS_DAC      (2)
 #endif
 
 /* Number of I2S channels from ADCs */
 #ifndef I2S_CHANS_ADC
-#define I2S_CHANS_ADC      (8)
+#define I2S_CHANS_ADC      (2)
 #endif
 
 /* Number of USB streaming channels - by default calculate by counting audio interfaces */
