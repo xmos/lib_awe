@@ -9,6 +9,6 @@ documentation:
     lib_xcore_math:
       doxyfile_path: doc/Doxyfile.inc
   pdfs:
-    doc/programming_guide/index:
-      pdf_title: "{{title}} - Programming Guide"
-      pdf_filename: "{{project}}_programming_guide_v{{version}}"
+    doc/user_guide/index:
+      pdf_title: "{{title}} - User Guide"
+      pdf_filename: "{{project}}_user_guide_v{{version}}"

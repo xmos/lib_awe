@@ -215,6 +215,7 @@ pipeline {
               // Zip and archive doc files
               zip dir: "doc/_build/", zipFile: "lib_awe_docs.zip"
               archiveArtifacts artifacts: "lib_awe_docs.zip"
+              archiveArtifacts artifacts: "${REPO}/doc/_build/**/*.pdf", allowEmptyArchive: true
             }
           } // steps
           post {
