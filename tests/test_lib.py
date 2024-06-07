@@ -4,12 +4,23 @@
 Check library not checked in to repo.
 """
 
+
 import pytest
 import os
 
+exclude_dirs = [".venv"]
 
 def test_lib_not_present():
+    file_list = []
     for dirpath, dirnames, filenames in os.walk("."):
-        print(dirpath)
         for filename in [f for f in filenames if f.endswith(".a")]:
-            pytest.fail(f"Found unexpected archive file in repo: {os.path.join(dirpath, filename)}")
+            include = True
+            for exclude_dir in exclude_dirs:
+                if exclude_dir in dirpath:
+                    include = False
+            if include:
+                file_list.append(os.path.join(dirpath, filename))
+    if len(file_list) > 0:
+        for item in file_list:
+            print(f"Found unexpected archive file in repo: {item}")
+        pytest.fail(f"Found one of more archive files in repo")
