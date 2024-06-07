@@ -127,8 +127,8 @@
 #endif
 
 /* Maximum frequency device runs at */
-#ifndef MAX_FREQ
-#define MAX_FREQ           (48000)
+#ifndef MIN_FREQ
+#define MIN_FREQ           (48000)
 #endif
 
 /*** Defines relating to feature placement regarding tiles ***/
