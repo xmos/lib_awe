@@ -46,16 +46,17 @@ USB Audio Example
 
 A sample application is provided called ``app_usb_audio_awe``. This is based on XMOS USB Audio reference design and associate XK-AUDIO-316-MC hardware. It is very closely related to the standard USB Audio reference design provided by XMOS. Documentation for this can be found here `sw_usb_audio design guide <https://www.xmos.com/download/sw_usb_audio:-sw_usb_audio-(user-guide)(v8_1_0).pdf>`_ 
 
-DSP Concepts provide a helpful setup guide which can be seen here :download:`pdf <../pdf/User_Guide_for_XMOS_EVK_with_AWE.pdf>` which is designed to help you get up and running as quickly as possible.
+DSP Concepts provide a helpful setup guide which can be found in the file ``User_Guide_for_XMOS_EVK_with_AWE.pdf`` provided in this repo which is designed to help you get up and running as quickly as possible using this example.
 
-The rest of this section focusses on the feature set of this AWE/USB Audio example.
+The rest of this section focuses on the feature set of this AWE/USB Audio example.
 
 The feature set of the demonstration is as follows:
 
     - USB Audio Class 1.0 (Full Speed)
     - Stereo input from the host to stereo output on the OUT 1/2 3.5 mm analog jack
     - Audio from the host is pumped through the AWE framework before being played on the output jack
-    - 24b Sample resolution
+    - Asynchronous clocking (local audio clock to hardware)
+    - 24 bit Sample resolution
     - 48 kHz sample rate
     - Control to AWE provided over USB HID with VID 0x20b1 and PID 0x0018 supporting live tuning
 
@@ -65,20 +66,73 @@ Building the Example
 
 The following section assumes you have downloaded and installed the XMOS `tools <https://www.xmos.com/software-tools/>`_ minimum version 15.2.1. Now open a tools command prompt.
 
-To build using xcommon-cmake::
-    
-    cd app_usb_audio_awe
-    cmake -G "Unix Makefiles" -B build
-    xmake -j -C build
+You will first need to download both ``lib_awe`` and ``xcommon_cmake`` to your chose sandbox directory::
 
-This will build both the UA (USB Audio) and I2S (I2S only for data transport but with USB/HID enabled for control) binaries. 
+    cd my_sandbox
+    git clone git@github.com:xmos/xcommon_cmake.git
+    git clone git@github.com:xmos/lib_awe.git
+
+Your sandbox root directory listing will look something like this::
+
+    lib_awe     xcommon_cmake
+
+Next you need to set the environment for xcommon-cmake:
+
+.. tab:: MacOS and Linux
+
+    .. code-block:: console
+
+       # MacOS and Linux
+       export XMOS_CMAKE_PATH=/home/user/xcommon_cmake
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+       # Windows
+       set XMOS_CMAKE_PATH=C:\Users\user\xcommon_cmake
+
+
+Finally, ensure you have the lib_awe.a file placed in the lib_awe/lib/xs3a directory. This is the core archive file containing the AWE library::
+
+    cp lib_awe.a lib_awe/lib_awe/lib/xs3a
+
+.. note::
+    The ``lib_awe.a`` file is not provided as part of the lib_awe repository for security reasons. Please obtain this from your XMOS contact directly.
+
+
+
+To build using xcommon-cmake:
+
+.. tab:: MacOS and Linux
+
+    .. code-block:: console
+
+       # MacOS and Linux
+       cd lib_awe
+       cd app_usb_audio_awe
+       cmake -G "Unix Makefiles" -B build
+       xmake -j -C build
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+       # Windows
+       cd lib_awe
+       cd app_usb_audio_awe
+       cmake -G "Unix Makefiles" -B build
+       xmake -C build
+    
+
+This will build both the UA (USB Audio) and I2S (I2S only for data transport but with USB/HID enabled for control) binaries. All of the required dependencies will be downloaded at this step. This will only happen the first time you build.
 
 The application uses approximately 49 kB on Tile[0] and 510 kB on Tile[1], of 512 kB on each tile. 
 
 Running the Example
 ...................
 
-To run the application use the following command::
+To run the application use the following command from the lib_awe/app_usb_audio_awe directory::
 
     xrun bin/UA/app_usb_audio_awe_UA.xe
 
