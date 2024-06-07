@@ -180,8 +180,9 @@ pipeline {
               withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
                 withVenv {
                   withTools(params.TOOLS_VERSION) {
+                    sh 'pip freeze' // find out which versions we have
+
                     dir("test_basic"){
-                      sh 'pip freeze'
                       sh "cmake -G \"Unix Makefiles\" -B build"
                       sh "xmake -C build -j"
                     }
