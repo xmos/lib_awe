@@ -59,7 +59,35 @@ The feature set of the demonstration is as follows:
     - 48 kHz sample rate
     - Control to AWE provided over USB HID with VID 0x20b1 and PID 0x0018 supporting live tuning
 
+
 Building the Example
 ....................
 
+The following section assumes you have downloaded and installed the XMOS `tools <https://www.xmos.com/software-tools/>`_ minimum version 15.2.1. Now open a tools command prompt.
+
+To build using xcommon-cmake::
+    
+    cd app_usb_audio_awe
+    cmake -G "Unix Makefiles" -B build
+    xmake -j -C build
+
+This will build both the UA (USB Audio) and I2S (I2S only for data transport but with USB/HID enabled for control) binaries. 
+
+The application uses approximately 49 kB on Tile[0] and 510 kB on Tile[1], of 512 kB on each tile. 
+
+Running the Example
+...................
+
+To run the application use the following command::
+
+    xrun bin/UA/app_usb_audio_awe_UA.xe
+
+Alternatively to make the design non-volatile by programming in to flash memory use the following command::
+
+    xflash bin/UA/app_usb_audio_awe_UA.xe
+
+The USB audio device should appear in you host OS's audio settings window.
+
+.. note::
+    No audio will be passed through from the host to the 3.5 mm jack until an AWE design is loaded. Please use the Audio Weaver software to download and appropriate design to enable audio streaming.
 
