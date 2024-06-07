@@ -213,8 +213,9 @@ pipeline {
                       -v ${WORKSPACE}/${REPO}:/build \
                       ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION -v"""
               // Zip and archive doc files
-              zip dir: "doc/_build/", zipFile: "lib_awe_docs.zip"
-              archiveArtifacts artifacts: "lib_awe_docs.zip"
+              zip dir: "doc/_build/html/", zipFile: "lib_awe_docs_html.zip"
+              archiveArtifacts artifacts: "lib_awe_docs_html.zip"
+              archiveArtifacts artifacts: "doc/_build/**/*.pdf", allowEmptyArchive: true
             }
           } // steps
           post {

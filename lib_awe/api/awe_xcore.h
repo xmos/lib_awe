@@ -6,6 +6,13 @@
 #include <stdint.h>
 #include <xcore/channel.h>
 
+/**
+ * \addtogroup lib_awe lib_awe
+ *
+ * The public API for using the lib_awe.
+ * @{
+ */
+
 /** Function that spawns all the child threads. This function does not return.
  * It always spawns at least one tuning thread, one data-transport
  * thread, and one DSP thread. Up to four additional DSP threads are spawned
@@ -114,5 +121,8 @@ extern void awe_offload_data_to_dsp_engine(chanend_t c_to_awe,
 #ifndef SLOW_HEAP_SIZE
 #define SLOW_HEAP_SIZE            (5*1024)
 #endif
+
+/**@}*/ // END: addtogroup lib_awe
+
 
 #endif
