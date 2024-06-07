@@ -33,6 +33,14 @@ Finally, a tuning thread is provided which abstracts away the awe_packetProcess(
 All of the above threads for the core lib_awe need to be placed on the same tile. Since the majority of one tile's RAM and threads are used by lib_awe it is typical to dedicate one tile to lib_awe and use the other tile for application logic. However, low-memory usage tasks such as I2S may also be placed on the lib_awe tile (when required by hardware IO constraints) and this is demonstrated in the USB Audio Example.
 
 
+Lib_awe API
+-----------
+
+A single function is provided to wrap the entire lib_awe implementation and automatically spawns all of the worker and helper threads. In addition, where USB/HID is used as the control interface, an API is provided which takes care of translating messages to and from the HID endpoint and to and from the lib_awe tuning thread.
+
+.. doxygengroup:: lib_awe
+    :content-only:
+
 USB Audio Example
 -----------------
 
@@ -49,7 +57,7 @@ The feature set of the demonstration is as follows:
     - Audio from the host is pumped through the AWE framework before being played on the output jack
     - 24b Sample resolution
     - 48 kHz sample rate
-    - Control to AWE provided over USB HID with VID 0x20b1 and PID 0x0018
+    - Control to AWE provided over USB HID with VID 0x20b1 and PID 0x0018 supporting live tuning
 
 Building the Example
 ....................
