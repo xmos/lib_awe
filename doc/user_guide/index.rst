@@ -44,7 +44,7 @@ A single function is provided to wrap the entire lib_awe implementation and auto
 USB Audio Example
 -----------------
 
-A sample application is provided called ``app_usb_audio_awe``. This is based on XMOS USB Audio reference design and associate XK-AUDIO-316-MC hardware. It is very closely related to the standard USB Audio reference design provided by XMOS. Documentation for this can be found here `sw_usb_audio design guide <https://www.xmos.com/download/sw_usb_audio:-sw_usb_audio-(user-guide)(v8_1_0).pdf>`_ 
+A sample application is provided called ``app_usb_audio_awe``. It is based on the XMOS USB Audio reference design and associated XK-AUDIO-316-MC hardware. It is very closely related to the standard USB Audio reference design provided by XMOS. Documentation for this can be found here `sw_usb_audio design guide <https://www.xmos.com/download/sw_usb_audio:-sw_usb_audio-(user-guide)(v8_1_0).pdf>`_ 
 
 DSP Concepts provide a helpful setup guide which can be found in the file ``User_Guide_for_XMOS_EVK_with_AWE.pdf`` provided in this repo which is designed to help you get up and running as quickly as possible using this example.
 
@@ -140,7 +140,7 @@ Alternatively to make the design non-volatile by programming in to flash memory 
 
     xflash bin/UA/app_usb_audio_awe_UA.xe
 
-The USB audio device should appear in you host OS's audio settings window.
+The USB audio device should appear in your host OS's audio settings window.
 
 .. note::
     No audio will be passed through from the host to the 3.5 mm jack until an AWE design is loaded. Please use the Audio Weaver software to download and appropriate design to enable audio streaming.
