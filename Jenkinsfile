@@ -169,9 +169,9 @@ pipeline {
           }
           steps {
             println "Stage running on ${env.NODE_NAME}"
+            sh "git clone git@github.com:xmos/sw_usb_audio"
             dir("${REPO}") {
               checkout scm
-              sh "git clone git@github.com:xmos/sw_usb_audio"
               createVenv()
               withVenv {
                 sh 'pip install -r requirements.txt'
