@@ -105,3 +105,58 @@ void awe_tuning_thread(chanend_t c_control_from_host,
         continue;
     }
 }
+
+
+void send_pkt(chanend_t c_tuning_from_host, unsigned int num_words, unsigned int packet[]){
+    chanend_out_word(c_tuning_from_host, num_words + 1); // + crc
+
+    unsigned int crc = 0;
+    for(int i = 0; i < num_words; i++) {
+        chanend_out_word(c_tuning_from_host, packet[i]);
+        // printhexln(packet[i]);
+        crc ^= packet[i];
+    }
+    chanend_out_word(c_tuning_from_host, crc);
+    // printhexln(crc);
+
+    chanend_out_end_token(c_tuning_from_host);
+    chanend_check_end_token(c_tuning_from_host);
+}
+
+int get_response(chanend_t c_tuning_to_host){
+    unsigned int packet_buffer[13];
+    chanend_check_end_token(c_tuning_to_host);
+    chanend_out_word(c_tuning_to_host, 13);
+    chanend_out_end_token(c_tuning_to_host);
+    int num_words = chanend_in_word(c_tuning_to_host);
+    packet_buffer[0] = (num_words << 16);
+    for(int i = 0; i < num_words; i++) {
+        packet_buffer[i+1] = chanend_in_word(c_tuning_to_host);
+    }
+    chanend_out_end_token(c_tuning_to_host);
+    chanend_check_end_token(c_tuning_to_host);
+
+    int ret_code = 0;
+    switch(packet_buffer[0]) {
+        case 0x30000: // Short response
+            ret_code = packet_buffer[1];
+        break;
+ 
+        case 0x40000: // Short response with sequence number
+            ret_code = packet_buffer[2];
+        break;
+
+        default:
+            printstr("Illegal response: ");
+#if DEFINE_ERROR_STRINGS
+            printstrln(s_error_strings[ret_code]);
+#else
+            printhexln(ret_code);
+#endif
+            ret_code = -1;
+        break;
+    }
+
+    return ret_code;
+}
+
