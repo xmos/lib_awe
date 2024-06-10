@@ -77,7 +77,7 @@ extern void awe_offload_data_to_dsp_engine(chanend_t c_to_awe,
 
 
 void send_pkt(chanend_t c_tuning_from_host, unsigned int num_words, unsigned int packet[]);
-int get_pkt(chanend_t c_tuning_to_host, unsigned int packet_buffer[]);
+int get_pkt(chanend_t c_tuning_to_host, unsigned int packet_buffer[], unsigned max_packet_size);
 int get_response(chanend_t c_tuning_to_host);
 
 #define AWE_DSP_MAX_THREAD_NUM        5

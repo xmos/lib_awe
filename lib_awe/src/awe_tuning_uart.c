@@ -20,7 +20,8 @@
 #define UART_TX_PORT        XS1_PORT_1A
 #define UART_RX_PORT        XS1_PORT_1C
 
-
+// This sequence id (set by incoming msg from host) needs to be eechoed back by the response
+volatile char seq = 0x30;
 
 DECLARE_JOB(uart_stub, (chanend_t));
 void uart_stub(chanend_t c_tuning_to_host){
@@ -28,28 +29,31 @@ void uart_stub(chanend_t c_tuning_to_host){
     hwtimer_t tmr = hwtimer_alloc();
     uart_tx_blocking_init(&uart, UART_TX_PORT, UART_BAUD, UART_DATA_BITS, UART_PARITY, UART_STOP_BITS, tmr);
 
-    char seq = 0x30;
     while(1){
         unsigned int packet_buffer[64];
-        get_pkt(chanend_t c_tuning_to_host, unsigned int packet_buffer[]){
+        int len = get_pkt(c_tuning_to_host, packet_buffer, 64);
+        // printintln(len);
 
-        int ret = get_response(c_tuning_to_host);
-        // printhexln(ret);
-        char pckt[8];
-        pckt[0] = 0x02;
-        pckt[1] = seq;
-        if(++seq == 0x40){
-            seq = 0x30;
+        uart_tx(&uart, 0x02);
+        uart_tx(&uart, seq);
+        // if(++seq == 0x40){
+        //     seq = 0x30;
+        // }
+
+        for(int w = 1; w < len + 1; w++){
+            unsigned int word = packet_buffer[w];
+            for(int i = 0; i < 5; i++){
+                uart_tx(&uart, (char)(0x80 | ((word >> (7 * i)) & 0x7f)) );
+            } 
         }
-        pckt[7] = 0x03;
-        for(int i = 0; i < 5; i++){
-            pckt[2 + i] = (char)((ret & 0x7f) << (7 * i));
-        } 
-        for(int i = 0; i < 8; i++){
-            uart_tx(&uart, pckt[i]);
-        }
+        uart_tx(&uart, 0x03);
         // delay_milliseconds(1000);
-        printstr("tx\n");
+
+        // printintln(packet_buffer[0]>>16);
+        for(int w = 1; w < len + 1; w++){
+            unsigned int word = packet_buffer[w];
+            // printhexln(word);
+        }
     }
 }
 
@@ -104,7 +108,7 @@ void uart_rx_wrapper(chanend_t c_tuning_from_host){
     uart_rx_blocking_init(  &uart, UART_RX_PORT, UART_BAUD, UART_DATA_BITS, UART_PARITY, UART_STOP_BITS, tmr,
                             rx_error_callback, &uart);
 
-    unsigned int packetBuffer[32];
+    unsigned int packetBuffer[32] = {0};
     unsigned int cmd = 0;
     unsigned byte_idx = 0;
     unsigned cmd_idx = 0;
@@ -118,6 +122,7 @@ void uart_rx_wrapper(chanend_t c_tuning_from_host){
             break;
             case 1:
                 // sequence num
+                seq = rx_from_uart;
                 byte_idx++;
             break;
             case 2:
@@ -131,21 +136,23 @@ void uart_rx_wrapper(chanend_t c_tuning_from_host){
                 byte_idx++;
             break;
             case 7:
+                packetBuffer[cmd_idx++] = cmd;
                 // End of packet
                 if(rx_from_uart == 0x03){
+                    send_pkt(c_tuning_from_host, cmd_idx - 1, packetBuffer);
+                    for(int i = 0; i < cmd_idx - 1; i++){
+                        // printhexln(packetBuffer[i]);
+                    }
+                    // printhexln(cmd_idx - 1);
                     byte_idx = 0;
-                    packetBuffer[cmd_idx++] = cmd;
-                    send_pkt(c_tuning_from_host, cmd_idx, packetBuffer);
-                    // printintln(cmd_idx);
+                    cmd_idx = 0;
                 } else {
-                    packetBuffer[cmd_idx++] = cmd;
-                    byte_idx = 2;
+                    // More data - save cmd and start on next starting from second byte as we have processed first here
+                    byte_idx = 3;
                     rx_from_uart &= 0x7f;
                     cmd = 0;
                     cmd |= rx_from_uart << ((byte_idx - 2) * 7);
-                    cmd_idx = 0;
                 }
-                // printhexln(cmd);
             break;
         }
 

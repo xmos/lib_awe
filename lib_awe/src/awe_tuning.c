@@ -123,9 +123,9 @@ void send_pkt(chanend_t c_tuning_from_host, unsigned int num_words, unsigned int
     chanend_check_end_token(c_tuning_from_host);
 }
 
-int get_pkt(chanend_t c_tuning_to_host, unsigned int packet_buffer[]){
+int get_pkt(chanend_t c_tuning_to_host, unsigned int packet_buffer[], unsigned max_packet_size){
     chanend_check_end_token(c_tuning_to_host);
-    chanend_out_word(c_tuning_to_host, 13);
+    chanend_out_word(c_tuning_to_host, max_packet_size);
     chanend_out_end_token(c_tuning_to_host);
     int num_words = chanend_in_word(c_tuning_to_host);
     packet_buffer[0] = (num_words << 16);
@@ -141,7 +141,7 @@ int get_pkt(chanend_t c_tuning_to_host, unsigned int packet_buffer[]){
 
 int get_response(chanend_t c_tuning_to_host){
     unsigned int packet_buffer[13];
-    get_pkt(c_tuning_to_host, packet_buffer);
+    get_pkt(c_tuning_to_host, packet_buffer, 13);
 
     int ret_code = 0;
     switch(packet_buffer[0]) {
