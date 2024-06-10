@@ -1,3 +1,5 @@
+# Copyright 2024 XMOS LIMITED.
+# This Software is subject to the terms of the XCORE VocalFusion Licence.
 import pytest
 import subprocess
 from pathlib import Path

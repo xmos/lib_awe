@@ -56,23 +56,25 @@ pipeline {
 
         stage('Library checks') {
           steps {
-            dir("${REPO}") {
-              withTools(params.TOOLS_VERSION) {
-                withVenv {
-                  // creation of tools_released and REPO environment variable are workarounds
-                  // to allow xcoreLibraryChecks to run without a viewfile-based sandbox
-                  dir("tools_released") {
-                    sh "echo ${params.TOOLS_VERSION} > REQUIRED_TOOLS_VERSION"
-                  }
-                  withEnv(["REPO=${REPO}"]) {
-                    xcoreLibraryChecks("${REPO}", false)
-                    // Need to run this test on the repo source only before we do a build and grab the .a
-                    sh "python -m pytest -k \"lib\" --junitxml=junit_lib.xml"
-                    junit "junit_lib.xml"
-                  } // withEnv
-                } // with Venv
-              } // tools
-            } // dir
+            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+              dir("${REPO}") {
+                withTools(params.TOOLS_VERSION) {
+                  withVenv {
+                    // creation of tools_released and REPO environment variable are workarounds
+                    // to allow xcoreLibraryChecks to run without a viewfile-based sandbox
+                    dir("tools_released") {
+                      sh "echo ${params.TOOLS_VERSION} > REQUIRED_TOOLS_VERSION"
+                    }
+                    withEnv(["REPO=${REPO}"]) {
+                      xcoreLibraryChecks("${REPO}", false)
+                      // Need to run this test on the repo source only before we do a build and grab the .a
+                      sh "python -m pytest -k \"lib\" --junitxml=junit_lib.xml"
+                      junit "junit_lib.xml"
+                    } // withEnv
+                  } // with Venv
+                } // tools
+              } // dir
+            } // catch error
           } //step
         }  // Library checks
         stage('Build examples XCCM') {
