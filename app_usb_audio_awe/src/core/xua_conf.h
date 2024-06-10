@@ -65,12 +65,12 @@
 /*** Defines relating to channel counts ***/
 /* Number of I2S channels to DACs*/
 #ifndef I2S_CHANS_DAC
-#define I2S_CHANS_DAC      (8)
+#define I2S_CHANS_DAC      (2)
 #endif
 
 /* Number of I2S channels from ADCs */
 #ifndef I2S_CHANS_ADC
-#define I2S_CHANS_ADC      (8)
+#define I2S_CHANS_ADC      (2)
 #endif
 
 /* Number of USB streaming channels - by default calculate by counting audio interfaces */
@@ -121,9 +121,14 @@
 #define MCLK_48            (512*48000)   /* 48, 96 etc */
 #endif
 
-/* Maximum frequency device runs at */
+/* Minimum frequency device runs at */
 #ifndef MAX_FREQ
-#define MAX_FREQ           (192000)
+#define MAX_FREQ           (48000)
+#endif
+
+/* Maximum frequency device runs at */
+#ifndef MIN_FREQ
+#define MIN_FREQ           (48000)
 #endif
 
 /*** Defines relating to feature placement regarding tiles ***/
