@@ -28,12 +28,28 @@ void uart_stub(chanend_t c_tuning_to_host){
     hwtimer_t tmr = hwtimer_alloc();
     uart_tx_blocking_init(&uart, UART_TX_PORT, UART_BAUD, UART_DATA_BITS, UART_PARITY, UART_STOP_BITS, tmr);
 
+    char seq = 0x30;
     while(1){
+        unsigned int packet_buffer[64];
+        get_pkt(chanend_t c_tuning_to_host, unsigned int packet_buffer[]){
+
         int ret = get_response(c_tuning_to_host);
-        printhexln(ret);
+        // printhexln(ret);
+        char pckt[8];
+        pckt[0] = 0x02;
+        pckt[1] = seq;
+        if(++seq == 0x40){
+            seq = 0x30;
+        }
+        pckt[7] = 0x03;
+        for(int i = 0; i < 5; i++){
+            pckt[2 + i] = (char)((ret & 0x7f) << (7 * i));
+        } 
+        for(int i = 0; i < 8; i++){
+            uart_tx(&uart, pckt[i]);
+        }
         // delay_milliseconds(1000);
-        // uart_tx(&uart, tx_data[0]);
-        // printstr("tx\n");
+        printstr("tx\n");
     }
 }
 
@@ -91,6 +107,7 @@ void uart_rx_wrapper(chanend_t c_tuning_from_host){
     unsigned int packetBuffer[32];
     unsigned int cmd = 0;
     unsigned byte_idx = 0;
+    unsigned cmd_idx = 0;
     while(1){
         char rx_from_uart = uart_rx(&uart);
         switch(byte_idx){
@@ -114,9 +131,21 @@ void uart_rx_wrapper(chanend_t c_tuning_from_host){
                 byte_idx++;
             break;
             case 7:
-                byte_idx = 0;
+                // End of packet
+                if(rx_from_uart == 0x03){
+                    byte_idx = 0;
+                    packetBuffer[cmd_idx++] = cmd;
+                    send_pkt(c_tuning_from_host, cmd_idx, packetBuffer);
+                    // printintln(cmd_idx);
+                } else {
+                    packetBuffer[cmd_idx++] = cmd;
+                    byte_idx = 2;
+                    rx_from_uart &= 0x7f;
+                    cmd = 0;
+                    cmd |= rx_from_uart << ((byte_idx - 2) * 7);
+                    cmd_idx = 0;
+                }
                 // printhexln(cmd);
-                send_pkt(c_tuning_from_host, 1, &cmd);
             break;
         }
 
