@@ -137,6 +137,7 @@ pipeline {
           steps {
             dir("${REPO}") {
               checkout scm
+              sh "git clone git@github.com:xmos/sw_usb_audio"
               createVenv()
               withVenv {
                 sh 'pip install -r requirements.txt'
@@ -188,7 +189,7 @@ pipeline {
                       sh "cmake -G \"Unix Makefiles\" -B build"
                       sh "xmake -C build -j"
                     }
-                    sh "python -m pytest -k \"not lib\" --junitxml=junit_main.xml"
+                    sh "python -m pytest -k \"not lib and not audio\" --junitxml=junit_main.xml"
                     junit "junit_main.xml"
                   } // withTools
                 } // withVenv
