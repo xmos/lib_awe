@@ -125,6 +125,7 @@ void uart_rx_wrapper(chanend_t c_tuning_from_host){
                 seq = rx_from_uart;
                 byte_idx++;
             break;
+            // Handle 5 data bytes
             case 2:
             case 3:
             case 4:
@@ -135,6 +136,7 @@ void uart_rx_wrapper(chanend_t c_tuning_from_host){
 
                 byte_idx++;
             break;
+            // Handle terminator or next cmd
             case 7:
                 packetBuffer[cmd_idx++] = cmd;
                 // End of packet
