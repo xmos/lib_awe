@@ -12,7 +12,7 @@
 
 extern unsafe client interface i2c_master_if i_i2c_client;
 extern void interface_saver(client interface i2c_master_if i);
-extern void ctrlPort();
+extern void board_setup();
 extern void awe_usb_hid(chanend c_hid_to_host, chanend c_hid_from_host, chanend c_tuning_from_host, chanend c_tuning_to_host);
 
 /* I2C interface ports */
@@ -27,7 +27,7 @@ extern void dsp_main(chanend control_from_host, chanend control_to_host);
 
 #define USER_MAIN_CORES \
     on tile[0]: {                                                       \
-        ctrlPort();                                                     \
+        board_setup();                                                  \
         i2c_master(i2c, 1, p_scl, p_sda, 100);                          \
     }                                                                   \
     on tile[0]: {                                                       \
