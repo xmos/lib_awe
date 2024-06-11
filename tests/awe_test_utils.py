@@ -7,6 +7,7 @@ import hid
 import struct
 import numpy as np
 import time
+import re
 
 
 # Get the udev rules sorted in linux https://depts.washington.edu/dxscdoc/Help/Guides/HID_permissions.html#:~:text=On%20Linux&text=This%20will%20give%20read%20and,plugging%20and%20replugging%20the%20device.
@@ -160,6 +161,70 @@ class awe_hid_comms:
             if err:
                 print("Non-zero response: {err}")
             awb_idx += cmd_len
+
+
+class awe_cmd_list:
+    """
+    Reads the commands file and turns them into the enum for sending cmds
+    """
+    def __init__(self, file="../lib_awe/src/include_internal/ProxyIDs.h"):
+        self.enum_dict = {}
+
+        with open(file) as ef:
+            file_content = ef.read()
+            enum_pattern = re.compile(r"typedef\s+enum\s*{([^}]*)}\s*(\w+);", re.DOTALL)
+            matches = enum_pattern.search(file_content)
+            if matches:
+                enum_body = matches.group(1)
+                # Remove all comments
+                enum_body = re.sub(r'//.*?\n|/\*.*?\*/', '', enum_body, flags=re.DOTALL)
+                enum_entries = enum_body.split(',')
+                current_value = -1
+                for entry in enum_entries:
+                    entry = entry.strip()
+                    if entry:
+                        if '=' in entry:
+                            name, value = entry.split('=')
+                            name = name.strip()
+                            value = int(value.strip())
+                            current_value = value
+                        else:
+                            name = entry.strip()
+                            current_value += 1
+                        self.enum_dict[name] = current_value
+
+    def lookup(self, cmd):
+        return self.enum_dict[cmd]
+
+    def get_keys(self):
+        return self.enum_dict
+
+class awe_error_codes:
+    """
+    Reads the error file and turns them into a string from the err code
+    """
+    def __init__(self, file="../lib_awe/src/include_internal/Errors.h"):
+        self.file = file
+        self.define_dict = self._parse_defines()
+
+    def _parse_defines(self):
+        define_dict = {}
+        define_pattern = re.compile(r"#define\s+(\w+)\s+\(([-\d]+)\)")
+        
+        with open(self.file, 'r') as ef:
+            file_content = ef.read()
+            for match in define_pattern.findall(file_content):
+                name, value = match
+                define_dict[int(value)] = name
+        
+        return define_dict
+
+    def lookup(self, err_code):
+        return self.define_dict.get(err_code, None)
+
+    def get_keys(self):
+        return self.define_dict
+
 
 
 def filter_awe_packet_log():
