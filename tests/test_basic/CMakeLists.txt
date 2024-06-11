@@ -4,7 +4,7 @@ project(test_awe_basic)
 
 set(APP_HW_TARGET XCORE-AI-EXPLORER)
 set(APP_DEPENDENT_MODULES   "lib_awe" 
-                            "lib_xua(4.0.0)"
+                            "lib_xua(4.1.0)"
 )
 
 set(APP_COMPILER_FLAGS ${EXTRA_BUILD_FLAGS}     -Os
