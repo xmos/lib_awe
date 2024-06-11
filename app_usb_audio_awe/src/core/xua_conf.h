@@ -121,12 +121,12 @@
 #define MCLK_48            (512*48000)   /* 48, 96 etc */
 #endif
 
-/* Minimum frequency device runs at */
+/* Maximum frequency device runs at */
 #ifndef MAX_FREQ
 #define MAX_FREQ           (48000)
 #endif
 
-/* Maximum frequency device runs at */
+/* Minimum frequency device runs at */
 #ifndef MIN_FREQ
 #define MIN_FREQ           (48000)
 #endif
