@@ -144,13 +144,27 @@ pipeline {
                 sh 'pip install -r ../../sw_usb_audio/requirements.txt'
               }
             }
+            dir("sw_audio_analyzer") {
+              copyArtifacts filter: '**/*.xe', fingerprintArtifacts: true, projectName: 'xmos-int/sw_audio_analyzer/master', selector: lastSuccessful()
+              copyArtifacts filter: 'host_xscope_controller/bin_macos/xscope_controller', fingerprintArtifacts: true, projectName: 'xmos-int/sw_audio_analyzer/master', selector: lastSuccessful()
+            }
             println "Stage running on ${env.NODE_NAME}"
             dir("${REPO}/tests") {
               withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
                 withVenv {
                   withTools(params.TOOLS_VERSION) {
+                    dir("tools") {
+                      // Build test support application
+                      // dir("volcontrol") {
+                      //   sh 'cmake -B build'
+                      //   sh 'make -C build'
+                      // }
+                      copyArtifacts filter: 'bin-macos-x86/xsig', fingerprintArtifacts: true, projectName: 'xmos-int/xsig/master', flatten: true, selector: lastSuccessful()
+                      copyArtifacts filter: 'OSX/x86/xmos_mixer', fingerprintArtifacts: true, projectName: 'XMOS/lib_xua/develop', flatten: true, selector: lastSuccessful()
+                    }
+
                     unstash "xe_files"
-                    sh "tree"
+                    sh "tree .."
                     sh "xrun -l"
                   } // Tools
                 } // Venv
@@ -175,6 +189,7 @@ pipeline {
               createVenv()
               withVenv {
                 sh 'pip install -r requirements.txt'
+                sh 'pip install -r ../../sw_usb_audio/requirements.txt'
               }
               withCredentials([file(credentialsId: 'DSPCAWE_8.D.1.1', variable: 'DSPC_AWE_LIB')]) {
                 sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
