@@ -110,7 +110,7 @@ void awe_tuning_thread(chanend_t c_control_from_host,
     }
 }
 
-
+// Sends a single packet. Adds CRC on end
 void _send_packet_to_awe(chanend_t c_tuning_from_host, unsigned int payload[], unsigned int num_words){
     chanend_out_word(c_tuning_from_host, num_words + 1); // + crc
 
@@ -129,6 +129,7 @@ void _send_packet_to_awe(chanend_t c_tuning_from_host, unsigned int payload[], u
 
 }
 
+// Sends a concatonated packet consisting of two single packets. Adds CRC on end
 void _send_packet_to_awe_dual_array(chanend_t c_tuning_from_host, const unsigned int payload1[], unsigned int num_words1, const unsigned int payload2[], unsigned int num_words2){
     chanend_out_word(c_tuning_from_host, num_words1 + num_words2 + 1); // + crc
 
@@ -151,6 +152,7 @@ void _send_packet_to_awe_dual_array(chanend_t c_tuning_from_host, const unsigned
     chanend_check_end_token(c_tuning_from_host);
 }
 
+// Gets a whole packet (icnluding CRC) from awe
 unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, unsigned int packet_buffer[], unsigned max_packet_words){
     chanend_check_end_token(c_tuning_to_host);
     chanend_out_word(c_tuning_to_host, max_packet_words);
@@ -326,7 +328,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
     
     // Required to allow audio to stop before issuing destroy as part of AWB load
     hwtimer_t tmr = hwtimer_alloc();
-    hwtimer_delay(tmr, XS1_TIMER_KHZ);
+    hwtimer_delay(tmr, XS1_TIMER_KHZ); // 1ms
     hwtimer_free(tmr);
 
     unsigned int cmd_idx = 0;
@@ -351,6 +353,4 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
     }
 
     return E_SUCCESS;
-
-
 }

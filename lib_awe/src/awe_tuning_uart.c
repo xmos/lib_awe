@@ -13,6 +13,9 @@
 #include <xcore/parallel.h>
 
 
+void _send_packet_to_awe(chanend_t c_tuning_from_host, unsigned int payload[], unsigned int num_words);
+unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, unsigned int packet_buffer[], unsigned max_packet_words);
+
 #define UART_BAUD           112500
 #define UART_DATA_BITS      8
 #define UART_PARITY         UART_PARITY_NONE
@@ -31,7 +34,7 @@ void uart_stub(chanend_t c_tuning_to_host){
 
     while(1){
         unsigned int packet_buffer[64];
-        int len = get_pkt(c_tuning_to_host, packet_buffer, 64);
+        int len = _get_packet_from_awe(c_tuning_to_host, packet_buffer, 64);
         // printintln(len);
 
         uart_tx(&uart, 0x02);
@@ -141,7 +144,7 @@ void uart_rx_wrapper(chanend_t c_tuning_from_host){
                 packetBuffer[cmd_idx++] = cmd;
                 // End of packet
                 if(rx_from_uart == 0x03){
-                    send_pkt(c_tuning_from_host, cmd_idx - 1, packetBuffer);
+                    _send_packet_to_awe(c_tuning_from_host, cmd_idx - 1, packetBuffer);
                     for(int i = 0; i < cmd_idx - 1; i++){
                         // printhexln(packetBuffer[i]);
                     }
