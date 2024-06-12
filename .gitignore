@@ -1,5 +1,46 @@
-*.a
-**/.build*
-**/build
-doc/_build
+# Tmp files & logs
+*.settings
+*.bin
+*.zip
+*.log
+*.vcd
+*.swp
+*.*~
+*.xmt
+*.swo
+*.swn
+*~
+*.DS_Store
+
+# Python
+*.pyc
+**/*.egg-info/
+**/*venv/*
+
+# XMOS temp files
+**/*build*/*
+*/bin/*
+**/flash_bin_node*
+**/fw-*
+**/s2l-*
+**/spanning-xn-*
+**/target-xn*
+*.xi
 *.o
+*.i
+*.a
+
+# XMOS binaries
+*.xe
+*.a
+
+# Regression test files
+*/test_results.csv
+
+# Built documentation
+doc/pdf/*.pdf
+toplevel_doc
+
+
+
+
