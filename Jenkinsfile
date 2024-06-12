@@ -75,7 +75,7 @@ pipeline {
             } // dir
           } //step
         }  // Library checks
-        stage('Build examples XCCM') {
+        stage('Build examples cmake/xcommon_cmake') {
           steps {
             withTools(params.TOOLS_VERSION) {
               withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
@@ -83,14 +83,11 @@ pipeline {
                   withCredentials([file(credentialsId: 'DSPCAWE_8.D.1.1', variable: 'DSPC_AWE_LIB')]) {
                     sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
                     script {
-                      // Build all apps in the examples directory
-                      def apps = sh(script: "ls -d examples/app_*", returnStdout: true).trim()
-                      for(String app : apps.split()) {
-                        dir("${app}") {
-                          sh "cmake  -G \"Unix Makefiles\" -B build"
-                          sh "xmake -C build -j"
-                        } // dir
-                      } // for loop
+                      // Build all example apps
+                      dir("${REPO}") {
+                        sh "cmake  -G \"Unix Makefiles\" -B build"
+                        sh "xmake -C build -j"
+                      } // dir
                     } // script
                   } // credentials
                 } // dir
@@ -100,7 +97,7 @@ pipeline {
             } // withTools
           } // steps
         }  // Build examples XCCM
-        stage('Build examples xmake') {
+        stage('Build examples xmake/xcommon') {
           steps {
             withTools(params.TOOLS_VERSION) {
               dir("${REPO}") {
