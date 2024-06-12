@@ -17,6 +17,9 @@
 **/*.egg-info/
 **/*venv/*
 
+# CMake
+**/CMakeFiles/**
+
 # XMOS temp and intermediate files
 **/*build*/*
 */bin/*
@@ -29,6 +32,7 @@
 *.o
 *.i
 *.a
+manifest.txt
 
 # XMOS binaries
 *.xe
