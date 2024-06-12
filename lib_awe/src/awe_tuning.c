@@ -2,8 +2,11 @@
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 #include <xcore/channel.h>
 #include <xcore/select.h>
+#include <xcore/hwtimer.h>
 #include <stdio.h>
+#include <print.h>
 #include "awe_xcore_internal.h"
+#include "ProxyIDs.h"
 
 #if AWE_DSP_MAX_THREAD_NUM > 5
 #error "AWE_DSP_MAX_THREAD_NUM should be 5 or tuning needs to be extended"
@@ -107,14 +110,14 @@ void awe_tuning_thread(chanend_t c_control_from_host,
 }
 
 
-void send_pkt(chanend_t c_tuning_from_host, unsigned int num_words, unsigned int packet[]){
+void _send_packet_to_awe(chanend_t c_tuning_from_host, unsigned int payload[], unsigned int num_words){
     chanend_out_word(c_tuning_from_host, num_words + 1); // + crc
 
     unsigned int crc = 0;
     for(int i = 0; i < num_words; i++) {
-        chanend_out_word(c_tuning_from_host, packet[i]);
-        // printhexln(packet[i]);
-        crc ^= packet[i];
+        chanend_out_word(c_tuning_from_host, payload[i]);
+        // printhexln(payload[i]);
+        crc ^= payload[i];
     }
     chanend_out_word(c_tuning_from_host, crc);
     // printhexln(crc);
@@ -123,14 +126,35 @@ void send_pkt(chanend_t c_tuning_from_host, unsigned int num_words, unsigned int
     chanend_check_end_token(c_tuning_from_host);
 }
 
-int get_pkt(chanend_t c_tuning_to_host, unsigned int packet_buffer[], unsigned max_packet_size){
+void _send_packet_to_awe_dual_array(chanend_t c_tuning_from_host, const unsigned int payload1[], unsigned int num_words1, const unsigned int payload2[], unsigned int num_words2){
+    chanend_out_word(c_tuning_from_host, num_words1 + num_words2 + 1); // + crc
+
+    unsigned int crc = 0;
+    for(unsigned i = 0; i < num_words1; i++) {
+        chanend_out_word(c_tuning_from_host, payload1[i]);
+        // printhexln(packet[i]);
+        crc ^= payload1[i];
+    }
+    for(unsigned i = 0; i < num_words2; i++) {
+        chanend_out_word(c_tuning_from_host, payload2[i]);
+        // printhexln(packet[i]);
+        crc ^= payload2[i];
+    }
+    chanend_out_word(c_tuning_from_host, crc);
+    // printhexln(crc);
+
+    chanend_out_end_token(c_tuning_from_host);
+    chanend_check_end_token(c_tuning_from_host);
+}
+
+unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, unsigned int packet_buffer[], unsigned max_packet_words){
     chanend_check_end_token(c_tuning_to_host);
-    chanend_out_word(c_tuning_to_host, max_packet_size);
+    chanend_out_word(c_tuning_to_host, max_packet_words);
     chanend_out_end_token(c_tuning_to_host);
-    int num_words = chanend_in_word(c_tuning_to_host);
-    packet_buffer[0] = (num_words << 16);
-    for(int i = 0; i < num_words; i++) {
-        packet_buffer[i+1] = chanend_in_word(c_tuning_to_host);
+    unsigned num_words = chanend_in_word(c_tuning_to_host);
+    // printintln(num_words);
+    for(unsigned i = 0; i < num_words; i++) {
+        packet_buffer[i] = chanend_in_word(c_tuning_to_host);
         // printhexln(packet_buffer[i]);
     }
     chanend_out_end_token(c_tuning_to_host);
@@ -139,31 +163,176 @@ int get_pkt(chanend_t c_tuning_to_host, unsigned int packet_buffer[], unsigned m
     return num_words;
 }
 
-int get_response(chanend_t c_tuning_to_host){
-    unsigned int packet_buffer[13];
-    get_pkt(c_tuning_to_host, packet_buffer, 13);
+#define AWE_TUNING_MAX_PACKET_SIZE_INTS 64
+#define NUM_WORDS(packet) (sizeof(packet) / sizeof(packet[0]))
+#define PACKET_HEADER(num_words, instance_id) ( ((num_words + 1) << 16) | ((instance_id & 0xff) << 8) )
+const unsigned coreID = 0;
 
-    int ret_code = 0;
-    switch(packet_buffer[0]) {
-        case 0x30000: // Short response
-            ret_code = packet_buffer[1];
-        break;
- 
-        case 0x40000: // Short response with sequence number
-            ret_code = packet_buffer[2];
-        break;
 
-        default:
-            printstr("Illegal response: ");
-#if DEFINE_ERROR_STRINGS
-            printstrln(s_error_strings[ret_code]);
-#else
-            printhexln(ret_code);
-#endif
-            ret_code = -1;
-        break;
-    }
-
-    return ret_code;
+/**
+ * @brief Get a scalar or array value of a module variable by handle
+ * @param [in] pAWE                     instance pointer
+ * @param [out] value                   value(s) to get
+ * @param [in] arrayOffset              array index if array
+ * @param [in] length                   number of elements. 1 if scaler
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED, 
+ *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS   
+ */ 
+INT32 xawe_ctrlGetValue(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length){
+    UINT32 payload[] = {PACKET_HEADER(coreID, PFID_GetValueHandle), handle, length, arrayOffset};
+    _send_packet_to_awe(pAWE->c_tuning_from_host, payload, NUM_WORDS(payload));
+    unsigned num_words = 0;
+    return _get_packet_from_awe_with_err(pAWE->c_tuning_to_host, &num_words, value, 16);
 }
 
+/**
+ * @brief Set a scalar or array value of a module variable by handle
+ * @param [in] pAWE                     instance pointer
+ * @param [in] handle                   packed object handle
+ * @param [in] value                    value(s) to set
+ * @param [in] arrayOffset              array index if array
+ * @param [in] length                   number of elements. 1 if scaler
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED, 
+ *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS   
+ */
+INT32 xawe_ctrlSetValue(const xAWEInstance_t *pAWE, UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length){
+    UINT32 payload1[AWE_TUNING_MAX_PACKET_SIZE_INTS] = {PACKET_HEADER(coreID, PFID_SetValueHandle), length, arrayOffset};
+    _send_packet_to_awe_dual_array(pAWE->c_tuning_from_host, payload1, NUM_WORDS(payload1), (const unsigned int *)value, length);
+    unsigned num_words = 0;
+    unsigned int response[2];
+    return _get_packet_from_awe_with_err(pAWE->c_tuning_to_host, &num_words, response, 3);
+}
+
+/**
+ * @brief Set the runtime status of a module. 
+ * 0 = Active,    1 = Bypass,    2 = Mute,    3 = Inactive
+ * @param [in] pAWE                     instance pointer
+ * @param [in] handle                   packed object handle
+ * @param [in] status                   status to set
+ * @return                              @ref E_SUCCESS,  @ref E_NOT_MODULE,  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS 
+ */
+INT32 xawe_ctrlSetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 status){
+
+    return 0;
+}
+
+/**
+ * @brief Get the runtime status of a module.
+ * 0 = Active,    1 = Bypass,    2 = Mute,    3 = Inactive
+ * @param [in] pAWE                     instance pointer
+ * @param [in] handle                   packed object handle
+ * @param [out] status                  status to get
+ * @return                              @ref E_SUCCESS,  @ref E_NOT_MODULE,  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS,  @ref E_PARAMETER_ERROR
+ */
+INT32 xawe_ctrlGetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *status){
+
+    return 0;
+}
+
+/**
+ * @brief Get an object class from its handle.
+ * @param pAWE                      instance pointer
+ * @param [in] handle               handle of object to find
+ * @param [out] pClassID            pointer to found object class
+ * @return                          @ref E_SUCCESS,  @ref E_NO_MORE_OBJECTS,  @ref E_LINKEDLIST_CORRUPT
+ */
+INT32 xawe_ctrlGetModuleClass(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *pClassID){
+
+    return 0;
+}
+
+/**
+ * @brief Set a scalar or array value  of a module variable by handle with mask. A mask allows you to only call module's set function
+ *      for a single variable.
+ * @param [in] pAWE                     instance pointer
+ * @param [in] handle                   packed object handle
+ * @param [in] value                    value(s) to set
+ * @param [in] arrayOffset              array index if array
+ * @param [in] length                   number of elements if array. 1 if scaler
+ * @param [in] mask                     mask to use - 0 to not call set function
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX, 
+ *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE  
+ */
+INT32 xawe_ctrlSetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length, UINT32 mask){
+
+    return 0;
+}
+
+/**
+ * @brief Get a scalar or array value of a module variable by handle with mask. A mask allows you to only call module's set function
+ *      for a single variable.
+ * @param [in] pAWE                     instance pointer
+ * @param [in] handle                   packed object handle
+ * @param [out] value                   value(s) to get
+ * @param [in] arrayOffset              array index if array
+ * @param [in] length                   number of elements if array. 1 if scaler
+ * @param [in] mask                     mask to use - 0 to not call get function
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX, 
+ *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE  
+ */
+INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length, UINT32 mask){
+
+    return 0;
+}
+
+
+/*------------------------------------------Loader Functions----------------------------------------------------*/
+/**
+* @brief Executes packet commands from an in-memory array. Designer can generate AWB arrays directly from a layout. 
+* @param[in] pAWE           AWE instance pointer
+* @param[in] pCommands      Buffer with commands to execute
+* @param[in] arraySize      Number of DWords in command buffer
+* @param[out] pPos          Report failing word index
+* @return                   @ref E_SUCCESS
+*                           @ref E_EXCEPTION
+*                           @ref E_UNEXPECTED_EOF
+*                           @ref E_END_OF_FILE
+*                           @ref E_MESSAGE_LENGTH_TOO_LONG
+*                           @ref E_BADPACKET
+*/
+INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT32 arraySize, UINT32 *pPos){
+
+    *pPos = 0;
+
+    const unsigned response_packet_len = 16;
+    unsigned int response_packet[response_packet_len] = {0};
+
+
+    const unsigned len = 2;
+    unsigned int stop_audio = (len << 16) + PFID_StopAudio;
+    _send_packet_to_awe(pAWE->c_tuning_from_host, &stop_audio, len - 1); // -1 because CRC appended
+    *pPos += len;
+    unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
+    // for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(packet_buffer[i]);}
+    int err = response_packet[1];
+    if(err != E_SUCCESS){
+        return E_BADPACKET; 
+    }
+    
+    // Required to allow audio to stop before issuing destroy as part of AWB load
+    hwtimer_t tmr = hwtimer_alloc();
+    hwtimer_delay(tmr, XS1_TIMER_KHZ);
+    hwtimer_free(tmr);
+
+    unsigned int cmd_idx = 0;
+    while(cmd_idx < arraySize){
+        unsigned int *msg_payload = (unsigned int *)&pCommands[cmd_idx];
+        if(*msg_payload == PFID_Undefined){
+            break;
+        }
+
+        unsigned int num_words_tx = (*msg_payload >> 16);
+        *pPos += num_words_tx;
+        _send_packet_to_awe(pAWE->c_tuning_from_host, msg_payload, num_words_tx - 1); // -1 because CRC appended
+        unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
+        int err = response_packet[1];
+        if(err != E_SUCCESS){
+            return E_BADPACKET; 
+        }
+        cmd_idx += num_words_tx;
+    }
+
+    return E_SUCCESS;
+
+
+}
