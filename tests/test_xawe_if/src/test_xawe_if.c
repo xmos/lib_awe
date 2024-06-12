@@ -18,11 +18,9 @@ void awe_test(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_
     
     xAWEInstance_t xAWEInstance = {c_tuning_from_host, c_tuning_to_host};
 
-    int num_words_rx = 0;
-
-    uint32_t pPos = 0;
 
     printstr("Loading AWB\n");
+    unsigned int pPos = 0;
     int err = xawe_loadAWBfromArray(&xAWEInstance, Core0_InitCommands, Core0_InitCommands_Len, &pPos);
     if(err){
         printstr("Error loading AWB: ");printint(err); printstr(" at pos: "); printintln(pPos);
@@ -31,8 +29,16 @@ void awe_test(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_
         printstr("AWB load SUCCESS\n");
     }
 
-    float nValue = 0.0;
+    float nValue = 5555.0;
     err = xawe_ctrlGetValue(&xAWEInstance, AWE_Volume1_gain_HANDLE, &nValue, 0, 1);
+
+    if(nValue == 0.0){
+        printstr("Get SUCCESS\n");
+    } else {
+        printstr("Error on get: ");printint(err); printstr(", Expected 0.0 got: "); printhex(nValue);;
+        _Exit(1);
+    }
+
     float new_nValue = -30.0;
     err = xawe_ctrlSetValue(&xAWEInstance, AWE_Volume1_gain_HANDLE, &new_nValue, 0, 1);
 
@@ -41,10 +47,9 @@ void awe_test(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_
     if(nValue == new_nValue){
         printstr("Get/Set SUCCESS\n");
     } else {
-        printstr("Error on get/set: ");printint(err); printstr(" "); printhex(nValue); printstr(" "); printhexln(new_nValue);
+        printstr("Error on get/set: ");printint(err); printstr(", "); printhex(nValue); printstr(" "); printhexln(new_nValue);
         _Exit(1);
     }
-
 
     _Exit(0);
 }
