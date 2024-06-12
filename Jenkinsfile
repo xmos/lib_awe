@@ -84,7 +84,7 @@ pipeline {
                     sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
                     script {
                       // Build all apps in the examples directory
-                      def apps = sh(script: "ls -d app_*", returnStdout: true).trim()
+                      def apps = sh(script: "ls -d examples/app_*", returnStdout: true).trim()
                       for(String app : apps.split()) {
                         dir("${app}") {
                           sh "cmake  -G \"Unix Makefiles\" -B build"
@@ -106,7 +106,7 @@ pipeline {
               dir("${REPO}") {
                 script {
                   // Build all apps in the examples directory
-                  def apps = sh(script: "ls -d app_*", returnStdout: true).trim()
+                  def apps = sh(script: "ls -d examples/app_*", returnStdout: true).trim()
                   for(String app : apps.split()) {
                     dir("${app}") {
                       // Disable xmake build for now until fixed
@@ -206,7 +206,7 @@ pipeline {
             println "Stage running on ${env.NODE_NAME}"
             dir("${REPO}") {
               checkout scm
-            
+
               sh "docker pull ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION"
               sh """docker run -u "\$(id -u):\$(id -g)" \
                       --rm \
