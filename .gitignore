@@ -17,7 +17,7 @@
 **/*.egg-info/
 **/*venv/*
 
-# XMOS temp files
+# XMOS temp and intermediate files
 **/*build*/*
 */bin/*
 **/flash_bin_node*
@@ -32,7 +32,6 @@
 
 # XMOS binaries
 *.xe
-*.a
 
 # Regression test files
 */test_results.csv
