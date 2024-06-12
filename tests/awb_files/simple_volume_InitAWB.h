@@ -1,3 +1,5 @@
+// Copyright 2024 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public Licence: Version 1.
 /* ----------------------------------------------------------------------
 ** Static Audio Weaver command packet header file
 ** Source file = D:\simple_volume.awb
