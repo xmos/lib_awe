@@ -249,4 +249,4 @@ def filter_awe_packet_log():
 # For testing only
 if __name__ == '__main__':
     awe = awe_hid_comms()
-    awe.send_awb("awb_files/playBasic_3thread.awb")
+    awe.send_awb("awb_files/simple_volume.awb")

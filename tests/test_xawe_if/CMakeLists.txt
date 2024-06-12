@@ -19,7 +19,7 @@ set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../../..)
 # Workaround until xcommon cmake supports mixed archive and source libs
 set(APP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 include(../../lib_awe/lib_build_info_sources.cmake)
-list(APPEND APP_C_SRCS ../awb_files/playBasic_3thread_InitAWB.c)
+list(APPEND APP_C_SRCS ../awb_files/simple_volume_InitAWB.c)
 
 
 

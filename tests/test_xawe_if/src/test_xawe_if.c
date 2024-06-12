@@ -9,7 +9,8 @@
 #include <xclib.h>
 #include "awe_xcore.h"
 
-#include "../../awb_files/playBasic_3thread_InitAWB.h"
+#include "../../awb_files/simple_volume_InitAWB.h"
+#include "../../awb_files/simple_volume_ControlInterface.h"
 
 
 DECLARE_JOB(awe_test, (chanend_t, chanend_t, chanend_t));
@@ -17,7 +18,6 @@ void awe_test(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_
     
     xAWEInstance_t xAWEInstance = {c_tuning_from_host, c_tuning_to_host};
 
-    uint32_t msg_from_awe_buffer[16] = {0};
     int num_words_rx = 0;
 
     uint32_t pPos = 0;
@@ -28,43 +28,23 @@ void awe_test(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_
         printstr("Error loading AWB: ");printint(err); printstr(" at pos: "); printintln(pPos);
         _Exit(1);
     } else {
-        printstr("SUCCESS\n");
+        printstr("AWB load SUCCESS\n");
     }
 
+    float nValue = 0.0;
+    err = xawe_ctrlGetValue(&xAWEInstance, AWE_Volume1_gain_HANDLE, &nValue, 0, 1);
+    float new_nValue = -30.0;
+    err = xawe_ctrlSetValue(&xAWEInstance, AWE_Volume1_gain_HANDLE, &new_nValue, 0, 1);
 
-   // // Does the current AWE model have a SinkInt module with this control object ID?
-   // if (xawe_ctrlGetModuleClass(&xAWEInstance, AWE_SinkInt1_value_HANDLE, &classID) == OBJECT_FOUND)
-   // {
-   //     // Check that module assigned this object ID is of module class SinkInt
-   //     if (classID == AWE_SinkInt1_classID)
-   //     {
-   //         // SinkInt module (value is an array)
-   //         xawe_ctrlGetValue(&xAWEInstance, AWE_SinkInt1_value_HANDLE, &nValue, 0, 1);
-   //     }
-   // }
+    err = xawe_ctrlGetValue(&xAWEInstance, AWE_Volume1_gain_HANDLE, &nValue, 0, 1);
 
-    //  * @brief Get a scalar or array value of a module variable by handle
-    //  * @param [in] pAWE                     instance pointer
-    //  * @param [in] handle                   packed object handle
-    //  * @param [out] value                   value(s) to get
-    //  * @param [in] arrayOffset              array index if array
-    //  * @param [in] length                   number of elements. 1 if scaler
-    //  * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED, 
-    //  *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS   
-    //  */ 
-    // INT32 xawe_ctrlGetValue(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length);
+    if(nValue == new_nValue){
+        printstr("Get/Set SUCCESS\n");
+    } else {
+        printstr("Error on get/set: ");printint(err); printstr(" "); printhex(nValue); printstr(" "); printhexln(new_nValue);
+        _Exit(1);
+    }
 
-    // /**
-    //  * @brief Set a scalar or array value of a module variable by handle
-    //  * @param [in] pAWE                     instance pointer
-    //  * @param [in] handle                   packed object handle
-    //  * @param [in] value                    value(s) to set
-    //  * @param [in] arrayOffset              array index if array
-    //  * @param [in] length                   number of elements. 1 if scaler
-    //  * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED, 
-    //  *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS   
-    //  */
-    // INT32 xawe_ctrlSetValue(const xAWEInstance_t *pAWE, UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length);
 
     _Exit(0);
 }

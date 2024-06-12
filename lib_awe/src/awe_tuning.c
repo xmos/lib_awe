@@ -135,12 +135,13 @@ void _send_packet_to_awe_dual_array(chanend_t c_tuning_from_host, const unsigned
     unsigned int crc = 0;
     for(unsigned i = 0; i < num_words1; i++) {
         chanend_out_word(c_tuning_from_host, payload1[i]);
-        // printhexln(packet[i]);
+        // printhexln(payload1[i]);
         crc ^= payload1[i];
     }
+    // printstr("split\n");
     for(unsigned i = 0; i < num_words2; i++) {
         chanend_out_word(c_tuning_from_host, payload2[i]);
-        // printhexln(packet[i]);
+        // printhexln(payload2[i]);
         crc ^= payload2[i];
     }
     chanend_out_word(c_tuning_from_host, crc);
@@ -168,7 +169,7 @@ unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, unsigned int packe
 
 #define AWE_TUNING_MAX_PACKET_SIZE_INTS 64
 #define NUM_WORDS(packet) (sizeof(packet) / sizeof(packet[0]))
-#define PACKET_HEADER(num_words, instance_id) ( ((num_words + 1) << 16) | ((instance_id & 0xff) << 8) )
+#define PACKET_HEADER(num_words, core_id, command) ( ((num_words + 1) << 16) | ((core_id & 0xff) << 8) | (command & 0xff))
 const unsigned coreID = 0;
 
 
@@ -182,10 +183,18 @@ const unsigned coreID = 0;
  *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS   
  */ 
 INT32 xawe_ctrlGetValue(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length){
-    UINT32 payload[] = {PACKET_HEADER(coreID, PFID_GetValueHandle), handle, length, arrayOffset};
+    UINT32 payload[] = {PACKET_HEADER(4, coreID, PFID_GetValueHandle), handle, length, arrayOffset};
     _send_packet_to_awe(pAWE->c_tuning_from_host, payload, NUM_WORDS(payload));
-    unsigned num_words = 0;
-    return _get_packet_from_awe_with_err(pAWE->c_tuning_to_host, &num_words, value, 16);
+    const unsigned response_packet_len = 16;
+    unsigned int response_packet[response_packet_len] = {0};
+    unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
+    // for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);} printchar('\n');
+
+    for(int i = 0; i < length; i++){
+        unsigned int *ptr = value;
+        ptr[i] = response_packet[2 + i];
+    }
+    return response_packet[1];
 }
 
 /**
@@ -199,11 +208,14 @@ INT32 xawe_ctrlGetValue(const xAWEInstance_t *pAWE, UINT32 handle, void *value, 
  *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS   
  */
 INT32 xawe_ctrlSetValue(const xAWEInstance_t *pAWE, UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length){
-    UINT32 payload1[AWE_TUNING_MAX_PACKET_SIZE_INTS] = {PACKET_HEADER(coreID, PFID_SetValueHandle), length, arrayOffset};
+    UINT32 payload1[] = {PACKET_HEADER(4 + length, coreID, PFID_SetValueHandle), handle, length, arrayOffset};
     _send_packet_to_awe_dual_array(pAWE->c_tuning_from_host, payload1, NUM_WORDS(payload1), (const unsigned int *)value, length);
-    unsigned num_words = 0;
-    unsigned int response[2];
-    return _get_packet_from_awe_with_err(pAWE->c_tuning_to_host, &num_words, response, 3);
+    const unsigned response_packet_len = 3;
+    unsigned int response_packet[response_packet_len] = {0};
+    unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
+    // for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);} printchar('\n');
+
+    return response_packet[1];
 }
 
 /**
