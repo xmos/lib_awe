@@ -7,6 +7,7 @@
 #include <print.h>
 #include "awe_xcore_internal.h"
 #include "ProxyIDs.h"
+#include "AWECoreUtils.h"
 
 #if AWE_DSP_MAX_THREAD_NUM > 5
 #error "AWE_DSP_MAX_THREAD_NUM should be 5 or tuning needs to be extended"
@@ -124,6 +125,8 @@ void _send_packet_to_awe(chanend_t c_tuning_from_host, unsigned int payload[], u
 
     chanend_out_end_token(c_tuning_from_host);
     chanend_check_end_token(c_tuning_from_host);
+    // printchar('\n');
+
 }
 
 void _send_packet_to_awe_dual_array(chanend_t c_tuning_from_host, const unsigned int payload1[], unsigned int num_words1, const unsigned int payload2[], unsigned int num_words2){
@@ -301,7 +304,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
     const unsigned len = 2;
     unsigned int stop_audio = (len << 16) + PFID_StopAudio;
     _send_packet_to_awe(pAWE->c_tuning_from_host, &stop_audio, len - 1); // -1 because CRC appended
-    *pPos += len;
+    *pPos += len - 1;
     unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
     // for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(packet_buffer[i]);}
     int err = response_packet[1];
@@ -321,15 +324,18 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
             break;
         }
 
-        unsigned int num_words_tx = (*msg_payload >> 16);
-        *pPos += num_words_tx;
+        unsigned int num_words_tx = PACKET_LENGTH_WORDS(msg_payload);
+        // printintln(num_words_tx);
+        *pPos += num_words_tx - 1;
         _send_packet_to_awe(pAWE->c_tuning_from_host, msg_payload, num_words_tx - 1); // -1 because CRC appended
         unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
-        int err = response_packet[1];
+        // for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);} printchar('\n');
+
+        int err = (num_words_rx == 4 ? response_packet[2] : response_packet[1]);
         if(err != E_SUCCESS){
             return E_BADPACKET; 
         }
-        cmd_idx += num_words_tx;
+        cmd_idx += num_words_tx - 1;
     }
 
     return E_SUCCESS;

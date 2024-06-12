@@ -23,8 +23,13 @@ void awe_test(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_
     uint32_t pPos = 0;
 
     printstr("Loading AWB\n");
-    xawe_loadAWBfromArray(&xAWEInstance, Core0_InitCommands, Core0_InitCommands_Len, &pPos);
-    printstr("SUCCESS\n");
+    int err = xawe_loadAWBfromArray(&xAWEInstance, Core0_InitCommands, Core0_InitCommands_Len, &pPos);
+    if(err){
+        printstr("Error loading AWB: ");printint(err); printstr(" at pos: "); printintln(pPos);
+        _Exit(1);
+    } else {
+        printstr("SUCCESS\n");
+    }
 
 
    // // Does the current AWE model have a SinkInt module with this control object ID?
@@ -61,6 +66,7 @@ void awe_test(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_
     //  */
     // INT32 xawe_ctrlSetValue(const xAWEInstance_t *pAWE, UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length);
 
+    _Exit(0);
 }
 
 DECLARE_JOB(awe_main_wrapper, (chanend_t, chanend_t, chanend_t));
