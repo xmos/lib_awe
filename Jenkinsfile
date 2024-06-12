@@ -84,10 +84,8 @@ pipeline {
                     sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
                     script {
                       // Build all example apps
-                      dir("${REPO}") {
-                        sh "cmake  -G \"Unix Makefiles\" -B build"
-                        sh "xmake -C build -j"
-                      } // dir
+                      sh "cmake  -G \"Unix Makefiles\" -B build"
+                      sh "xmake -C build -j"
                     } // script
                   } // credentials
                 } // dir
