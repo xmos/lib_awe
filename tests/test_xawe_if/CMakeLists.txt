@@ -24,4 +24,3 @@ list(APPEND APP_C_SRCS ../awb_files/simple_volume_InitAWB.c)
 
 
 XMOS_REGISTER_APP()
-message(STATUS *** ${APP_C_SRCS})
