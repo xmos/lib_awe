@@ -6,8 +6,9 @@
 #include <xcore/chanend.h>
 #include <xcore/select.h>
 #include <xcore/parallel.h>
-#include <xclib.h>
+#include <assert.h>
 #include "awe_xcore.h"
+#include "Errors.h"
 
 #include "../../awb_files/simple_volume_InitAWB.h"
 #include "../../awb_files/simple_volume_ControlInterface.h"
@@ -20,7 +21,7 @@ void awe_test(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_
 
     int rr;
     int err = xawe_ctrlGetValue(&xAWEInstance, AWE_Volume1_gain_HANDLE, &rr, 0, 1);
-    printintln(err);
+    assert(err == E_NO_MORE_OBJECTS);
 
 
     printstr("Loading AWB\n");
@@ -56,10 +57,25 @@ void awe_test(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_
     }
 
     err = xawe_ctrlGetValue(&xAWEInstance, 0xdeadbeef, &nValue, 0, 1);
-    printintln(err);
+    assert(err == E_NO_MORE_OBJECTS);
 
     err = xawe_ctrlGetValue(&xAWEInstance, AWE_Volume1_gain_HANDLE, &nValue, 0, 2);
-    printintln(err);
+    assert(err == E_ARGUMENT_ERROR);
+
+
+    unsigned int status = -1;
+    err = xawe_ctrlGetStatus(&xAWEInstance, AWE_Volume1_centerFreq_HANDLE, &status);
+    assert(err == E_SUCCESS);
+    assert(status == 0); // Active
+
+    status = 2; // Mute
+    err = xawe_ctrlSetStatus(&xAWEInstance, AWE_Volume1_centerFreq_HANDLE, status);\
+    assert(err == E_SUCCESS);
+    status = 0; // Active
+
+    err = xawe_ctrlGetStatus(&xAWEInstance, AWE_Volume1_centerFreq_HANDLE, &status);
+    assert(err == E_SUCCESS);
+    assert(status == 2); // Mute
 
     _Exit(0);
 }

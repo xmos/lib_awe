@@ -229,8 +229,14 @@ INT32 xawe_ctrlSetValue(const xAWEInstance_t *pAWE, UINT32 handle, const void *v
  * @return                              @ref E_SUCCESS,  @ref E_NOT_MODULE,  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS 
  */
 INT32 xawe_ctrlSetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 status){
+    UINT32 payload[] = {PACKET_HEADER(3, coreID, PFID_SetStatusHandle), handle, status};
+    _send_packet_to_awe(pAWE->c_tuning_from_host, payload, NUM_WORDS(payload));
+    const unsigned response_packet_len = 3;
+    unsigned int response_packet[response_packet_len] = {0};
+    unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
+    // for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);} printchar('\n');
 
-    return 0;
+    return response_packet[1];
 }
 
 /**
@@ -242,8 +248,15 @@ INT32 xawe_ctrlSetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 statu
  * @return                              @ref E_SUCCESS,  @ref E_NOT_MODULE,  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS,  @ref E_PARAMETER_ERROR
  */
 INT32 xawe_ctrlGetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *status){
+    UINT32 payload[] = {PACKET_HEADER(2, coreID, PFID_GetStatusHandle), handle};
+    _send_packet_to_awe(pAWE->c_tuning_from_host, payload, NUM_WORDS(payload));
+    const unsigned response_packet_len = 3;
+    unsigned int response_packet[response_packet_len] = {0};
+    unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
+    *status = response_packet[1];
+    // for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);} printchar('\n');
 
-    return 0;
+    return ((int)(*status) < 0 ? E_NOT_OBJECT : 0);
 }
 
 /**
