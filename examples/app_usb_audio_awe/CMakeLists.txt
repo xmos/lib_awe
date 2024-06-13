@@ -68,15 +68,7 @@ set(APP_INCLUDES    src
                     ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src/extensions
                     ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src)
 
-<<<<<<< HEAD
-set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../../..)
 
-# Workaround until xcommon cmake supports mixed archive and source libs
-set(APP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-include(../../lib_awe/lib_build_info_sources.cmake)
-
-=======
 set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../)
->>>>>>> ffbb6bb92bb7eb9c8094a065350e1c1a55dc2edd
 
 XMOS_REGISTER_APP()
