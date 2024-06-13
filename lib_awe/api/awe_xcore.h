@@ -86,7 +86,9 @@ typedef struct xAWEInstance_t{
     chanend_t c_tuning_to_host;
 } xAWEInstance_t;
 
+/** @brief Type definition to make the xawe API reflect the AWE API*/
 #define INT32 int
+/** @brief Type definition to make the xawe API reflect the AWE API*/
 #define UINT32 unsigned int
 
 /**
@@ -178,10 +180,8 @@ INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *val
 */
 INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT32 arraySize, UINT32 *pPos);
 
-#undef INT32
-#undef UINT32
 
-
+/** @brief The maximum number of xcore processor threads supported by lib_awe. Cannot be changed by the user. */
 #define AWE_DSP_MAX_THREAD_NUM        5
 
 
@@ -189,6 +189,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 #include "awe_conf.h"
 #endif
 
+/** @brief The number of xcore threads used by lib_awe. Modifiable by the user per project. */
 #ifndef AWE_DSP_THREAD_NUM
 #define AWE_DSP_THREAD_NUM              2
 #endif
@@ -213,23 +214,30 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 #error "Must define AUDIO_OUTPUT_CHANNELS"
 #endif
 
+/** @brief The size of the packet buffer used for USB/HID transfer. */
 #define AWE_HID_PACKET_BUFFER_SIZE 264
 
+/** @brief The number of audio samples per block processed by AWE. */
 #define AWE_BLOCK_SIZE              32
 
 #ifndef FAST_HEAP_A_SIZE
+/** @brief The amount of heap in bytes allocated for FAST_HEAP_A usage. Please see DSP Concepts documentation for further details. */
 #define FAST_HEAP_A_SIZE          (5*1024)
 #endif
 
 #ifndef FAST_HEAP_B_SIZE
+/** @brief The amount of heap in bytes allocated for FAST_HEAP_B usage. Please see DSP Concepts documentation for further details. */
 #define FAST_HEAP_B_SIZE          (5*1024)
 #endif
 
 #ifndef SLOW_HEAP_SIZE
+/** @brief The amount of heap in bytes allocated for SLOW_HEAP usage. Please see DSP Concepts documentation for further details. */
 #define SLOW_HEAP_SIZE            (5*1024)
 #endif
 
 /**@}*/ // END: addtogroup lib_awe
 
+#undef INT32
+#undef UINT32
 
 #endif
