@@ -14,7 +14,6 @@
 #endif
 
 // TODO: cleanup stacksize
-
 #pragma stackfunction 1024
 void awe_tuning_thread(chanend_t c_control_from_host,
                        chanend_t c_control_to_host,
@@ -169,7 +168,6 @@ unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, unsigned int packe
     return num_words;
 }
 
-#define AWE_TUNING_MAX_PACKET_SIZE_INTS 64
 #define NUM_WORDS(packet) (sizeof(packet) / sizeof(packet[0]))
 #define PACKET_HEADER(num_words, core_id, command) ( ((num_words + 1) << 16) | ((core_id & 0xff) << 8) | (command & 0xff))
 // #define DEBUG_PRINT_RESPONSE(num_words, response_packet) {for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);}}
@@ -264,20 +262,6 @@ INT32 xawe_ctrlGetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *stat
     return ((int)(*status) < 0 ? E_NOT_OBJECT : 0);
 }
 
-// TODO Does this make sense to implement?
-
-// /**
-//  * @brief Get an object class from its handle.
-//  * @param pAWE                      instance pointer
-//  * @param [in] handle               handle of object to find
-//  * @param [out] pClassID            pointer to found object class
-//  * @return                          @ref E_SUCCESS,  @ref E_NO_MORE_OBJECTS,  @ref E_LINKEDLIST_CORRUPT
-//  */
-// INT32 xawe_ctrlGetModuleClass(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *pClassID){
-
-//     return 0;
-// }
-
 /**
  * @brief Set a scalar or array value of a module variable by handle with mask. A mask allows you to only call module's set function
  *      for a single variable.
@@ -325,7 +309,7 @@ INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *val
         unsigned int *ptr = value;
         ptr[i] = response_packet[2 + i];
     }
-    
+
     return response_packet[1];
 }
 
@@ -350,6 +334,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
     const unsigned response_packet_len = 16;
     unsigned int response_packet[response_packet_len] = {0};
 
+    // Send audio stop command
     const unsigned len = 2; // Whole packet inc CRC
     unsigned int stop_audio = (len << 16) + PFID_StopAudio;
     _send_packet_to_awe(pAWE->c_tuning_from_host, &stop_audio, len - 1); // -1 because CRC appended
@@ -366,6 +351,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
     hwtimer_delay(tmr, XS1_TIMER_KHZ); // 1ms
     hwtimer_free(tmr);
 
+    // Send AWB file commands
     unsigned int cmd_idx = 0;
     while(cmd_idx < arraySize){
         unsigned int *msg_payload = (unsigned int *)&pCommands[cmd_idx];

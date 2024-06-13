@@ -82,16 +82,18 @@ pipeline {
                 dir("${REPO}") {
                   withCredentials([file(credentialsId: 'DSPCAWE_8.D.1.1', variable: 'DSPC_AWE_LIB')]) {
                     sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
-                    script {
-                      // Build all apps in the examples directory
-                      def apps = sh(script: "ls -d app_*", returnStdout: true).trim()
-                      for(String app : apps.split()) {
-                        dir("${app}") {
-                          sh "cmake  -G \"Unix Makefiles\" -B build"
-                          sh "xmake -C build -j"
-                        } // dir
-                      } // for loop
-                    } // script
+                    dir("examples") {
+                      script {
+                        // Build all apps in the examples directory
+                        def apps = sh(script: "ls -d app_*", returnStdout: true).trim()
+                        for(String app : apps.split()) {
+                          dir("${app}") {
+                            sh "cmake  -G \"Unix Makefiles\" -B build"
+                            sh "xmake -C build -j"
+                          } // dir
+                        } // for loop
+                      } // script
+                      } // examples dir
                   } // credentials
                 } // dir
                 archiveArtifacts artifacts: "${REPO}/**/*.xe", allowEmptyArchive: false

@@ -110,6 +110,7 @@ To build using xcommon-cmake:
 
        # MacOS and Linux
        cd lib_awe
+       cd examples
        cd app_usb_audio_awe
        cmake -G "Unix Makefiles" -B build
        xmake -j -C build
@@ -120,6 +121,7 @@ To build using xcommon-cmake:
 
        # Windows
        cd lib_awe
+       cd examples
        cd app_usb_audio_awe
        cmake -G "Unix Makefiles" -B build
        xmake -C build
