@@ -102,25 +102,6 @@ pipeline {
             } // withTools
           } // steps
         }  // Build examples XCCM
-        stage('Build examples xmake') {
-          steps {
-            withTools(params.TOOLS_VERSION) {
-              dir("${REPO}") {
-                script {
-                  // Build all apps in the examples directory
-                  def apps = sh(script: "ls -d app_*", returnStdout: true).trim()
-                  for(String app : apps.split()) {
-                    dir("${app}") {
-                      // Disable xmake build for now until fixed
-                      // sh "xmake -j"
-                    }
-                  } // for loop
-                } // script
-              } // dir
-            // archiveArtifacts artifacts: "${REPO}/**/bin/*.xe", allowEmptyArchive: false
-            } // withTools
-          } // steps
-        }  // Build examples
       } // stages
       post {
         cleanup {
