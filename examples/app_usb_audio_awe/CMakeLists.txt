@@ -38,7 +38,6 @@ set(APP_COMPILER_FLAGS_UA ${EXTRA_BUILD_FLAGS}  -fcomment-asm
                                                 -DADAT_TX_USE_SHARED_BUFF=1
                                                 -DQUAD_SPI_FLASH=1
                                                 -DMIXER=0
-                                                -D__awe_conf_h_exists__=1
 )
 
 set(APP_COMPILER_FLAGS_I2S ${EXTRA_BUILD_FLAGS} -fcomment-asm
@@ -57,7 +56,6 @@ set(APP_COMPILER_FLAGS_I2S ${EXTRA_BUILD_FLAGS} -fcomment-asm
                                                 -DNUM_USB_CHAN_OUT=0
                                                 -DNUM_USB_CHAN_IN=0
                                                 -DI2S_ONLY=1
-                                                -D__awe_conf_h_exists__=1
 )
 
 # Grab the app sources - we will extend these with HW setup from sw_usb_audio
@@ -70,11 +68,15 @@ set(APP_INCLUDES    src
                     ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src/extensions
                     ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src)
 
+<<<<<<< HEAD
 set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../../..)
 
 # Workaround until xcommon cmake supports mixed archive and source libs
 set(APP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 include(../../lib_awe/lib_build_info_sources.cmake)
 
+=======
+set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../)
+>>>>>>> ffbb6bb92bb7eb9c8094a065350e1c1a55dc2edd
 
 XMOS_REGISTER_APP()

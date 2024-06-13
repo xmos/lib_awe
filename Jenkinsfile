@@ -4,7 +4,7 @@ getApproval()
 
 // Get XCommon CMake and log a record of the git commit
 def get_xcommon_cmake() {
-  sh "git clone -b develop git@github.com:xmos/xcommon_cmake"
+  sh "git clone -b v1.1.0 git@github.com:xmos/xcommon_cmake"
   sh "git -C xcommon_cmake rev-parse HEAD"
 }
 
@@ -75,25 +75,16 @@ pipeline {
             } // dir
           } //step
         }  // Library checks
-        stage('Build examples XCCM') {
+        stage('Build examples cmake/xcommon_cmake') {
           steps {
             withTools(params.TOOLS_VERSION) {
               withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
                 dir("${REPO}") {
                   withCredentials([file(credentialsId: 'DSPCAWE_8.D.1.1', variable: 'DSPC_AWE_LIB')]) {
                     sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
-                    dir("examples") {
-                      script {
-                        // Build all apps in the examples directory
-                        def apps = sh(script: "ls -d app_*", returnStdout: true).trim()
-                        for(String app : apps.split()) {
-                          dir("${app}") {
-                            sh "cmake  -G \"Unix Makefiles\" -B build"
-                            sh "xmake -C build -j"
-                          } // dir
-                        } // for loop
-                      } // script
-                      } // examples dir
+                    // Build all example apps
+                    sh "cmake  -G \"Unix Makefiles\" -B build"
+                    sh "xmake -C build -j"
                   } // credentials
                 } // dir
                 archiveArtifacts artifacts: "${REPO}/**/*.xe", allowEmptyArchive: false
@@ -102,6 +93,18 @@ pipeline {
             } // withTools
           } // steps
         }  // Build examples XCCM
+        stage('Build examples xmake/xcommon') {
+          steps {
+            withTools(params.TOOLS_VERSION) {
+              dir("${REPO}") {
+                  // Build all apps in the examples directory
+                  // Disable xmake build for now until fixed
+                  // sh "xmake -j"
+              } // dir
+            // archiveArtifacts artifacts: "${REPO}/**/bin/*.xe", allowEmptyArchive: false
+            } // withTools
+          } // steps
+        }  // Build examples
       } // stages
       post {
         cleanup {
@@ -193,7 +196,7 @@ pipeline {
             println "Stage running on ${env.NODE_NAME}"
             dir("${REPO}") {
               checkout scm
-            
+
               sh "docker pull ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION"
               sh """docker run -u "\$(id -u):\$(id -g)" \
                       --rm \
