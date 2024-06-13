@@ -6,4 +6,7 @@ set(LIB_INCLUDES api)
 
 set(LIB_OPTIONAL_HEADERS awe_conf.h)
 
+set(LIB_ADD_SRC_DIRS src)
+set(LIB_ADD_INC_DIRS inc src src/include_internal)
+
 XMOS_REGISTER_STATIC_LIB()
