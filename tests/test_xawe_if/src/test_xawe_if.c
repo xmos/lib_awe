@@ -78,7 +78,7 @@ void awe_test(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_
     assert(err == E_SUCCESS);
     assert(status == 2); // Mute
 
-    // printstr("Get/Set STATUS SUCCESS\n");
+    puts("Get/Set STATUS SUCCESS");
 
     // SET AND GET VALUE WITH MASK
     // see https://documentation.dspconcepts.com/awe-designer/latest-version/c-run-time-environment#id-(8.D.2.4)CRun-TimeEnvironment-SetFunctionSetFunction
@@ -113,10 +113,10 @@ void awe_test(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_
     assert(err == E_SUCCESS);
     assert(nValue == new_nValue);
 
-    puts("Get/Set MASK SUCCESS\n");
+    puts("Get/Set MASK SUCCESS");
 
+    err = xawe_ctrlGetValueMask(&xAWEInstance, 0xdeadbeef, &nValue, 0, 1, AWE_Volume1_gain_MASK);
     // TODO - why is this not happy?
-    // err = xawe_ctrlGetValueMask(&xAWEInstance, 0xdeadbeef, &nValue, 0, 1, AWE_Volume1_gain_MASK);
     // assert(err == E_NO_MORE_OBJECTS);
 
     err = xawe_ctrlGetValueMask(&xAWEInstance, AWE_Volume1_gain_HANDLE & 0xffff0000, &nValue, 0, 2, AWE_Volume1_gain_MASK);

@@ -5,13 +5,25 @@ AWE Library User Guide
 Introduction
 ------------
 
-Lib_awe is a port of DSP Concept's Audio Weaver (AWE) for XMOS's powerful xcore.ai device. It contains code for software threads which wrap the core library and provide easy interfacing to both audio streaming components such as I2S and USB Audio as well as control interfacing to allow control and loading of pre-built designs from a host or internally from the device.
+AudioWeaver is a tool and libraries for implementing Digitial Signal Processing algorithms. It comprises a GUI and a set of libraries. Standard building blocks such as filters, equalisers, echo cancellers, can be assembled in the GUI and then executed on a device. A control library is available that enables on-line control of the blocks.
+
+XCORE is a programmable multi-core device with flexible DSP and IO interfaces. The IO interfaces can be programmed to, for example, I2S, TDM, USB, ADAT or S/PDIF interfaces (or indeed any other interface), and the DSP capability can be used to operate on data that is received from or sent to these interfaces. In addition to interfaces and DSP, XCORE devices can also execute control code or even ML inference engines.
+
+Lib_awe is a port of AudioWeaver for XMOS's powerful xcore.ai device. It contains code for software threads which wrap the core library and provide easy interfacing to both audio streaming components such as I2S and USB Audio as well as control interfacing to allow control and loading of pre-built designs from a host or internally from the device.
 
 It utilises xcore.ai's multi-threaded architecture and vector processing unit to provide very high performance and predictable timing required by embedded systems.
 
 .. note::
     This document refers to the XMOS specific implementation details. DSP Concepts provide several documents on the usage and integration of Audio Weaver into user system. Please refer to https://documentation.dspconcepts.com for documentation specific to Audio Weaver.
 
+For reference, we refer to the following repositories that you may want to
+use:
+
+* <https://github.com/xmos/lib_awe.git> for the library that integrates
+  AudioWeaver and XCORE.
+
+* <https://github.com/xmos/lib_xua.git> for the USB Audio library
+  design
 
 Architecture
 ------------
@@ -24,7 +36,7 @@ Lib_awe provides an interface to the audio streaming and control functions using
    lib_awe thread diagram
 
 
-Lib_Awe consists of a group of threads. There are a statically define number (maximum 5) of DSP worker threads which perform the AWE core functionality.
+Lib_Awe consists of a group of threads. There are a statically define number (maximum 5) of DSP worker threads which perform the AWE core functionality within the AudioWeaver Virtual Machine.
 
 To support audio streaming an audio transport thread provides a channel interface to the Audio Weaver awe_audioImportSamples() and awe_audioExportSamples() functions. The purpose of this thread is to simplify connection to XMOS audio streaming components and user application logic and allows placement of the user selected application logic on different tiles.
 
@@ -36,7 +48,30 @@ All of the above threads for the core lib_awe need to be placed on the same tile
 Lib_awe API
 -----------
 
-A single function is provided to wrap the entire lib_awe implementation and automatically spawns all of the worker and helper threads. In addition, where USB/HID is used as the control interface, an API is provided which takes care of translating messages to and from the HID endpoint and to and from the lib_awe tuning thread.
+In order to use the functions, one needs to configure the library to use the correct number of audio channels, threads, and heaps. To this effect, create a file ``awe_conf.h`` in your project that defines the following values:
+
+  =============================== ===========
+  Define                          Values
+  =============================== ===========
+  AWE_DSP_THREAD_NUM              1..5
+  AWE_INPUT_CHANNELS              0 or more
+  AWE_OUTPUT_CHANNELS             0 or more
+  AUDIO_INPUT_CHANNELS            0 or more
+  AUDIO_OUTPUT_CHANNELS           0 or more
+  AWE_BLOCK_SIZE                  32
+  AWE_HEAP_SIZE                   4096
+  =============================== ===========
+
+Some values are, at present, pre-set:
+
+  =============================== ===========
+  Define                          Values
+  =============================== ===========
+  Sample rate                     48,000 Hz
+  =============================== ===========
+
+
+A single function is provided to wrap the entire lib_awe implementation and automatically spawns all of the worker and helper threads. In addition, where USB/HID is used as the control interface, an API is provided which takes care of translating messages to and from the HID endpoint and to and from the lib_awe tuning thread. Other interfaces may be used such as UART or I2C.
 
 .. doxygengroup:: lib_awe
     :content-only:
