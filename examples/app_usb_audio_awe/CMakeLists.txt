@@ -4,7 +4,7 @@ project(app_usb_audio_awe)
 
 # Grab sw_usb_audio for XU316-MC HW setup files and deps
 include(FetchContent)
-set(SW_USB_AUDIO_PATH ../../sw_usb_audio)
+set(SW_USB_AUDIO_PATH ../../../sw_usb_audio)
 IF(EXISTS ${CMAKE_CURRENT_LIST_DIR}/${SW_USB_AUDIO_PATH})
     message(STATUS "Skipping fetch of: sw_usb_audio")
 else()
@@ -70,11 +70,11 @@ set(APP_INCLUDES    src
                     ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src/extensions
                     ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src)
 
-set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
+set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../../..)
 
 # Workaround until xcommon cmake supports mixed archive and source libs
 set(APP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-include(../lib_awe/lib_build_info_sources.cmake)
+include(../../lib_awe/lib_build_info_sources.cmake)
 
 
 XMOS_REGISTER_APP()
