@@ -22,5 +22,4 @@ include(../../lib_awe/lib_build_info_sources.cmake)
 list(APPEND APP_C_SRCS ../awb_files/simple_volume_InitAWB.c)
 
 
-
 XMOS_REGISTER_APP()

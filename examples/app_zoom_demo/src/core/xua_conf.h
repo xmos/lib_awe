@@ -126,7 +126,6 @@
 #define MAX_FREQ           (192000)
 #endif
 
-#define EXCLUDE_USB_AUDIO_MAIN
 
 /*** Defines relating to feature placement regarding tiles ***/
 #define XUD_TILE           (0)
@@ -154,6 +153,9 @@
 #define HID_CONTROLS       (0)
 #endif
 
-#define HID_OUT_REQUIRED   (0)
+#define HID_OUT_REQUIRED   (1)
+
+#include "user_main.h"
+
 
 #endif
