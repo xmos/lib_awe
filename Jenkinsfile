@@ -101,12 +101,8 @@ pipeline {
               dir("${REPO}") {
                 script {
                   // Build all apps in the examples directory
-                  def apps = sh(script: "ls -d examples/app_*", returnStdout: true).trim()
-                  for(String app : apps.split()) {
-                    dir("${app}") {
                       // Disable xmake build for now until fixed
                       // sh "xmake -j"
-                    }
                   } // for loop
                 } // script
               } // dir
