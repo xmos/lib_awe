@@ -185,6 +185,10 @@ pipeline {
                       sh "cmake -G \"Unix Makefiles\" -B build"
                       sh "xmake -C build -j"
                     }
+                    dir("test_xawe_if"){
+                      sh "cmake -G \"Unix Makefiles\" -B build"
+                      sh "xmake -C build -j"
+                    }
                     sh "python -m pytest -k \"not lib\" --junitxml=junit_main.xml"
                     junit "junit_main.xml"
                   } // withTools

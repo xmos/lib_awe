@@ -8,6 +8,7 @@ import struct
 import numpy as np
 import time
 import re
+import subprocess
 
 
 # Get the udev rules sorted in linux https://depts.washington.edu/dxscdoc/Help/Guides/HID_permissions.html#:~:text=On%20Linux&text=This%20will%20give%20read%20and,plugging%20and%20replugging%20the%20device.
@@ -225,7 +226,14 @@ class awe_error_codes:
     def get_keys(self):
         return self.define_dict
 
+def run_xe(bin_dir, cmds, max_cycles=1000000):
+    cmd = f"xsim --max-cycles {max_cycles} --args {bin_dir} {cmds}"
+  
+    ret = subprocess.run(cmd.split(), capture_output=True, text=True)
+    assert ret.returncode == 0, f"Failed runing {cmd}: {ret.stderr}"
+    # print(ret.stderr)
 
+    return ret.stdout
 
 def filter_awe_packet_log():
     """Takes the AWE low level packet log and filters out all TX operations and captures then in a file"""

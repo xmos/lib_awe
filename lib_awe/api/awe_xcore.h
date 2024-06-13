@@ -77,10 +77,8 @@ extern void awe_offload_data_to_dsp_engine(chanend_t c_to_awe,
 
 
 /** 
-@ingroup AWEInstance
-@brief The AWE instance. 
-@details The AWE Instance struct must have its members/pointers assigned at init time. 
-The actual object is remote - for XMOS this is an array of channel ends which represent
+@brief The XMOS AWE instance. 
+@details For XMOS this is an array of channel ends which represent
 the public API to the XMOS AWE instance.
 */
 typedef struct xAWEInstance_t{
@@ -136,15 +134,6 @@ INT32 xawe_ctrlSetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 statu
 INT32 xawe_ctrlGetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *status);
 
 /**
- * @brief Get an object class from its handle.
- * @param pAWE                      instance pointer
- * @param [in] handle               handle of object to find
- * @param [out] pClassID            pointer to found object class
- * @return                          @ref E_SUCCESS,  @ref E_NO_MORE_OBJECTS,  @ref E_LINKEDLIST_CORRUPT
- */
-INT32 xawe_ctrlGetModuleClass(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *pClassID);
-
-/**
  * @brief Set a scalar or array value  of a module variable by handle with mask. A mask allows you to only call module's set function
  *      for a single variable.
  * @param [in] pAWE                     instance pointer
@@ -188,6 +177,9 @@ INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *val
 *                           @ref E_BADPACKET
 */
 INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT32 arraySize, UINT32 *pPos);
+
+#undef INT32
+#undef UINT32
 
 
 #define AWE_DSP_MAX_THREAD_NUM        5

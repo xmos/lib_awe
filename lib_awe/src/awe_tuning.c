@@ -172,6 +172,8 @@ unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, unsigned int packe
 #define AWE_TUNING_MAX_PACKET_SIZE_INTS 64
 #define NUM_WORDS(packet) (sizeof(packet) / sizeof(packet[0]))
 #define PACKET_HEADER(num_words, core_id, command) ( ((num_words + 1) << 16) | ((core_id & 0xff) << 8) | (command & 0xff))
+// #define DEBUG_PRINT_RESPONSE(num_words, response_packet) {for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);}}
+#define DEBUG_PRINT_RESPONSE(num_words, response_packet) (void)num_words;
 const unsigned coreID = 0;
 
 
@@ -191,7 +193,7 @@ INT32 xawe_ctrlSetValue(const xAWEInstance_t *pAWE, UINT32 handle, const void *v
     const unsigned response_packet_len = 3;
     unsigned int response_packet[response_packet_len] = {0};
     unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
-    // for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);} printchar('\n');
+    DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
 
     return response_packet[1];
 }
@@ -212,7 +214,7 @@ INT32 xawe_ctrlGetValue(const xAWEInstance_t *pAWE, UINT32 handle, void *value, 
     const unsigned response_packet_len = 16;
     unsigned int response_packet[response_packet_len] = {0};
     unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
-    // for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);} printchar('\n');
+    DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
 
     for(int i = 0; i < length; i++){
         unsigned int *ptr = value;
@@ -236,7 +238,7 @@ INT32 xawe_ctrlSetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 statu
     const unsigned response_packet_len = 3;
     unsigned int response_packet[response_packet_len] = {0};
     unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
-    // for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);} printchar('\n');
+    DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
 
     return response_packet[1];
 }
@@ -256,13 +258,13 @@ INT32 xawe_ctrlGetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *stat
     const unsigned response_packet_len = 3;
     unsigned int response_packet[response_packet_len] = {0};
     unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
+    DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
     *status = response_packet[1];
-    // for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);} printchar('\n');
 
     return ((int)(*status) < 0 ? E_NOT_OBJECT : 0);
 }
 
-// TODO DOes this make sense to implement?
+// TODO Does this make sense to implement?
 
 // /**
 //  * @brief Get an object class from its handle.
@@ -294,7 +296,7 @@ INT32 xawe_ctrlSetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, const voi
     const unsigned response_packet_len = 3;
     unsigned int response_packet[response_packet_len] = {0};
     unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
-    // for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);} printchar('\n');
+    DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
 
     return response_packet[1];
 }
@@ -317,12 +319,13 @@ INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *val
     const unsigned response_packet_len = 16;
     unsigned int response_packet[response_packet_len] = {0};
     unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
-    // for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);} printchar('\n');
+    DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
 
     for(int i = 0; i < length; i++){
         unsigned int *ptr = value;
         ptr[i] = response_packet[2 + i];
     }
+    
     return response_packet[1];
 }
 
@@ -352,7 +355,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
     _send_packet_to_awe(pAWE->c_tuning_from_host, &stop_audio, len - 1); // -1 because CRC appended
     *pPos += len - 1;
     unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
-    // for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(packet_buffer[i]);}
+    DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
     int err = response_packet[1];
     if(err != E_SUCCESS){
         return E_BADPACKET; 
@@ -371,12 +374,10 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
         }
 
         unsigned int num_words_tx = PACKET_LENGTH_WORDS(msg_payload);
-        // printintln(num_words_tx);
         *pPos += num_words_tx - 1;
         _send_packet_to_awe(pAWE->c_tuning_from_host, msg_payload, num_words_tx - 1); // -1 because CRC appended
         unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
-        // for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);} printchar('\n');
-
+        DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
         int err = (num_words_rx == 4 ? response_packet[2] : response_packet[1]);
         if(err != E_SUCCESS){
             return E_BADPACKET; 
