@@ -4,7 +4,7 @@ getApproval()
 
 // Get XCommon CMake and log a record of the git commit
 def get_xcommon_cmake() {
-  sh "git clone -b develop git@github.com:xmos/xcommon_cmake"
+  sh "git clone -b v1.1.0 git@github.com:xmos/xcommon_cmake"
   sh "git -C xcommon_cmake rev-parse HEAD"
 }
 
@@ -82,11 +82,9 @@ pipeline {
                 dir("${REPO}") {
                   withCredentials([file(credentialsId: 'DSPCAWE_8.D.1.1', variable: 'DSPC_AWE_LIB')]) {
                     sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
-                    script {
-                      // Build all example apps
-                      sh "cmake  -G \"Unix Makefiles\" -B build"
-                      sh "xmake -C build -j"
-                    } // script
+                    // Build all example apps
+                    sh "cmake  -G \"Unix Makefiles\" -B build"
+                    sh "xmake -C build -j"
                   } // credentials
                 } // dir
                 archiveArtifacts artifacts: "${REPO}/**/*.xe", allowEmptyArchive: false
@@ -99,12 +97,9 @@ pipeline {
           steps {
             withTools(params.TOOLS_VERSION) {
               dir("${REPO}") {
-                script {
                   // Build all apps in the examples directory
-                      // Disable xmake build for now until fixed
-                      // sh "xmake -j"
-                  } // for loop
-                } // script
+                  // Disable xmake build for now until fixed
+                  // sh "xmake -j"
               } // dir
             // archiveArtifacts artifacts: "${REPO}/**/bin/*.xe", allowEmptyArchive: false
             } // withTools
