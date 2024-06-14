@@ -40,7 +40,7 @@ Lib_Awe consists of a group of threads. There are a statically define number (ma
 
 To support audio streaming an audio transport thread provides a channel interface to the Audio Weaver awe_audioImportSamples() and awe_audioExportSamples() functions. The purpose of this thread is to simplify connection to XMOS audio streaming components and user application logic and allows placement of the user selected application logic on different tiles.
 
-Finally, a tuning thread is provided which abstracts away the awe_packetProcess() function calls and provides a channel API and again provides a channel based interface allowing placement of control to be on a different tile.
+Finally, a tuning thread is provided which abstracts away the awe_packetProcess() function calls and provides a channel API and again provides a channel based interface allowing placement of control to be on a different tile. In AWE language, this provides a ``tuning interface`` which is different from a ``control interface`` in that the control interface uses function calls. The same functionality is available for both AWE approaches however for the XCORE port the ``tuning interface`` method is default since it allows logic to be placed on a remote tile which does not share the memory space with the AWE tile.
 
 All of the above threads for the core lib_awe need to be placed on the same tile. Since the majority of one tile's RAM and threads are used by lib_awe it is typical to dedicate one tile to lib_awe and use the other tile for application logic. However, low-memory usage tasks such as I2S may also be placed on the lib_awe tile (when required by hardware IO constraints) and this is demonstrated in the USB Audio Example.
 
