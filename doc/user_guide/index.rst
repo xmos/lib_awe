@@ -36,7 +36,7 @@ Lib_awe provides an interface to the audio streaming and control functions using
    lib_awe thread diagram
 
 
-Lib_Awe consists of a group of threads. There are a statically define number (maximum 5) of DSP worker threads which perform the AWE core functionality within the AudioWeaver Virtual Machine.
+Lib_Awe consists of a group of threads. There are a statically define number (maximum 5) of DSP worker threads which perform the AWE core functionality within the AudioWeaver runtime core.
 
 To support audio streaming an audio transport thread provides a channel interface to the Audio Weaver awe_audioImportSamples() and awe_audioExportSamples() functions. The purpose of this thread is to simplify connection to XMOS audio streaming components and user application logic and allows placement of the user selected application logic on different tiles.
 
@@ -76,28 +76,99 @@ A single function is provided to wrap the entire lib_awe implementation and auto
 .. doxygengroup:: lib_awe
     :content-only:
 
-USB Audio Example
------------------
+Application Examples
+--------------------
 
-A sample application is provided called ``app_usb_audio_awe``. It is based on the XMOS USB Audio reference design and associated XK-AUDIO-316-MC hardware. It is very closely related to the standard USB Audio reference design provided by XMOS. Documentation for this can be found here `sw_usb_audio design guide <https://www.xmos.com/download/sw_usb_audio:-sw_usb_audio-(user-guide)(v8_1_0).pdf>`_ 
+A number of sample applications are provided to help you get up and running quickly. The sample application provided is called ``app_usb_audio_awe``. It is based on the XMOS USB Audio reference design and associated XK-AUDIO-316-MC hardware. It is very closely related to the standard USB Audio reference design provided by XMOS. Documentation for this can be found here `sw_usb_audio design guide <https://www.xmos.com/download/sw_usb_audio:-sw_usb_audio-(user-guide)(v8_1_0).pdf>`_ 
 
 DSP Concepts provide a helpful setup guide which can be found in the file ``User_Guide_for_XMOS_EVK_with_AWE.pdf`` provided in this repo which is designed to help you get up and running as quickly as possible using this example.
 
-The rest of this section focuses on the feature set of this AWE/USB Audio example.
+There are three build profiles provided each one providing a different audio source/sink or tuning data path:
 
-The feature set of the demonstration is as follows:
+.. list-table:: Example Application Builds
+   :widths: 25 25 50
+   :header-rows: 1
 
-    - USB Audio Class 1.0 (Full Speed)
-    - Stereo input from the host to stereo output on the OUT 1/2 3.5 mm analog jack
+   * - Build
+     - Data path
+     - Tuning path
+   * - UA
+     - USB Audio to target, Line out from target
+     - USB / HID
+   * - I2S
+     - Line in to target, Line out from target
+     - USB / HID
+   * - UA_STANDALONE
+     - USB Audio to target, Line out from target
+     - Internal to firmware 
+
+UA Build
+........
+
+
+The feature set of this build is as follows:
+
+    - USB Audio Class 2.0 (High Speed)
+    - Stereo input from the host
+    - Stereo output on the OUT 1/2 3.5 mm analog jack
     - Audio from the host is pumped through the AWE framework before being played on the output jack
     - Asynchronous clocking (local audio clock to hardware)
     - 24 bit Sample resolution
     - 48 kHz sample rate
-    - Control to AWE provided over USB HID with VID 0x20b1 and PID 0x0018 supporting live tuning
+    - Tuning to AWE provided over USB HID with VID 0x20b1 and PID 0x0018 supporting live tuning from the Audioweaver application
+
+.. note::
+    When the firmware boots, there is no design loaded so you will not hear any sound played from the host. Please load an AWB from the host using the Audioweaver application.
 
 
-Building the Example
-....................
+I2S Build
+.........
+
+The feature set of this build is as follows:
+
+
+    - Stereo input from the IN 1/2 3.5 mm analog jack
+    - Stereo output on the OUT 1/2 3.5 mm analog jack
+    - Audio from the host is pumped through the AWE framework before being played on the output jack
+    - USB Audio Class 1.0 (Full Speed)
+    - Tuning to AWE provided over USB HID with VID 0x20b1 and PID 0x0018 supporting live tuning from the Audioweaver application
+
+    .. note::
+        When the firmware boots, there is no design loaded so you will not hear any sound played from the host. Please load an AWB from the host using the Audioweaver application.
+
+
+UA_STANDALONE Build
+...................
+
+The feature set of this build is as follows:
+
+    - USB Audio Class 2.0 (High Speed)
+    - Stereo input from the host
+    - Stereo output on the OUT 1/2 3.5 mm analog jack
+    - Audio from the host is pumped through the AWE framework before being played on the output jack
+    - Asynchronous clocking (local audio clock to hardware)
+    - 24 bit Sample resolution
+    - 48 kHz sample rate
+    - Tuning to AWE provided by a control thread in the firmware on Tile[0]
+
+The control works as follows:
+
+.. list-table:: UA_STANDALONE control
+   :widths: 25 50
+   :header-rows: 1
+
+   * - Button
+     - Function
+   * - 2
+     - Load the ``PlayBasic_3thread`` AWB file which contains the multi-band compressor example
+   * - 1
+     - Load the ``simple_volume`` AWB file which contains a passthrough with volume control
+   * - 0
+     - When the ``simple_volume`` AWB is selected, it controls the volume in -10 dB incremenets. No function otherwise.
+
+
+Building the Examples
+.....................
 
 The following section assumes you have downloaded and installed the XMOS `tools <https://www.xmos.com/software-tools/>`_ minimum version 15.2.1. Now open a tools command prompt.
 
@@ -166,19 +237,19 @@ This will build both the UA (USB Audio) and I2S (I2S only for data transport but
 
 The application uses approximately 49 kB on Tile[0] and 510 kB on Tile[1], of 512 kB on each tile. 
 
-Running the Example
-...................
+Running the Examples
+....................
 
 To run the application use the following command from the lib_awe/app_usb_audio_awe directory::
 
-    xrun bin/UA/app_usb_audio_awe_UA.xe
+    xrun bin/<build>/app_usb_audio_awe_<build>.xe
 
 Alternatively to make the design non-volatile by programming in to flash memory use the following command::
 
-    xflash bin/UA/app_usb_audio_awe_UA.xe
+    xflash bin/<build>/app_usb_audio_awe_<build>.xe
 
 The USB audio device should appear in your host OS's audio settings window.
 
 .. note::
-    No audio will be passed through from the host to the 3.5 mm jack until an AWE design is loaded. Please use the Audio Weaver software to download and appropriate design to enable audio streaming.
+    No audio will be passed through from the host to the 3.5 mm jack until an AWE design is loaded.
 
