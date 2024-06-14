@@ -6,7 +6,8 @@
 #include "awe_xcore.h"
 #include "Errors.h"
 
-// Rename the AWB arrays (which are the same name from AWD) so we can have more than one referenced in this file
+// Rename the AWB arrays (which are the same name from AWD) so we can have more than one array referenced in this file
+// We do the same in the CMAKE file so the compiled objects get renamed too
 #define Core0_InitCommands  Core0_InitCommands_Basic_3thread
 #define Core0_InitCommands_Len  Core0_InitCommands_Basic_3thread_Len
 #include "playBasic_3thread_InitAWB.h"
@@ -15,6 +16,7 @@
 #define Core0_InitCommands  Core0_InitCommands_simple_volume
 #define Core0_InitCommands_Len  Core0_InitCommands_simple_volume_Len
 #include "simple_volume_InitAWB.h"
+#include "simple_volume_ControlInterface.h"
 #undef Core0_InitCommands
 #undef Core0_InitCommands_Len
 
@@ -31,6 +33,7 @@ typedef enum awb_state_t{
 void awe_standalone_tuning(chanend_t control_from_host, chanend_t control_to_host){
     xAWEInstance_t pAWE = {control_from_host, control_to_host};
 
+    // AWB image state
     awb_state_t awb_state_old = AWB_NONE;
     awb_state_t awb_state = AWB_NONE;
     unsigned int *awb_array = NULL;
@@ -40,11 +43,13 @@ void awe_standalone_tuning(chanend_t control_from_host, chanend_t control_to_hos
     port_enable(p_buttons);
     const int buttons_none = 0x7;
 
+    // Control for AWB_SIMPLE_VOLUME
+    float volume = 0.0;
     while(1){
         delay_milliseconds(100);
         int buttons = port_in(p_buttons);
 
-        // See if button pressed
+        // See if button pressed and take action if so
         if(buttons != buttons_none){
             switch(buttons){
                 case 0x03:
@@ -52,6 +57,20 @@ void awe_standalone_tuning(chanend_t control_from_host, chanend_t control_to_hos
                 break;
                 case 0x05:
                     awb_state = AWB_SIMPLE_VOLUME;
+                break;
+                case 0x06:
+                    // Only do for AWB_SIMPLE_VOLUME because it has the vol control
+                    if(awb_state == AWB_SIMPLE_VOLUME){
+                        volume -= 10.0;
+                        if(volume < -50.0){
+                            volume = 0.0;
+                        }
+                        int err = xawe_ctrlSetValue(&pAWE, AWE_Volume1_gain_HANDLE, &volume, 0, 1);
+                        if(err != E_SUCCESS){
+                            printstrln("ERROR - setting volume failed");
+                            printintln(err);
+                        }
+                    }
                 break;
             }
 
@@ -63,8 +82,8 @@ void awe_standalone_tuning(chanend_t control_from_host, chanend_t control_to_hos
                     // printstrln("AWB_BASIC_3THREAD");
                 break;
                 case AWB_SIMPLE_VOLUME:
-                    awb_array = (unsigned int *)Core0_InitCommands_Basic_3thread;
-                    awb_array_len = Core0_InitCommands_Basic_3thread_Len;
+                    awb_array = (unsigned int *)Core0_InitCommands_simple_volume;
+                    awb_array_len = Core0_InitCommands_simple_volume_Len;
                     // printstrln("AWB_SIMPLE_VOLUME");
                 break;
                 case AWB_NONE:
@@ -72,6 +91,7 @@ void awe_standalone_tuning(chanend_t control_from_host, chanend_t control_to_hos
                 break;
 
                 }
+                // Load the AWB
                 unsigned int pPos = 0;
                 int err = xawe_loadAWBfromArray(&pAWE, awb_array, awb_array_len, &pPos);
                 if(err != E_SUCCESS){

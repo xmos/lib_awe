@@ -16,7 +16,6 @@
 
 DECLARE_JOB(awe_test, (chanend_t, chanend_t, chanend_t));
 void awe_test(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_t c_data){
-    
     xAWEInstance_t xAWEInstance = {c_tuning_from_host, c_tuning_to_host};
 
 
