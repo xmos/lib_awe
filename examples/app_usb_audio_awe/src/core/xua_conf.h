@@ -161,6 +161,9 @@
 
 #define HID_OUT_REQUIRED   (1)
 
+#if STANDALONE
+#include "user_main_standalone.h"
+#else
 #include "user_main.h"
-
+#endif
 #endif

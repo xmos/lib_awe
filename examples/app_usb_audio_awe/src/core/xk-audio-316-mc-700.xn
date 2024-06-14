@@ -23,6 +23,7 @@
 
             <!-- Various ctrl signals -->
             <Port Location="XS1_PORT_8D"  Name="PORT_CTRL"/>
+            <Port Location="XS1_PORT_4E"  Name="PORT_BUTTONS"/>
 
             <!-- I2C -->
             <Port Location="XS1_PORT_1L"  Name="PORT_I2C_SCL"/>
