@@ -78,4 +78,9 @@ set(APP_INCLUDES    src
 
 set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../)
 
+# Workaround until xcommon cmake supports mixed archive and source libs
+set(APP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+include(../../lib_awe/lib_build_info_sources.cmake)
+
+
 XMOS_REGISTER_APP()
