@@ -4,7 +4,6 @@
 #include <xcore/select.h>
 #include "awe_xcore_internal.h"
 
-#if defined(AWE_TUNING_OVER_USB_HID)
 #include "xud.h"
 #include "xud_device.h"
 #include "xua_endpoint0.h"
@@ -68,5 +67,3 @@ void awe_usb_hid(chanend_t c_hid_to_host, chanend_t c_hid_from_host,
 
     }
 }
-
-#endif

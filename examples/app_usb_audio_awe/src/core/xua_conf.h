@@ -159,7 +159,9 @@
 #define HID_CONTROLS       (0)
 #endif
 
+#if !STANDALONE
 #define HID_OUT_REQUIRED   (1)
+#endif
 
 #if STANDALONE
 #include "user_main_standalone.h"

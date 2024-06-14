@@ -128,6 +128,9 @@ void _send_packet_to_awe(chanend_t c_tuning_from_host, unsigned int payload[], u
 
 }
 
+// For debugging AWE tuning commands. Will print packets to and from AWE
+#define DEBUG_PACKETS     0
+
 // Sends a concatonated packet consisting of two single packets. Adds CRC on end
 void _send_packet_to_awe_dual_array(chanend_t c_tuning_from_host, const unsigned int payload1[], unsigned int num_words1, const unsigned int payload2[], unsigned int num_words2){
     chanend_out_word(c_tuning_from_host, num_words1 + num_words2 + 1); // + crc
@@ -135,17 +138,17 @@ void _send_packet_to_awe_dual_array(chanend_t c_tuning_from_host, const unsigned
     unsigned int crc = 0;
     for(unsigned i = 0; i < num_words1; i++) {
         chanend_out_word(c_tuning_from_host, payload1[i]);
-        // printhexln(payload1[i]);
+        if(DEBUG_PACKETS) printhexln(payload1[i]);
         crc ^= payload1[i];
     }
-    // printstr("split\n");
+    if(DEBUG_PACKETS) printstr("split\n");
     for(unsigned i = 0; i < num_words2; i++) {
         chanend_out_word(c_tuning_from_host, payload2[i]);
-        // printhexln(payload2[i]);
+        if(DEBUG_PACKETS) printhexln(payload2[i]);
         crc ^= payload2[i];
     }
     chanend_out_word(c_tuning_from_host, crc);
-    // printhexln(crc);
+    if(DEBUG_PACKETS) printhexln(crc);
 
     chanend_out_end_token(c_tuning_from_host);
     chanend_check_end_token(c_tuning_from_host);
@@ -157,10 +160,10 @@ unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, unsigned int packe
     chanend_out_word(c_tuning_to_host, max_packet_words);
     chanend_out_end_token(c_tuning_to_host);
     unsigned num_words = chanend_in_word(c_tuning_to_host);
-    // printintln(num_words);
+    if(DEBUG_PACKETS) printintln(num_words);
     for(unsigned i = 0; i < num_words; i++) {
         packet_buffer[i] = chanend_in_word(c_tuning_to_host);
-        // printhexln(packet_buffer[i]);
+        if(DEBUG_PACKETS) printhexln(packet_buffer[i]);
     }
     chanend_out_end_token(c_tuning_to_host);
     chanend_check_end_token(c_tuning_to_host);
@@ -170,9 +173,12 @@ unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, unsigned int packe
 
 #define NUM_WORDS(packet) (sizeof(packet) / sizeof(packet[0]))
 #define PACKET_HEADER(num_words, core_id, command) ( ((num_words + 1) << 16) | ((core_id & 0xff) << 8) | (command & 0xff))
-// For debugging AWE tuning response. Uncomment next line and comment out the subsequent line
-// #define DEBUG_PRINT_RESPONSE(num_words, response_packet) {for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);}}
+#if DEBUG_PACKETS
+#define DEBUG_PRINT_RESPONSE(num_words, response_packet) {for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);}}
+#else
 #define DEBUG_PRINT_RESPONSE(num_words, response_packet) (void)num_words;
+#endif
+
 const unsigned coreID = 0;
 
 
