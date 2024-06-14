@@ -5,7 +5,7 @@ AWE Library User Guide
 Introduction
 ------------
 
-AudioWeaver is a tool and libraries for implementing Digitial Signal Processing algorithms. It comprises a GUI and a set of libraries. Standard building blocks such as filters, equalisers, echo cancellers, can be assembled in the GUI and then executed on a device. A control library is available that enables on-line control of the blocks.
+AudioWeaver is a tool and libraries for implementing Digital Signal Processing algorithms. It comprises a GUI and a set of libraries. Standard building blocks such as filters, equalisers, echo cancellers, can be assembled in the GUI and then executed on a device. A control library is available that enables on-line control of the blocks.
 
 XCORE is a programmable multi-core device with flexible DSP and IO interfaces. The IO interfaces can be programmed to, for example, I2S, TDM, USB, ADAT or S/PDIF interfaces (or indeed any other interface), and the DSP capability can be used to operate on data that is received from or sent to these interfaces. In addition to interfaces and DSP, XCORE devices can also execute control code or even ML inference engines.
 
@@ -86,7 +86,7 @@ DSP Concepts provide a helpful setup guide which can be found in the file ``User
 There are three build profiles provided each one providing a different audio source/sink or tuning data path:
 
 .. list-table:: Example Application Builds
-   :widths: 25 25 50
+   :widths: 25 50 50
    :header-rows: 1
 
    * - Build
@@ -164,7 +164,7 @@ The control works as follows:
    * - 1
      - Load the ``simple_volume`` AWB file which contains a passthrough with volume control
    * - 0
-     - When the ``simple_volume`` AWB is selected, it controls the volume in -10 dB incremenets. No function otherwise.
+     - When the ``simple_volume`` AWB is selected, it controls the volume in 10 dB decremenets. No function for other builds.
 
 
 Building the Examples
@@ -235,12 +235,12 @@ To build using xcommon-cmake:
 
 This will build both the UA (USB Audio) and I2S (I2S only for data transport but with USB/HID enabled for control) binaries. All of the required dependencies will be downloaded at this step. This will only happen the first time you build.
 
-The application uses approximately 49 kB on Tile[0] and 510 kB on Tile[1], of 512 kB on each tile. 
+The application uses approximately 30-48 kB on Tile[0] depending on build and 510 kB on Tile[1], of 512 kB on each tile. 
 
 Running the Examples
 ....................
 
-To run the application use the following command from the lib_awe/app_usb_audio_awe directory::
+To run the application use the following command from the lib_awe/app_usb_audio_awe directory where <build> should be one of UA, I2S or UA_STANDALONE::
 
     xrun bin/<build>/app_usb_audio_awe_<build>.xe
 

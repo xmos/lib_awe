@@ -2,6 +2,7 @@
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 #include <xcore/channel.h>
 #include <xcore/port.h>
+#include <xcore/hwtimer.h>
 #include <print.h>
 #include "awe_xcore.h"
 #include "Errors.h"
@@ -29,6 +30,21 @@ typedef enum awb_state_t{
     AWB_SIMPLE_VOLUME
 }awb_state_t;
 
+void delay_ms(unsigned delay_ms){
+    hwtimer_t tmr = hwtimer_alloc();
+    hwtimer_delay(tmr, XS1_TIMER_KHZ * delay_ms);
+    hwtimer_free(tmr);
+}
+
+int wait_for_button_change(port_t p_buttons){
+    int current_val = port_in(p_buttons);
+    port_set_trigger_in_not_equal(p_buttons, current_val);
+    delay_ms(10); // Debounce
+    current_val = port_in(p_buttons);
+    port_clear_trigger_in(p_buttons);
+
+    return current_val;
+}
 
 void awe_standalone_tuning(chanend_t control_from_host, chanend_t control_to_host){
     xAWEInstance_t pAWE = {control_from_host, control_to_host};
@@ -41,16 +57,18 @@ void awe_standalone_tuning(chanend_t control_from_host, chanend_t control_to_hos
 
     // Setup GPIO
     port_enable(p_buttons);
-    const int buttons_none = 0x7;
+    delay_ms(10); // Allow port to settle after boot
+    const int buttons_not_pressed = 0x7;
 
     // Control for AWB_SIMPLE_VOLUME
     float volume = 0.0;
+
     while(1){
-        delay_milliseconds(100);
-        int buttons = port_in(p_buttons);
+        int buttons = wait_for_button_change(p_buttons);
+        // printintln(buttons);
 
         // See if button pressed and take action if so
-        if(buttons != buttons_none){
+        if(buttons != buttons_not_pressed){
             switch(buttons){
                 case 0x03:
                     awb_state = AWB_BASIC_3THREAD;                                                                                                                                                                                                          
@@ -72,8 +90,12 @@ void awe_standalone_tuning(chanend_t control_from_host, chanend_t control_to_hos
                         }
                     }
                 break;
+                default:
+                    // Do nothing
+                break;
             }
 
+            // See if we need to load AWBs
             if(awb_state != awb_state_old){
                 switch(awb_state){
                 case AWB_BASIC_3THREAD:
