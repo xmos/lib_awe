@@ -31,10 +31,10 @@ void awe_test(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_
     unsigned int pPos = 0;
     err = xawe_loadAWBfromArray(&xAWEInstance, Core0_InitCommands, Core0_InitCommands_Len, &pPos);
     if(err){
-        // printstr("Error loading AWB: ");printint(err); printstr(" at pos: "); printintln(pPos);
+        puts("Error loading AWB");
         _Exit(1);
     } else {
-        // printstr("AWB load SUCCESS\n");
+        puts("AWB load SUCCESS");
     }
 
     // SET AND GET VALUE
