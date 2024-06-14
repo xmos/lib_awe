@@ -170,6 +170,7 @@ unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, unsigned int packe
 
 #define NUM_WORDS(packet) (sizeof(packet) / sizeof(packet[0]))
 #define PACKET_HEADER(num_words, core_id, command) ( ((num_words + 1) << 16) | ((core_id & 0xff) << 8) | (command & 0xff))
+// For debugging AWE tuning response. Uncomment next line and comment out the subsequent line
 // #define DEBUG_PRINT_RESPONSE(num_words, response_packet) {for(int i=0; i<num_words_rx; i++) {printstr("rx "); printint(i); printchar(' '); printhexln(response_packet[i]);}}
 #define DEBUG_PRINT_RESPONSE(num_words, response_packet) (void)num_words;
 const unsigned coreID = 0;
@@ -329,21 +330,21 @@ INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *val
 *                           @ref E_BADPACKET
 */
 INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT32 arraySize, UINT32 *pPos){
+    // Zero the position pointer
     *pPos = 0;
 
     const unsigned response_packet_len = 16;
     unsigned int response_packet[response_packet_len] = {0};
 
     // Send audio stop command
-    const unsigned len = 2; // Whole packet inc CRC
+    const unsigned len = 2; // Whole packet length inc CRC
     unsigned int stop_audio = (len << 16) + PFID_StopAudio;
     _send_packet_to_awe(pAWE->c_tuning_from_host, &stop_audio, len - 1); // -1 because CRC appended
-    *pPos += len - 1;
     unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
     DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
     int err = response_packet[1];
     if(err != E_SUCCESS){
-        return E_BADPACKET; 
+        return err; 
     }
     
     // Required to allow audio to stop before issuing destroy as part of AWB load
@@ -364,9 +365,13 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
         _send_packet_to_awe(pAWE->c_tuning_from_host, msg_payload, num_words_tx - 1); // -1 because CRC appended
         unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
         DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
-        int err = (num_words_rx == 4 ? response_packet[2] : response_packet[1]);
+        if(num_words_rx == 4){
+            err = response_packet[2];
+        } else {
+            err = response_packet[1];
+        }
         if(err != E_SUCCESS){
-            return E_BADPACKET; 
+            return err; 
         }
         cmd_idx += num_words_tx - 1;
     }

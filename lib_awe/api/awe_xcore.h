@@ -214,7 +214,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 #error "Must define AUDIO_OUTPUT_CHANNELS"
 #endif
 
-/** @brief The size of the packet buffer used for USB/HID transfer. */
+/** @brief The size of the packet buffer in 32b words used for communicating with AWE over tuning interface. */
 #define AWE_HID_PACKET_BUFFER_SIZE 264
 
 /** @brief The number of audio samples per block processed by AWE. */
