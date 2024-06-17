@@ -154,7 +154,7 @@ The feature set of this build is as follows:
 The control works as follows:
 
 .. list-table:: UA_STANDALONE control
-   :widths: 25 50
+   :widths: 10 50
    :header-rows: 1
 
    * - Button
@@ -162,9 +162,9 @@ The control works as follows:
    * - 2
      - Load the ``PlayBasic_3thread`` AWB file which contains the multi-band compressor example
    * - 1
-     - Load the ``simple_volume`` AWB file which contains a passthrough with volume control
+     - Load the ``simple_volume`` AWB file which contains a pass-through with volume control
    * - 0
-     - When the ``simple_volume`` AWB is selected, it controls the volume in 10 dB decremenets. No function for other builds.
+     - When the ``simple_volume`` AWB is selected, it controls the volume in 10 dB decrements. No function for other builds.
 
 
 Building the Examples
