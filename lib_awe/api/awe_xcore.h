@@ -75,6 +75,113 @@ extern void awe_offload_data_to_dsp_engine(chanend_t c_to_awe,
                                            unsigned toAWE[],
                                            unsigned fromAWE[]);
 
+
+/** 
+@brief The XMOS AWE instance. 
+@details For XMOS this is an array of channel ends which represent
+the public API to the XMOS AWE instance.
+*/
+typedef struct xAWEInstance_t{
+    chanend_t c_tuning_from_host;
+    chanend_t c_tuning_to_host;
+} xAWEInstance_t;
+
+/** @brief Type definition to make the xawe API reflect the AWE API*/
+#define INT32 int
+/** @brief Type definition to make the xawe API reflect the AWE API*/
+#define UINT32 unsigned int
+
+/**
+ * @brief Get a scalar or array value of a module variable by handle
+ * @param [in] pAWE                     instance pointer
+ * @param [in] handle                   packed object handle
+ * @param [out] value                   value(s) to get
+ * @param [in] arrayOffset              array index if array
+ * @param [in] length                   number of elements. 1 if scaler
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED, 
+ *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS   
+ */ 
+INT32 xawe_ctrlGetValue(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length);
+
+/**
+ * @brief Set a scalar or array value of a module variable by handle
+ * @param [in] pAWE                     instance pointer
+ * @param [in] handle                   packed object handle
+ * @param [in] value                    value(s) to set
+ * @param [in] arrayOffset              array index if array
+ * @param [in] length                   number of elements. 1 if scaler
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED, 
+ *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS   
+ */
+INT32 xawe_ctrlSetValue(const xAWEInstance_t *pAWE, UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length);
+
+/**
+ * @brief Set the runtime status of a module. 
+ * 0 = Active,    1 = Bypass,    2 = Mute,    3 = Inactive
+ * @param [in] pAWE                     instance pointer
+ * @param [in] handle                   packed object handle
+ * @param [in] status                   status to set
+ * @return                              @ref E_SUCCESS,  @ref E_NOT_MODULE,  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS 
+ */
+INT32 xawe_ctrlSetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 status);
+
+/**
+ * @brief Get the runtime status of a module.
+ * 0 = Active,    1 = Bypass,    2 = Mute,    3 = Inactive
+ * @param [in] pAWE                     instance pointer
+ * @param [in] handle                   packed object handle
+ * @param [out] status                  status to get
+ * @return                              @ref E_SUCCESS,  @ref E_NOT_MODULE,  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS,  @ref E_PARAMETER_ERROR
+ */
+INT32 xawe_ctrlGetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *status);
+
+/**
+ * @brief Set a scalar or array value  of a module variable by handle with mask. A mask allows you to only call module's set function
+ *      for a single variable.
+ * @param [in] pAWE                     instance pointer
+ * @param [in] handle                   packed object handle
+ * @param [in] value                    value(s) to set
+ * @param [in] arrayOffset              array index if array
+ * @param [in] length                   number of elements if array. 1 if scaler
+ * @param [in] mask                     mask to use - 0 to not call set function
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX, 
+ *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE  
+ */
+INT32 xawe_ctrlSetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length, UINT32 mask);
+
+/**
+ * @brief Get a scalar or array value of a module variable by handle with mask. A mask allows you to only call module's set function
+ *      for a single variable.
+ * @param [in] pAWE                     instance pointer
+ * @param [in] handle                   packed object handle
+ * @param [out] value                   value(s) to get
+ * @param [in] arrayOffset              array index if array
+ * @param [in] length                   number of elements if array. 1 if scaler
+ * @param [in] mask                     mask to use - 0 to not call get function
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX, 
+ *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE  
+ */
+INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length, UINT32 mask);
+
+
+/*------------------------------------------Loader Functions----------------------------------------------------*/
+/**
+* @brief Executes packet commands from an in-memory array. Designer can generate AWB arrays directly from a layout. 
+* @param[in] pAWE           AWE instance pointer
+* @param[in] pCommands      Buffer with commands to execute
+* @param[in] arraySize      Number of DWords in command buffer
+* @param[out] pPos          Report failing word index
+* @return                   @ref E_SUCCESS
+*                           @ref E_EXCEPTION
+*                           @ref E_UNEXPECTED_EOF
+*                           @ref E_END_OF_FILE
+*                           @ref E_MESSAGE_LENGTH_TOO_LONG
+*                           @ref E_BADPACKET
+*/
+INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT32 arraySize, UINT32 *pPos);
+
+
+/** @brief The maximum number of xcore processor threads supported by lib_awe. Cannot be changed by the user. */
 #define AWE_DSP_MAX_THREAD_NUM        5
 
 
@@ -82,6 +189,7 @@ extern void awe_offload_data_to_dsp_engine(chanend_t c_to_awe,
 #include "awe_conf.h"
 #endif
 
+/** @brief The number of xcore threads used by lib_awe. Modifiable by the user per project. */
 #ifndef AWE_DSP_THREAD_NUM
 #define AWE_DSP_THREAD_NUM              2
 #endif
@@ -106,23 +214,30 @@ extern void awe_offload_data_to_dsp_engine(chanend_t c_to_awe,
 #error "Must define AUDIO_OUTPUT_CHANNELS"
 #endif
 
+/** @brief The size of the packet buffer in 32b words used for communicating with AWE over tuning interface. */
 #define AWE_HID_PACKET_BUFFER_SIZE 264
 
+/** @brief The number of audio samples per block processed by AWE. */
 #define AWE_BLOCK_SIZE              32
 
 #ifndef FAST_HEAP_A_SIZE
+/** @brief The amount of heap in bytes allocated for FAST_HEAP_A usage. Please see DSP Concepts documentation for further details. */
 #define FAST_HEAP_A_SIZE          (5*1024)
 #endif
 
 #ifndef FAST_HEAP_B_SIZE
+/** @brief The amount of heap in bytes allocated for FAST_HEAP_B usage. Please see DSP Concepts documentation for further details. */
 #define FAST_HEAP_B_SIZE          (5*1024)
 #endif
 
 #ifndef SLOW_HEAP_SIZE
+/** @brief The amount of heap in bytes allocated for SLOW_HEAP usage. Please see DSP Concepts documentation for further details. */
 #define SLOW_HEAP_SIZE            (5*1024)
 #endif
 
 /**@}*/ // END: addtogroup lib_awe
 
+#undef INT32
+#undef UINT32
 
 #endif

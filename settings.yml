@@ -5,6 +5,7 @@ version: 0.1.0
 
 documentation:
   exclude_patterns_path: doc/exclude_patterns.inc
+  linkcheck_ignore_regex: [".*lib_awe.*"]
   doxygen_projects:
     lib_xcore_math:
       doxyfile_path: doc/Doxyfile.inc

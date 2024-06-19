@@ -1,12 +1,1 @@
-LIBRARY = awe
-
-MODULE_XCC_FLAGS = $(XCC_FLAGS)
-LIB_DIRS = lib
-VERSION = 0.1.0
-
-OPTIONAL_HEADERS += awe_conf.h
-EXPORT_INCLUDE_DIRS = api \
-                      src/include_internal
-INCLUDE_DIRS = $(EXPORT_INCLUDE_DIRS)
-
-EXPORTED = 1
+# xcommon build not supported for lib_awe. Please use xcommon-cmake

@@ -9,33 +9,19 @@ output.
 
 import pytest
 from pathlib import Path
-import subprocess
 import struct
+from awe_test_utils import awe_cmd_list, awe_error_codes, run_xe
 
-xe = "test_basic/bin/test_awe_basic.xe"
-
-
-class awe_cmds:
-    get_target_info = 0x00020029
-    get_moduleclass_count = 0x0002000d
-    get_core_list = 0x0002007f
-    get_cpu_usage = 0x0002002b
-
+xe_cmd = "test_basic/bin/test_awe_basic.xe"
+xe_xawe = "test_xawe_if/bin/test_xawe_if.xe"
 
 def send_command(xe, cmd):
+    cmd = 0x00020000 + awe_cmd_list().lookup(cmd)
     crc = 0 ^ cmd
     cmd_str = f"{hex(cmd)} {hex(crc)}"
     cmd_str = cmd_str.replace("0x", "")
     return run_xe(xe, cmd_str)
 
-def run_xe(bin_dir, cmds):
-    cmd = f"xsim --max-cycles 1000000 --args {bin_dir} {cmds}"
-  
-    ret = subprocess.run(cmd.split(), capture_output=True, text=True)
-    assert ret.returncode == 0, f"Failed runing {cmd}: {ret.stderr}"
-    # print(ret.stderr)
-
-    return ret.stdout
 
 def check_expected(dut, expected):
     for dut_word, expected_word in zip(dut.split(), expected.split()):
@@ -44,7 +30,7 @@ def check_expected(dut, expected):
 
 
 def test_target_info():
-    dut = send_command(xe, awe_cmds.get_target_info)
+    dut = send_command(xe_cmd, "PFID_GetTargetInfo")
     expected = "000e0000 00000000 473b8000 4b3ebc20 00403020 24020264 08440100 00000107 534f4d58 4253555f 4cbebc20 00000000 7a6b5c4d 07c4f609"
 
     to_fp = lambda a : struct.unpack('f', struct.pack('I', a))[0]
@@ -55,16 +41,32 @@ def test_target_info():
 
     check_expected(dut, expected)
 
+
+
 def test_get_moduleclass_count():
+    dut = send_command(xe_cmd, "PFID_GetCIModuleCount")
     count = 325
-    dut = send_command(xe, awe_cmds.get_moduleclass_count)
     expected = f"00030000 00000{count:x} 00030{count:x}"
 
     check_expected(dut, expected)
 
 def test_get_core_list():
+    dut = send_command(xe_cmd, "PFID_GetCores2")
     cores = 1
-    dut = send_command(xe, awe_cmds.get_core_list)
     expected = f"00040000 0000000{cores} 0000000{cores-1} 0004000{cores}"
 
     check_expected(dut, expected)
+
+
+def test_xawe_ctrl_interface():
+    stdout = run_xe(xe_xawe, "", max_cycles=10000000)
+    print(stdout)
+
+# Just for testing some of the utils
+if __name__ == "__main__":
+    cmds = awe_cmd_list()
+    print(cmds.lookup("PFID_SetValuesSetCall"))
+    error_codes = awe_error_codes()
+    print(error_codes.lookup(-71))
+
+

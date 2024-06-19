@@ -126,6 +126,7 @@
 #define MAX_FREQ           (192000)
 #endif
 
+
 /*** Defines relating to feature placement regarding tiles ***/
 #define XUD_TILE           (0)
 #define PLL_REF_TILE       (0)
@@ -134,8 +135,6 @@
 #define MIDI_TILE          (1)
 
 #define XUA_DFU_EN         (0)
-#define ENDPOINT_INT_INTERVAL_IN_HID (1)
-#define ENDPOINT_INT_INTERVAL_OUT_HID (1)
 
 /*** Defines relating to USB descriptor strings and ID's ***/
 #define VENDOR_ID          (0x20B1) /* XMOS VID */
@@ -157,5 +156,6 @@
 #define HID_OUT_REQUIRED   (1)
 
 #include "user_main.h"
+
 
 #endif
