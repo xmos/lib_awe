@@ -79,7 +79,9 @@ A single function is provided to wrap the entire lib_awe implementation and auto
 Application Examples
 --------------------
 
-A number of sample applications are provided to help you get up and running quickly. The sample application provided is called ``app_usb_audio_awe``. It is based on the XMOS USB Audio reference design and associated XK-AUDIO-316-MC hardware. It is very closely related to the standard USB Audio reference design provided by XMOS. Documentation for this can be found here `sw_usb_audio design guide <https://www.xmos.com/download/sw_usb_audio:-sw_usb_audio-(user-guide)(v8_1_0).pdf>`_ 
+A number of sample applications are provided to help you get up and running quickly. The sample application provided is called ``app_usb_audio_awe``. It is based on the XMOS USB Audio reference design and associated XK-AUDIO-316-MC hardware. Please note that it assumes version 1.1 of the XK-AUDIO-316-MC hardware. Version 1.0 will not work without modification to the code.
+
+The example is very closely related to the standard USB Audio reference design provided by XMOS. Documentation for this can be found here `sw_usb_audio design guide <https://www.xmos.com/download/sw_usb_audio:-sw_usb_audio-(user-guide)(v8_1_0).pdf>`_ 
 
 DSP Concepts provide a helpful setup guide which can be found in the file ``User_Guide_for_XMOS_EVK_with_AWE.pdf`` provided in this repo which is designed to help you get up and running as quickly as possible using this example.
 
@@ -165,6 +167,10 @@ The control works as follows:
      - Load the ``simple_volume`` AWB file which contains a pass-through with volume control
    * - 0
      - When the ``simple_volume`` AWB is selected, it controls the volume in 10 dB decrements. No function for other builds.
+
+.. note::
+    When the firmware boots, there is no design loaded so you will not hear any sound played from the host. Please press button 2 or 1 to load an AWB and enable audio processing.
+
 
 
 Building the Examples
