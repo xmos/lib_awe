@@ -9,7 +9,7 @@
 #define AUDIO_INPUT_CHANNELS        16
 #define AUDIO_OUTPUT_CHANNELS       16
 
-#define AWE_HEAP_SIZE         (44*1024)
+#define AWE_HEAP_SIZE         (30*1024)
 
 #if !STANDALONE
 #define AWE_TUNING_OVER_USB_HID      1

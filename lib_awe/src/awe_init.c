@@ -17,6 +17,12 @@ static UINT32 g_AWEHeap[AWE_HEAP_SIZE];
 
 UINT32 AWE_Packet_Buffer[AWE_HID_PACKET_BUFFER_SIZE];
 
+#if USE_AWE_FLASH_FILE_SYSTEM
+#include "awe_ffs_rpc.h"
+AWEFlashFSInstance2 g_AWEFlashFSInstance;
+#endif
+
+
 void awe_xcore_init() {
     g_AWEInstance.instanceId = 0;
     g_AWEInstance.pInputPin = (IOPinDescriptor *)&g_InputPin;
@@ -45,6 +51,25 @@ void awe_xcore_init() {
     g_AWEInstance.pName = "XMOS_USB_Audio";
     g_AWEInstance.userVersion = 0x20230406;
 
+#if USE_AWE_FLASH_FILE_SYSTEM
+    memset(&g_AWEFlashFSInstance, 0, sizeof(g_AWEFlashFSInstance));
+
+    g_AWEFlashFSInstance.cbInit = &usrInitFlashFileSystem;
+    g_AWEFlashFSInstance.cbEraseSector = &usrEraseFlashSector;
+    g_AWEFlashFSInstance.cbFlashWrite = &usrWriteFlashMemory;
+    g_AWEFlashFSInstance.cbFlashRead = &usrReadFlashMemory;
+
+
+    g_AWEFlashFSInstance.flashSizeInBytes = FLASH_MEMORY_SIZE_IN_BYTES;
+    g_AWEFlashFSInstance.flashErasableBlockSizeInBytes = ERASEABLE_SECTOR_SIZE;
+    g_AWEFlashFSInstance.flashStartOffsetInBytes = FILE_SYSTEM_START_OFFSET;
+    g_AWEFlashFSInstance.flashEraseTimeInMs = (INT32)((FLOAT32)((( (FLASH_MEMORY_SIZE_IN_BYTES - FILE_SYSTEM_START_OFFSET)/ ERASEABLE_SECTOR_SIZE)*SECTOR_ERASE_TIME_MS/1000) + 0.5f) + 5);
+
+    awe_initFlashFS((AWEInstance *)&g_AWEInstance, (AWEFlashFSInstance *)&g_AWEFlashFSInstance);
+    
+    g_AWEInstance.pFlashFileSystem = (AWEFlashFSInstance *)&g_AWEFlashFSInstance;
+#endif
+
     int ret;
     ret = awe_initPin((IOPinDescriptor *)&g_InputPin,  AWE_INPUT_CHANNELS, NULL);
     assert(ret == 0);
@@ -52,6 +77,11 @@ void awe_xcore_init() {
     assert(ret == 0);
     ret = awe_init((AWEInstance*)&g_AWEInstance);
     assert(ret == 0);
+
+    /// FLASH FILE STUFF
+    // PDIRECTORY_ENTRY pDirEntry = {0};
+    // awe_fwGetFirstFile((AWEFlashFSInstance *)&g_AWEFlashFSInstance, &pDirEntry);
+
 }
 
 /** Function that returns the number of elapsed "cycles". This has to be a
