@@ -64,10 +64,10 @@ extern void awe_xcore_main(chanend_t c_control_from_host,
  * \param c_data      Channelend for audio communication
  *
  * \param toAWE       frame of data destined for AWE. This frame should be
- *                    AUDIO_OUTPUT_CHANNELS in size
+ *                    AWE_INPUT_CHANNELS in size
  *
  * \param fromAWE     frame of data from AWE. This array should be
- *                    AUDIO_INPUT_CHANNELS in size and will be filled by the
+ *                    AWE_OUTPUT_CHANNELS in size and will be filled by the
  *                    function
  */
 extern void awe_offload_data_to_dsp_engine(chanend_t c_to_awe,

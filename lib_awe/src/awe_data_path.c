@@ -82,12 +82,14 @@ void awe_data_transport_thread(chanend_t c_data, chanend_t c_children[]) {
     while(1) {
 
         /* Get samples to process */
+        #pragma unroll
         for(int i = 0; i < AWE_INPUT_CHANNELS; i++) {
             input_data[frame][i] = chanend_in_word(c_data);
         }
         chanend_check_end_token(c_data);
 
         /* Send out processed samples */
+        #pragma unroll
         for(int i = 0; i < AWE_OUTPUT_CHANNELS; i++) {
             chanend_out_word(c_data, output_data[frame][i]);
         }
