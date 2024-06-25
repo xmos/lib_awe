@@ -55,8 +55,9 @@ set(APP_COMPILER_FLAGS_UA_STANDALONE            ${EXTRA_BUILD_FLAGS}
                                                 ${APP_COMMON_BUILD_FLAGS}
                                                 -DSTANDALONE=1)
 
-set(APP_COMPILER_FLAGS_FLASH                    ${EXTRA_BUILD_FLAGS}
-                                                ${APP_COMMON_BUILD_FLAGS})
+set(APP_COMPILER_FLAGS_UA_FFS                   ${EXTRA_BUILD_FLAGS}
+                                                ${APP_COMMON_BUILD_FLAGS}
+                                                -DUSE_AWE_FLASH_FILE_SYSTEM=1)
 
 set(APP_COMPILER_FLAGS_playBasic_3thread_InitAWB.c  -DCore0_InitCommands=Core0_InitCommands_Basic_3thread
                                                     -DCore0_InitCommands_Len=Core0_InitCommands_Basic_3thread_Len)

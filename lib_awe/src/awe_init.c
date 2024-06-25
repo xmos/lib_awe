@@ -22,6 +22,7 @@ UINT32 AWE_Packet_Buffer[AWE_HID_PACKET_BUFFER_SIZE];
 AWEFlashFSInstance2 g_AWEFlashFSInstance;
 #endif
 
+volatile char g_AWE_IsInitialised = 0;
 
 void awe_xcore_init() {
     g_AWEInstance.instanceId = 0;
@@ -78,10 +79,7 @@ void awe_xcore_init() {
     ret = awe_init((AWEInstance*)&g_AWEInstance);
     assert(ret == 0);
 
-    /// FLASH FILE STUFF
-    // PDIRECTORY_ENTRY pDirEntry = {0};
-    // awe_fwGetFirstFile((AWEFlashFSInstance *)&g_AWEFlashFSInstance, &pDirEntry);
-
+    g_AWE_IsInitialised = 1;
 }
 
 /** Function that returns the number of elapsed "cycles". This has to be a
