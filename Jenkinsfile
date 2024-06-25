@@ -26,7 +26,7 @@ pipeline {
     REPO = 'lib_awe'
     PIP_VERSION = "24.0"
     PYTHON_VERSION = "3.11"
-    XMOSDOC_VERSION = "v4.0"
+    XMOSDOC_VERSION = "v5.4"
   }
   stages {
     stage('Linux stages') {

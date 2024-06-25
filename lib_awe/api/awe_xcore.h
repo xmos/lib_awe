@@ -198,6 +198,14 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 #error "AWE_DSP_THREAD_NUM too high, max " ## AWE_DSP_MAX_THREAD_NUM
 #endif
 
+/** @brief The amound of heap memory in long words (32 bit) that can be used by lib_awe. Modifiable by the user per project. */
+#ifndef AWE_HEAP_SIZE
+#error "Please define AWE_HEAP_SIZE to allocate the number of long words (32 bit) for AWE main heap"
+#define AWE_HEAP_SIZE // For doxygen only
+#endif
+
+
+
 #ifndef AWE_INPUT_CHANNELS
 #error "Must define AWE_INPUT_CHANNELS"
 #endif
