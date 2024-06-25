@@ -189,8 +189,8 @@ const unsigned coreID = 0;
  * @param [in] value                    value(s) to set
  * @param [in] arrayOffset              array index if array
  * @param [in] length                   number of elements. 1 if scaler
- * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED, 
- *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS   
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED,
+ *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS
  */
 INT32 xawe_ctrlSetValue(const xAWEInstance_t *pAWE, UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length){
     UINT32 payload1[] = {PACKET_HEADER(4 + length, coreID, PFID_SetValueHandle), handle, length, arrayOffset};
@@ -210,9 +210,9 @@ INT32 xawe_ctrlSetValue(const xAWEInstance_t *pAWE, UINT32 handle, const void *v
  * @param [out] value                   value(s) to get
  * @param [in] arrayOffset              array index if array
  * @param [in] length                   number of elements. 1 if scaler
- * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED, 
- *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS   
- */ 
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED,
+ *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS
+ */
 INT32 xawe_ctrlGetValue(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length){
     UINT32 payload[] = {PACKET_HEADER(4, coreID, PFID_GetValueHandle), handle, length, arrayOffset};
     _send_packet_to_awe(pAWE->c_tuning_from_host, payload, NUM_WORDS(payload));
@@ -230,12 +230,12 @@ INT32 xawe_ctrlGetValue(const xAWEInstance_t *pAWE, UINT32 handle, void *value, 
 
 
 /**
- * @brief Set the runtime status of a module. 
+ * @brief Set the runtime status of a module.
  * 0 = Active,    1 = Bypass,    2 = Mute,    3 = Inactive
  * @param [in] pAWE                     instance pointer
  * @param [in] handle                   packed object handle
  * @param [in] status                   status to set
- * @return                              @ref E_SUCCESS,  @ref E_NOT_MODULE,  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS 
+ * @return                              @ref E_SUCCESS,  @ref E_NOT_MODULE,  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS
  */
 INT32 xawe_ctrlSetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 status){
     UINT32 payload[] = {PACKET_HEADER(3, coreID, PFID_SetStatusHandle), handle, status};
@@ -278,8 +278,8 @@ INT32 xawe_ctrlGetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *stat
  * @param [in] arrayOffset              array index if array
  * @param [in] length                   number of elements if array. 1 if scaler
  * @param [in] mask                     mask to use - 0 to not call set function
- * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX, 
- *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE  
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,
+ *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE
  */
 INT32 xawe_ctrlSetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length, UINT32 mask){
     UINT32 payload1[] = {PACKET_HEADER(5 + length, coreID, PFID_SetValueHandleMask), handle, length, arrayOffset, mask};
@@ -301,8 +301,8 @@ INT32 xawe_ctrlSetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, const voi
  * @param [in] arrayOffset              array index if array
  * @param [in] length                   number of elements if array. 1 if scaler
  * @param [in] mask                     mask to use - 0 to not call get function
- * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX, 
- *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE  
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,
+ *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE
  */
 INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length, UINT32 mask){
     UINT32 payload[] = {PACKET_HEADER(5, coreID, PFID_GetValueHandleMask), handle, length, arrayOffset, mask};
@@ -323,7 +323,7 @@ INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *val
 
 /*------------------------------------------Loader Functions----------------------------------------------------*/
 /**
-* @brief Executes packet commands from an in-memory array. Designer can generate AWB arrays directly from a layout. 
+* @brief Executes packet commands from an in-memory array. Designer can generate AWB arrays directly from a layout.
 * @param[in] pAWE           AWE instance pointer
 * @param[in] pCommands      Buffer with commands to execute
 * @param[in] arraySize      Number of DWords in command buffer
@@ -350,9 +350,9 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
     DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
     int err = response_packet[1];
     if(err != E_SUCCESS){
-        return err; 
+        return err;
     }
-    
+
     // Required to allow audio to stop before issuing destroy as part of AWB load
     hwtimer_t tmr = hwtimer_alloc();
     hwtimer_delay(tmr, XS1_TIMER_KHZ); // 1ms
@@ -377,7 +377,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
             err = response_packet[1];
         }
         if(err != E_SUCCESS){
-            return err; 
+            return err;
         }
         cmd_idx += num_words_tx - 1;
     }

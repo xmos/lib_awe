@@ -29,8 +29,7 @@
  * channel-end.
  *
  * You must create a awe_conf.h file to configure the AWE instantiation.
- * This defines the number of channels in the audio stack (AUDIO_INPUT_CHANNELS,
- * AUDIO_OUTPUT_CHANNELS), the number of channels that AWE expects
+ * This defines the the number of channels that AWE expects
  * (AWE_INPUT_CHANNELS, AWE_OUTPUT_CHANNELS), and the number of threads that
  * should be used for DSP (AWE_DSP_THREAD_NUM).
  *
@@ -49,8 +48,8 @@
  *
  * \param c_data      The channelend over which audio is communicated. Either
  *                    use ``awe_offload_data_to_dsp_engine`` or output
- *                    [ AUDIO_INPUT_CHANNELS words, CT_END] over c_data, then
- *                    input [ AUDIO_OUTPUT_CHANNELS, CT_END ] from c_data.
+ *                    [ AWE_INPUT_CHANNELS words, CT_END] over c_data, then
+ *                    input [ AWE_OUTPUT_CHANNELS, CT_END ] from c_data.
  */
 extern void awe_xcore_main(chanend_t c_control_from_host,
                            chanend_t c_tuning_to_host,
@@ -76,8 +75,8 @@ extern void awe_offload_data_to_dsp_engine(chanend_t c_to_awe,
                                            unsigned fromAWE[]);
 
 
-/** 
-@brief The XMOS AWE instance. 
+/**
+@brief The XMOS AWE instance.
 @details For XMOS this is an array of channel ends which represent
 the public API to the XMOS AWE instance.
 */
@@ -98,9 +97,9 @@ typedef struct xAWEInstance_t{
  * @param [out] value                   value(s) to get
  * @param [in] arrayOffset              array index if array
  * @param [in] length                   number of elements. 1 if scaler
- * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED, 
- *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS   
- */ 
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED,
+ *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS
+ */
 INT32 xawe_ctrlGetValue(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length);
 
 /**
@@ -110,18 +109,18 @@ INT32 xawe_ctrlGetValue(const xAWEInstance_t *pAWE, UINT32 handle, void *value, 
  * @param [in] value                    value(s) to set
  * @param [in] arrayOffset              array index if array
  * @param [in] length                   number of elements. 1 if scaler
- * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED, 
- *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS   
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED,
+ *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS
  */
 INT32 xawe_ctrlSetValue(const xAWEInstance_t *pAWE, UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length);
 
 /**
- * @brief Set the runtime status of a module. 
+ * @brief Set the runtime status of a module.
  * 0 = Active,    1 = Bypass,    2 = Mute,    3 = Inactive
  * @param [in] pAWE                     instance pointer
  * @param [in] handle                   packed object handle
  * @param [in] status                   status to set
- * @return                              @ref E_SUCCESS,  @ref E_NOT_MODULE,  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS 
+ * @return                              @ref E_SUCCESS,  @ref E_NOT_MODULE,  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS
  */
 INT32 xawe_ctrlSetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 status);
 
@@ -144,8 +143,8 @@ INT32 xawe_ctrlGetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *stat
  * @param [in] arrayOffset              array index if array
  * @param [in] length                   number of elements if array. 1 if scaler
  * @param [in] mask                     mask to use - 0 to not call set function
- * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX, 
- *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE  
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,
+ *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE
  */
 INT32 xawe_ctrlSetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length, UINT32 mask);
 
@@ -158,15 +157,15 @@ INT32 xawe_ctrlSetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, const voi
  * @param [in] arrayOffset              array index if array
  * @param [in] length                   number of elements if array. 1 if scaler
  * @param [in] mask                     mask to use - 0 to not call get function
- * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX, 
- *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE  
+ * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,
+ *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE
  */
 INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length, UINT32 mask);
 
 
 /*------------------------------------------Loader Functions----------------------------------------------------*/
 /**
-* @brief Executes packet commands from an in-memory array. Designer can generate AWB arrays directly from a layout. 
+* @brief Executes packet commands from an in-memory array. Designer can generate AWB arrays directly from a layout.
 * @param[in] pAWE           AWE instance pointer
 * @param[in] pCommands      Buffer with commands to execute
 * @param[in] arraySize      Number of DWords in command buffer
@@ -183,7 +182,6 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 
 /** @brief The maximum number of xcore processor threads supported by lib_awe. Cannot be changed by the user. */
 #define AWE_DSP_MAX_THREAD_NUM        5
-
 
 #if defined(__awe_conf_h_exists__)
 #include "awe_conf.h"
@@ -204,14 +202,6 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 
 #ifndef AWE_OUTPUT_CHANNELS
 #error "Must define AWE_OUTPUT_CHANNELS"
-#endif
-
-#ifndef AUDIO_INPUT_CHANNELS
-#error "Must define AUDIO_INPUT_CHANNELS"
-#endif
-
-#ifndef AUDIO_OUTPUT_CHANNELS
-#error "Must define AUDIO_OUTPUT_CHANNELS"
 #endif
 
 /** @brief The size of the packet buffer in 32b words used for communicating with AWE over tuning interface. */
