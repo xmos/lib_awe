@@ -77,17 +77,23 @@ A single function is provided to wrap the entire lib_awe implementation and auto
 Application Examples
 --------------------
 
-A number of sample applications are provided to help you get up and running quickly. The sample application provided is called ``app_usb_audio_awe``. It is based on the XMOS USB Audio reference design and associated XK-AUDIO-316-MC hardware. Please note that it assumes version 1.1 of the XK-AUDIO-316-MC hardware. Version 1.0 will not work without modification to the code.
+A number of sample applications are provided to help you get up and running quickly. The sample application provided is called ``app_usb_audio_awe``. It is based on the XMOS USB Audio reference design which uses ``lib_xua`` and associated XK-AUDIO-316-MC hardware. It is very closely related to the standard USB Audio reference design provided by XMOS in ``sw_usb_audio``. Documentation for this can be found here `sw_usb_audio design guide <https://www.xmos.com/download/sw_usb_audio:-sw_usb_audio-(user-guide)(v8_1_0).pdf>`_
 
-The example is very closely related to the standard USB Audio reference design provided by XMOS. Documentation for this can be found here `sw_usb_audio design guide <https://www.xmos.com/download/sw_usb_audio:-sw_usb_audio-(user-guide)(v8_1_0).pdf>`_
+The thread diagram for the application example is shown below. Note how most of it is either brought in from ``lib_xua`` or ``lib_awe`` with only the platform specific ``lib_i2c`` remote thread being part of the application which is required for configuration of the audio hardware on the board.
 
-DSP Concepts provide a helpful setup guide which can be found in the file ``User_Guide_for_XMOS_EVK_with_AWE.pdf`` provided in this repo which is designed to help you get up and running as quickly as possible using this example.
+.. figure:: ./images/awe_example_ua.png
+   :width: 75%
+
+   Application thread diagram for awe_example
+
+DSP Concepts provide a helpful setup guide which can be found in the file ``User_Guide_for_XMOS_EVK_with_AWE.pdf`` provided in this repo which is designed to help you get up and running as quickly as possible and help you connect to the AudioWeaver designer software.
 
 There are three build profiles provided each one providing a different audio source/sink or tuning data path:
 
 .. list-table:: Example Application Builds
    :widths: 25 50 50
    :header-rows: 1
+   :align: center
 
    * - Build
      - Data path
@@ -151,11 +157,20 @@ The feature set of this build is as follows:
     - 48 kHz sample rate
     - Tuning to AWE provided by a control thread in the firmware on Tile[0]
 
+
+The thread diagram for the standalone application example is shown below. In addition to the I2C remote master a new application thread has been added ``awe_standalone_tuning`` which handles loading of the AWB image and volume control via the buttons.
+
+.. figure:: ./images/awe_example_ua_standalone.png
+   :width: 65%
+
+   Application thread diagram for awe_example in standalone tuning mode
+
 The control works as follows:
 
 .. list-table:: UA_STANDALONE control
-   :widths: 10 50
+   :widths: 5 50
    :header-rows: 1
+   :align: center
 
    * - Button
      - Function
@@ -239,7 +254,7 @@ To build using xcommon-cmake:
 
 This will build both the UA (USB Audio) and I2S (I2S only for data transport but with USB/HID enabled for control) binaries. All of the required dependencies will be downloaded at this step. This will only happen the first time you build.
 
-The application uses approximately 30-48 kB on Tile[0] depending on build and 510 kB on Tile[1], of 512 kB on each tile.
+The application uses approximately 30-48 kB on Tile[0] depending on build and 510 kB on Tile[1], of 512 kB on each tile when allocating a generous 44 k long-words for ``AWE_HEAP_SIZE``.
 
 Running the Examples
 ....................
@@ -257,3 +272,4 @@ The USB audio device should appear in your host OS's audio settings window.
 .. note::
     No audio will be passed through from the host to the 3.5 mm jack until an AWE design is loaded.
 
+For designs which are tuned via USB/HID you may connect Audioweaver designer via USB/HID according to the documentation in the ``User_Guide_for_XMOS_EVK_with_AWE.pdf`` file which can be found in the ``lib_awe`` repo doc directory.
