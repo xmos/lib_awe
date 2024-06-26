@@ -15,7 +15,7 @@ void UserBufferManagement(unsigned sampsFromUsbToAudio[], unsigned sampsFromAudi
     /* Intercept samples from ADC (destined for the host) and process them.
      * Send processed samples to the DAC
      */
-    awe_offload_data_to_dsp_engine(g_c_to_dspc, sampsAudioToUsb, sampsFromUsbToAudio);
+    awe_offload_data_to_dsp_engine(g_c_to_dspc, sampsFromAudioToUsb, sampsFromUsbToAudio);
 #else
     /* Intercept samples from the (host destined for the DAC) and process them.
      * Send processed samples to the DAC
