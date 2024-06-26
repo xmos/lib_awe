@@ -1,7 +1,7 @@
 // Copyright 2023-2024 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
-#ifndef AWE_XCORE_INTERNAL_H
-#define AWE_XCORE_INTERNAL_H
+#ifndef _AWE_XCORE_INTERNAL_H
+#define _AWE_XCORE_INTERNAL_H
 
 #include <xcore/chanend.h>
 #include "AWECore.h"
@@ -31,8 +31,8 @@ void awe_tuning_thread(chanend_t c_control_from_host,
  *
  * \param c_data      The channelend over which audio is communicated. Either
  *                    use ``awe_offload_data_to_dsp_engine`` or output
- *                    AUDIO_INPUT_CHANNELS ints over the channel followed by
- *                    CT_END, then input AUDIO_OUTPUT_CHANNELS ints over the 
+ *                    AWE_INPUT_CHANNELS ints over the channel followed by
+ *                    CT_END, then input AWE_OUTPUT_CHANNELS ints over the
  *                    channelend and then input a CT_END.
  */
 void awe_data_transport_thread(chanend_t c_data, chanend_t c_children[]);

@@ -4,7 +4,7 @@ XMOS xCORE-AI USB Audio AWE example
 :scope: Example
 :description: USB Audio application with AWE stack
 :keywords: USB, UAC, AudioWeaver
-:boards: XCORE-AI MC AUDIO (rev 1.0)
+:boards: XCORE-AI MC AUDIO (rev 1.1)
 
 Overview
 ........

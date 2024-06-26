@@ -35,20 +35,20 @@ void awe_xcore_init() {
     g_AWEInstance.numModules = g_module_descriptor_table_end - g_module_descriptor_table;
     g_AWEInstance.numThreads = AWE_DSP_THREAD_NUM;
     g_AWEInstance.sampleRate = 48000.0f;
-    
+
     g_AWEInstance.fundamentalBlockSize = AWE_BLOCK_SIZE;
     g_AWEInstance.pFlashFileSystem = 0;
-    
+
     g_AWEInstance.fastHeapASize = AWE_HEAP_SIZE;
     g_AWEInstance.fastHeapBSize = 0;
     g_AWEInstance.slowHeapSize  = 0;
     g_AWEInstance.pFastHeapA    = g_AWEHeap;
     g_AWEInstance.pFastHeapB    = NULL;
     g_AWEInstance.pSlowHeap     = NULL;
-    
+
     g_AWEInstance.coreSpeed     = 100e6f;
     g_AWEInstance.profileSpeed  = 12.5e6f;
-    
+
     g_AWEInstance.pName = "XMOS_USB_Audio";
     g_AWEInstance.userVersion = 0x20230406;
 

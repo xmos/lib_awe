@@ -6,62 +6,18 @@
 #include "assert.h"
 #include "awe_xcore_internal.h"
 
-void awe_offload_data_to_dsp_engine(chanend_t c_to_dspc, unsigned sampstoAWE[], unsigned fromAWE[])
+void awe_offload_data_to_dsp_engine(chanend_t c_to_dspc, unsigned sampsToAWE[], unsigned sampsFromAWE[])
 {
-    // TODO: reroll these loops
-    chanend_out_word(c_to_dspc, sampstoAWE[0]);
-    chanend_out_word(c_to_dspc, sampstoAWE[1]);
-    chanend_out_word(c_to_dspc, sampstoAWE[2]);
-    chanend_out_word(c_to_dspc, sampstoAWE[3]);
-    chanend_out_word(c_to_dspc, sampstoAWE[4]);
-    chanend_out_word(c_to_dspc, sampstoAWE[5]);
-    chanend_out_word(c_to_dspc, sampstoAWE[6]);
-    chanend_out_word(c_to_dspc, sampstoAWE[7]);
-    chanend_out_word(c_to_dspc, fromAWE[0]);
-    chanend_out_word(c_to_dspc, fromAWE[1]);
-    chanend_out_word(c_to_dspc, fromAWE[2]);
-    chanend_out_word(c_to_dspc, fromAWE[3]);
-    chanend_out_word(c_to_dspc, fromAWE[4]);
-    chanend_out_word(c_to_dspc, fromAWE[5]);
-    chanend_out_word(c_to_dspc, fromAWE[6]);
-    chanend_out_word(c_to_dspc, fromAWE[7]);
+    for(int i = 0; i < AWE_INPUT_CHANNELS; i++) {
+        chanend_out_word(c_to_dspc, sampsToAWE[i]);
+    }
+
     chanend_out_end_token(c_to_dspc);
-    sampstoAWE[0] = chanend_in_word(c_to_dspc);
-    sampstoAWE[1] = chanend_in_word(c_to_dspc);
-    sampstoAWE[2] = chanend_in_word(c_to_dspc);
-    sampstoAWE[3] = chanend_in_word(c_to_dspc);
-    sampstoAWE[4] = chanend_in_word(c_to_dspc);
-    sampstoAWE[5] = chanend_in_word(c_to_dspc);
-    sampstoAWE[6] = chanend_in_word(c_to_dspc);
-    sampstoAWE[7] = chanend_in_word(c_to_dspc);
-    fromAWE[0] = chanend_in_word(c_to_dspc);
-    fromAWE[1] = chanend_in_word(c_to_dspc);
-    fromAWE[2] = chanend_in_word(c_to_dspc);
-    fromAWE[3] = chanend_in_word(c_to_dspc);
-    fromAWE[4] = chanend_in_word(c_to_dspc);
-    fromAWE[5] = chanend_in_word(c_to_dspc);
-    fromAWE[6] = chanend_in_word(c_to_dspc);
-    fromAWE[7] = chanend_in_word(c_to_dspc);
+    for(int i = 0; i < AWE_INPUT_CHANNELS; i++) {
+        sampsFromAWE[i] = chanend_in_word(c_to_dspc);
+    }
+
     chanend_check_end_token(c_to_dspc);
-    /*
-#pragma unroll loop(8)
-    for(int i = 0; i < AUDIO_INPUT_CHANNELS; i++) {            // These are USB-OUT
-        chanend_out_word(c_to_dspc, sampstoAWE[i]);
-    }
-#pragma unroll loop(8)
-    for(int i = 0; i < AUDIO_OUTPUT_CHANNELS; i++) {            // These are ADC
-        chanend_out_word(c_to_dspc, fromAWE[i]);
-    }
-    chanend_out_end_token(c_to_dspc);
-#pragma unroll loop(8)
-    for(int i = 0; i < AUDIO_INPUT_CHANNELS; i++) {           // These go to DAC
-        sampstoAWE[i] = chanend_in_word(c_to_dspc);
-    }
-#pragma unroll loop(8)
-    for(int i = 0; i < AUDIO_OUTPUT_CHANNELS; i++) {           // These go to USB-IN
-        fromAWE[i] = chanend_in_word(c_to_dspc);
-    }
-    chanend_check_end_token(c_to_dspc);*/
 }
 
 /** Function that transfers data to and from the AWE subsystem. This
@@ -124,22 +80,20 @@ void awe_data_transport_thread(chanend_t c_data, chanend_t c_children[]) {
     int32_t output_data[AWE_BLOCK_SIZE][AWE_OUTPUT_CHANNELS];
     int frame = 0;
     while(1) {
-        for(int i = 0; i < AUDIO_INPUT_CHANNELS; i++) {
-            int x = chanend_in_word(c_data);
-            if (i < AWE_INPUT_CHANNELS) {
-                input_data[frame][i] = x;
-            }
+
+        /* Get samples to process */
+        #pragma unroll
+        for(int i = 0; i < AWE_INPUT_CHANNELS; i++) {
+            input_data[frame][i] = chanend_in_word(c_data);
         }
         chanend_check_end_token(c_data);
-        int awe_channel = 0;
-        for(int i = 0; i < AUDIO_OUTPUT_CHANNELS; i++) {
-            int x = output_data[frame][awe_channel];
-            chanend_out_word(c_data, x);
-            awe_channel ++;
-            if (awe_channel == AWE_OUTPUT_CHANNELS) {
-                awe_channel = 0;
-            }
+
+        /* Send out processed samples */
+        #pragma unroll
+        for(int i = 0; i < AWE_OUTPUT_CHANNELS; i++) {
+            chanend_out_word(c_data, output_data[frame][i]);
         }
+
         for(int i = 0; i < AWE_OUTPUT_CHANNELS; i++) {
             output_data[frame][i] = 0;
         }
@@ -147,6 +101,7 @@ void awe_data_transport_thread(chanend_t c_data, chanend_t c_children[]) {
         frame++;
         if (frame == AWE_BLOCK_SIZE) { // TODO: this may not fit between samples
             frame = 0;
+            /* Process a frame of samples */
             data_to_and_from_awe(output_data, input_data, c_children);
         }
     }
