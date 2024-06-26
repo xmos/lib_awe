@@ -21,8 +21,7 @@ extern port p_sda;
 
 /* AWE components and tuning */
 extern void dsp_main(chanend control_from_host, chanend control_to_host);
-extern void awe_usb_hid(chanend c_hid_to_host, chanend c_hid_from_host, chanend c_tuning_from_host, chanend c_tuning_to_host);
-
+extern void awe_standalone_tuning(chanend control_from_host, chanend control_to_host);
 
 #define USER_MAIN_DECLARATIONS \
     interface i2c_master_if i2c[1]; \
