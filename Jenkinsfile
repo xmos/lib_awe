@@ -4,7 +4,7 @@ getApproval()
 
 // Get XCommon CMake and log a record of the git commit
 def get_xcommon_cmake() {
-  sh "git clone -b v1.1.0 git@github.com:xmos/xcommon_cmake"
+  sh "git clone -b v1.2.0 git@github.com:xmos/xcommon_cmake"
   sh "git -C xcommon_cmake rev-parse HEAD"
 }
 
