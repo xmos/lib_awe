@@ -40,28 +40,42 @@ void awe_ffs_test(chanend_t c_ffs_rpc){
 
     printf("awe_ffs_test\n");
     while(!g_AWE_IsInitialised);
-    printf("awe_ffs_test\n");
+    printf("g_AWE_IsInitialised OK\n");
 
-#define BUFF_SIZE_DWORDS 512
+#define BUFF_SIZE_DWORDS 1024
     UINT32 buffer[BUFF_SIZE_DWORDS] = {0};
-    
+
+    // Check we can re-init without issues (awe_init will have already done this)
     xassert(usrInitFlashFileSystem() == 1);
-    xassert(usrReadFlashMemory(0, buffer, BUFF_SIZE_DWORDS) == 1);
-    write_dword_bin_file("init.bin", buffer, 64);
+    printf("usrInitFlashFileSystem OK\n");
+
+    // Extract DP and sector sizes
+    UINT32 dp_size = 0;
+    UINT32 sector_size = 0;
+    get_flash_info(&dp_size, &sector_size);
+    printf("FLASH d.p. size: 0x%x sector size: %u\n", dp_size, sector_size);
+
+    xassert(usrReadFlashMemory(0, buffer, BUFF_SIZE_DWORDS * sizeof(UINT32)) == 1);
+    write_dword_bin_file("increment.bin", buffer, BUFF_SIZE_DWORDS);
+
+    write_dword_bin_file("init.bin", buffer, BUFF_SIZE_DWORDS);
 
     for(int i = 0; i < BUFF_SIZE_DWORDS; i++){
         buffer[i] = 0x1000 + i;
     }
-    xassert(usrWriteFlashMemory(0, buffer, 256) == 1);
+    xassert(usrWriteFlashMemory(0, buffer, BUFF_SIZE_DWORDS * sizeof(UINT32)) == 1);
+    printf("usrWriteFlashMemory OK\n");
 
-    xassert(usrReadFlashMemory(0, buffer, BUFF_SIZE_DWORDS) == 1);
-    write_dword_bin_file("increment.bin", buffer, 64);
+    xassert(usrReadFlashMemory(0, buffer, BUFF_SIZE_DWORDS * sizeof(UINT32)) == 1);
+    printf("usrReadFlashMemory OK\n");
+    write_dword_bin_file("increment.bin", buffer, BUFF_SIZE_DWORDS);
 
 
     xassert(usrEraseFlashSector(0, 1) == 1);
-    xassert(usrReadFlashMemory(0, buffer, BUFF_SIZE_DWORDS) == 1);
-    write_dword_bin_file("empty.bin", buffer, 64);
-
+    printf("usrEraseFlashSector OK\n");
+    xassert(usrReadFlashMemory(0, buffer, BUFF_SIZE_DWORDS * sizeof(UINT32)) == 1);
+    printf("usrReadFlashMemory OK\n");
+    write_dword_bin_file("empty.bin", buffer, BUFF_SIZE_DWORDS);
 
     _Exit(0);
 }

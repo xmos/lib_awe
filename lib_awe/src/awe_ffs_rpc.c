@@ -26,11 +26,13 @@ enum {
     FFS_RPC_READ,
     FFS_RPC_WRITE,
     FFS_RPC_ERASE,
+    FFS_RPC_GET_FLASH_INFO
 };
 
-#define DEBUG       0
+#define DEBUG_CLIENT       0
+#define DEBUG_SERVER       0
 
-#if     DEBUG
+#if     DEBUG_SERVER
 #define dprintf(...) printf(__VA_ARGS__)
 #else
 #define dprintf(...)
@@ -39,22 +41,38 @@ enum {
 void ffs_server(chanend_t c_ffs_rpc){
     dprintf("ffs_server\n");
     uint32_t flash_buffer[FFS_SERVER_BUFF_SIZE];
+    char flash_initialised = 0;
 
     while(1){
         int ret = 0;
         uint32_t cmd = chan_in_word(c_ffs_rpc);
         switch(cmd){
             case FFS_RPC_INIT:
-                dprintf("fl_connect\n");
-                ret = fl_connect(&ports);
+                dprintf("FFS_RPC_INIT\n");
+                if(!flash_initialised){
+                    ret = fl_connect(&ports);
+                } else {
+                    ret = 0;
+                }
                 chan_out_word(c_ffs_rpc, ret == 0);
+                if(ret == 0){
+                    flash_initialised = 1;
+                }
+            break;
 
-                dprintf("0x%x\n", fl_getDataPartitionSize());
-                dprintf("0x%u\n", fl_getDataSectorSize(0));
+            case FFS_RPC_GET_FLASH_INFO:
+                xassert(flash_initialised);
+                dprintf("FFS_RPC_GET_FLASH_INFO\n");
+
+                UINT32 dp_size = fl_getDataPartitionSize();
+                UINT32 sector_size = fl_getDataSectorSize(0); // Makes assumption that sectors all the same size. AWE FFS also does this
+                chan_out_word(c_ffs_rpc, dp_size);
+                chan_out_word(c_ffs_rpc, sector_size);
             break;
 
             case FFS_RPC_READ:
                 (void) cmd; // Avoid compiler bug
+                xassert(flash_initialised);
                 UINT32 nAddress = chan_in_word(c_ffs_rpc);
                 UINT32 nDWordsToRead = chan_in_word(c_ffs_rpc);
                 dprintf("FFS_RPC_READ: 0x%x, 0x%x\n", nAddress, nDWordsToRead);
@@ -63,7 +81,7 @@ void ffs_server(chanend_t c_ffs_rpc){
                 for(int i = 0; i < nDWordsToRead; i += FFS_SERVER_BUFF_SIZE){
                     uint32_t addr = nAddress + i * sizeof(uint32_t);
                     uint32_t chunk_size_words = (nDWordsToRead - i) > FFS_SERVER_BUFF_SIZE ? FFS_SERVER_BUFF_SIZE :  (nDWordsToRead - i);
-                    dprintf("fl_readData: 0x%lx, 0x%lu, 0x%x\n", addr, chunk_size_words * sizeof(uint32_t), (UINT32)flash_buffer);
+                    dprintf("fl_readData: 0x%lx, 0x%lx, 0x%x\n", addr, chunk_size_words * sizeof(uint32_t), (UINT32)flash_buffer);
                     ret |= fl_readData(addr, chunk_size_words * sizeof(uint32_t), (uint8_t *)flash_buffer);
                     chan_out_word(c_ffs_rpc, chunk_size_words);
                     chan_out_buf_word(c_ffs_rpc, flash_buffer, chunk_size_words);                    
@@ -74,6 +92,7 @@ void ffs_server(chanend_t c_ffs_rpc){
 
             case FFS_RPC_WRITE:
                 (void) cmd; // Avoid compiler bug
+                xassert(flash_initialised);
                 nAddress = chan_in_word(c_ffs_rpc);
                 UINT32 nDWordsToWrite = chan_in_word(c_ffs_rpc);
                 dprintf("FFS_RPC_WRITE: 0x%x, 0x%x\n", nAddress, nDWordsToWrite);
@@ -92,7 +111,7 @@ void ffs_server(chanend_t c_ffs_rpc){
                     uint32_t chunk_size_words = (nDWordsToWrite - i) > FFS_SERVER_BUFF_SIZE ? FFS_SERVER_BUFF_SIZE :  (nDWordsToWrite - i);
                     chan_out_word(c_ffs_rpc, chunk_size_words);
                     chan_in_buf_word(c_ffs_rpc, flash_buffer, chunk_size_words);
-                    dprintf("fl_writeData: 0x%lx, 0x%lu, 0x%x 0x%x\n", addr, chunk_size_words * sizeof(uint32_t), (unsigned)flash_buffer, (unsigned)write_sratch_buffer);
+                    dprintf("fl_writeData: 0x%lx, 0x%lx, 0x%x 0x%x\n", addr, chunk_size_words * sizeof(uint32_t), (unsigned)flash_buffer, (unsigned)write_sratch_buffer);
                     ret |= fl_writeData(addr, chunk_size_words * sizeof(uint32_t), (const unsigned char *)flash_buffer, write_sratch_buffer);
                 }
                 chan_out_word(c_ffs_rpc, ret == 0);
@@ -100,6 +119,7 @@ void ffs_server(chanend_t c_ffs_rpc){
 
             case FFS_RPC_ERASE:
                 (void) cmd; // Avoid compiler bug
+                xassert(flash_initialised);
                 UINT32 nStartingAddress = chan_in_word(c_ffs_rpc);
                 UINT32 nNumberOfSectors = chan_in_word(c_ffs_rpc);
 
@@ -146,8 +166,8 @@ void init_ffs_rpc_client_chanend(chanend_t ffs_rpc_client){
 BOOL usrInitFlashFileSystem(void)
 {
     xassert(g_ffs_rpc_client != 0); // Ensure we have a channel connection
-#if DEBUG
-    printchar('.');
+#if DEBUG_CLIENT
+    printchar('$');
 #endif
     chan_out_word(g_ffs_rpc_client, FFS_RPC_INIT);
     BOOL bSuccess = chan_in_word(g_ffs_rpc_client);
@@ -156,8 +176,8 @@ BOOL usrInitFlashFileSystem(void)
 
 BOOL usrReadFlashMemory(UINT32 nAddress, UINT32 * pBuffer, UINT32 nDWordsToRead)
 {
-#if DEBUG
-    printchar('@');
+#if DEBUG_CLIENT
+    printchar('.');
 #endif
     chan_out_word(g_ffs_rpc_client, FFS_RPC_READ);
     chan_out_word(g_ffs_rpc_client, nAddress);
@@ -179,7 +199,7 @@ BOOL usrReadFlashMemory(UINT32 nAddress, UINT32 * pBuffer, UINT32 nDWordsToRead)
 
 BOOL usrWriteFlashMemory(UINT32 nAddress, UINT32 * pBuffer, UINT32 nDWordsToWrite)
 {
-#if DEBUG
+#if DEBUG_CLIENT
     printchar('+');
 #endif
     chan_out_word(g_ffs_rpc_client, FFS_RPC_WRITE);
@@ -202,7 +222,7 @@ BOOL usrWriteFlashMemory(UINT32 nAddress, UINT32 * pBuffer, UINT32 nDWordsToWrit
 
 BOOL usrEraseFlashSector(UINT32 nStartingAddress, UINT32 nNumberOfSectors)
 {
-#if DEBUG
+#if DEBUG_CLIENT
     printchar('-');
 #endif
     chan_out_word(g_ffs_rpc_client, FFS_RPC_ERASE);
@@ -212,3 +232,11 @@ BOOL usrEraseFlashSector(UINT32 nStartingAddress, UINT32 nNumberOfSectors)
     BOOL bSuccess = chan_in_word(g_ffs_rpc_client);
     return bSuccess;
 }
+
+
+void get_flash_info(UINT32 *dp_size, UINT32 *sector_size){
+    chan_out_word(g_ffs_rpc_client, FFS_RPC_GET_FLASH_INFO);
+    *dp_size = chan_in_word(g_ffs_rpc_client);
+    *sector_size = chan_in_word(g_ffs_rpc_client);
+}
+

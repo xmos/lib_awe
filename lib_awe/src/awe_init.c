@@ -53,6 +53,12 @@ void awe_xcore_init() {
     g_AWEInstance.userVersion = 0x20230406;
 
 #if USE_AWE_FLASH_FILE_SYSTEM
+    // Init the remote flash server and fetch flash info for setting up AWE FFS
+    usrInitFlashFileSystem();
+    UINT32 flash_memory_size_in_bytes = 0;
+    UINT32 eraseable_sector_size = 0;
+    get_flash_info(&flash_memory_size_in_bytes, &eraseable_sector_size);
+
     memset(&g_AWEFlashFSInstance, 0, sizeof(g_AWEFlashFSInstance));
 
     g_AWEFlashFSInstance.cbInit = &usrInitFlashFileSystem;
@@ -61,10 +67,10 @@ void awe_xcore_init() {
     g_AWEFlashFSInstance.cbFlashRead = &usrReadFlashMemory;
 
 
-    g_AWEFlashFSInstance.flashSizeInBytes = FLASH_MEMORY_SIZE_IN_BYTES;
-    g_AWEFlashFSInstance.flashErasableBlockSizeInBytes = ERASEABLE_SECTOR_SIZE;
+    g_AWEFlashFSInstance.flashSizeInBytes = flash_memory_size_in_bytes;
+    g_AWEFlashFSInstance.flashErasableBlockSizeInBytes = eraseable_sector_size;
     g_AWEFlashFSInstance.flashStartOffsetInBytes = FILE_SYSTEM_START_OFFSET;
-    g_AWEFlashFSInstance.flashEraseTimeInMs = (INT32)((FLOAT32)((( (FLASH_MEMORY_SIZE_IN_BYTES - FILE_SYSTEM_START_OFFSET)/ ERASEABLE_SECTOR_SIZE)*SECTOR_ERASE_TIME_MS/1000) + 0.5f) + 5);
+    g_AWEFlashFSInstance.flashEraseTimeInMs = (INT32)((FLOAT32)((( (flash_memory_size_in_bytes - FILE_SYSTEM_START_OFFSET)/ eraseable_sector_size)*SECTOR_ERASE_TIME_MS/1000) + 0.5f) + 5);
 
     awe_initFlashFS((AWEInstance *)&g_AWEInstance, (AWEFlashFSInstance *)&g_AWEFlashFSInstance);
     
