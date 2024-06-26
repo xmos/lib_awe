@@ -56,8 +56,6 @@ In order to use the functions, one needs to configure the library to use the cor
   AWE_DSP_THREAD_NUM              1..5
   AWE_INPUT_CHANNELS              0 or more
   AWE_OUTPUT_CHANNELS             0 or more
-  AUDIO_INPUT_CHANNELS            0 or more
-  AUDIO_OUTPUT_CHANNELS           0 or more
   AWE_BLOCK_SIZE                  32
   AWE_HEAP_SIZE                   4096
   =============================== ===========
@@ -79,7 +77,7 @@ A single function is provided to wrap the entire lib_awe implementation and auto
 Application Examples
 --------------------
 
-A number of sample applications are provided to help you get up and running quickly. The sample application provided is called ``app_usb_audio_awe``. It is based on the XMOS USB Audio reference design which uses ``lib_xua`` and associated XK-AUDIO-316-MC hardware. It is very closely related to the standard USB Audio reference design provided by XMOS in ``sw_usb_audio``. Documentation for this can be found here `sw_usb_audio design guide <https://www.xmos.com/download/sw_usb_audio:-sw_usb_audio-(user-guide)(v8_1_0).pdf>`_ 
+A number of sample applications are provided to help you get up and running quickly. The sample application provided is called ``app_usb_audio_awe``. It is based on the XMOS USB Audio reference design which uses ``lib_xua`` and associated XK-AUDIO-316-MC hardware. It is very closely related to the standard USB Audio reference design provided by XMOS in ``sw_usb_audio``. Documentation for this can be found here `sw_usb_audio design guide <https://www.xmos.com/download/sw_usb_audio:-sw_usb_audio-(user-guide)(v8_1_0).pdf>`_
 
 The thread diagram for the application example is shown below. Note how most of it is either brought in from ``lib_xua`` or ``lib_awe`` with only the platform specific ``lib_i2c`` remote thread being part of the application which is required for configuration of the audio hardware on the board.
 
@@ -108,7 +106,7 @@ There are three build profiles provided each one providing a different audio sou
      - USB / HID
    * - UA_STANDALONE
      - USB Audio to target, Line out from target
-     - Internal to firmware 
+     - Internal to firmware
 
 UA Build
 ........
@@ -252,7 +250,7 @@ To build using xcommon-cmake:
        cd app_usb_audio_awe
        cmake -G "Unix Makefiles" -B build
        xmake -C build
-    
+
 
 This will build both the UA (USB Audio) and I2S (I2S only for data transport but with USB/HID enabled for control) binaries. All of the required dependencies will be downloaded at this step. This will only happen the first time you build.
 
