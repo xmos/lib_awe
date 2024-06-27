@@ -135,15 +135,19 @@ void ffs_server(chanend_t c_ffs_rpc){
                 int start_sector_found = 0;
                 while(curr_sector < num_sectors){
                     uint32_t curr_sector_size = fl_getDataSectorSize(curr_sector);
+                    dprintf("Found sector: %u, size %lu\n", curr_sector, curr_sector_size);
+
                     if(nStartingAddress >= sector_base_addr && nStartingAddress < sector_base_addr + curr_sector_size){
                         start_sector_found = 1;
                         break;
                     }
                     curr_sector++;
+                    sector_base_addr += curr_sector_size;
                 }
                 // Erase the sectors
                 if(start_sector_found){
                     for(unsigned sector = curr_sector; sector < curr_sector + nNumberOfSectors; sector++){
+                        dprintf("Erasing sector: %u\n", sector);
                         ret |= fl_eraseDataSector(sector);
                     }
                 } else {
@@ -234,9 +238,9 @@ BOOL usrEraseFlashSector(UINT32 nStartingAddress, UINT32 nNumberOfSectors)
 }
 
 
-void get_flash_info(UINT32 *dp_size, UINT32 *sector_size){
+void get_flash_info(UINT32 *dp_size_bytes, UINT32 *sector_size_bytes){
     chan_out_word(g_ffs_rpc_client, FFS_RPC_GET_FLASH_INFO);
-    *dp_size = chan_in_word(g_ffs_rpc_client);
-    *sector_size = chan_in_word(g_ffs_rpc_client);
+    *dp_size_bytes = chan_in_word(g_ffs_rpc_client);
+    *sector_size_bytes = chan_in_word(g_ffs_rpc_client);
 }
 

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <xcore/channel.h>
 #include <xcore/chanend.h>
 #include <xcore/select.h>
@@ -26,13 +27,67 @@ void awe_main_wrapper(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, 
 extern volatile char g_AWE_IsInitialised;
 
 
-void write_dword_bin_file(const char *fname, UINT32 *data, UINT32 numwords){
+void write_dword_bin_file(const char *fname, UINT32 addr, UINT32 *data, UINT32 numwords){
     FILE *fptr;
-    fptr = fopen(fname,"wb");
+    char full_fname[128];
+
+    sprintf(full_fname, "%s_0x%x.bin", fname, addr);
+    printf("writing - %s\n", full_fname);
+    fptr = fopen(full_fname, "wb");
     for(int i = 0; i < numwords; i++){
         fwrite(&data[i], sizeof(data[0]), 1, fptr);
     }
     fclose(fptr);
+}
+
+/* Address is the byte address */
+void test_at_address(UINT32 addr){
+    #define BUFF_SIZE_DWORDS 512
+
+    UINT32 buffer[BUFF_SIZE_DWORDS] = {0};
+    UINT32 buff_size_bytes = BUFF_SIZE_DWORDS * sizeof(UINT32);
+
+    // Extract DP and sector sizes
+    UINT32 dp_size = 0;
+    UINT32 sector_size_bytes = 0;
+    get_flash_info(&dp_size, &sector_size_bytes);
+    printf("FLASH d.p. size: 0x%x sector size: %u\n", dp_size, sector_size_bytes);
+
+    // Grab current contents
+    xassert(usrReadFlashMemory(addr, buffer, BUFF_SIZE_DWORDS) == 1);
+    write_dword_bin_file("init", addr, buffer, BUFF_SIZE_DWORDS);
+
+    // Now write a known pattern
+    for(int i = 0; i < BUFF_SIZE_DWORDS; i++){
+        buffer[i] = 0x1000 + i;
+    }
+    xassert(usrWriteFlashMemory(addr, buffer, BUFF_SIZE_DWORDS) == 1);
+    printf("usrWriteFlashMemory OK\n");
+
+    // Verify and save this pattern
+    xassert(usrReadFlashMemory(addr, buffer, BUFF_SIZE_DWORDS) == 1);
+    printf("usrReadFlashMemory OK\n");
+    write_dword_bin_file("increment", addr, buffer, BUFF_SIZE_DWORDS);
+    for(int i = 0; i < BUFF_SIZE_DWORDS; i++){
+        xassert(buffer[i] == 0x1000 + i);
+    }
+    printf("Verify OK\n");
+
+    // TODO GET THIS CALC SORTED
+    // Now erase
+    int num_sectors = ((sector_size_bytes - 1) + buff_size_bytes) / sector_size_bytes;
+
+    xassert(usrEraseFlashSector(addr, num_sectors) == 1);
+    printf("usrEraseFlashSector, num_sectors: (%d) OK\n", num_sectors);
+
+    // Grab empty flash
+    xassert(usrReadFlashMemory(addr, buffer, BUFF_SIZE_DWORDS) == 1);
+    printf("usrReadFlashMemory OK\n");
+    write_dword_bin_file("empty", addr, buffer, BUFF_SIZE_DWORDS);
+    for(int i = 0; i < BUFF_SIZE_DWORDS; i++){
+        xassert(buffer[i] == 0xffffffff);
+    }
+    printf("Verify OK\n");
 }
 
 DECLARE_JOB(awe_ffs_test, (chanend_t));
@@ -42,40 +97,16 @@ void awe_ffs_test(chanend_t c_ffs_rpc){
     while(!g_AWE_IsInitialised);
     printf("g_AWE_IsInitialised OK\n");
 
-#define BUFF_SIZE_DWORDS 1024
-    UINT32 buffer[BUFF_SIZE_DWORDS] = {0};
-
     // Check we can re-init without issues (awe_init will have already done this)
     xassert(usrInitFlashFileSystem() == 1);
     printf("usrInitFlashFileSystem OK\n");
 
-    // Extract DP and sector sizes
-    UINT32 dp_size = 0;
-    UINT32 sector_size = 0;
-    get_flash_info(&dp_size, &sector_size);
-    printf("FLASH d.p. size: 0x%x sector size: %u\n", dp_size, sector_size);
+    test_at_address(0x0000);
+    test_at_address(0x2000);
+    test_at_address(0x4100);
+    test_at_address(0x4e00);
+    test_at_address(0x10000);
 
-    xassert(usrReadFlashMemory(0, buffer, BUFF_SIZE_DWORDS * sizeof(UINT32)) == 1);
-    write_dword_bin_file("increment.bin", buffer, BUFF_SIZE_DWORDS);
-
-    write_dword_bin_file("init.bin", buffer, BUFF_SIZE_DWORDS);
-
-    for(int i = 0; i < BUFF_SIZE_DWORDS; i++){
-        buffer[i] = 0x1000 + i;
-    }
-    xassert(usrWriteFlashMemory(0, buffer, BUFF_SIZE_DWORDS * sizeof(UINT32)) == 1);
-    printf("usrWriteFlashMemory OK\n");
-
-    xassert(usrReadFlashMemory(0, buffer, BUFF_SIZE_DWORDS * sizeof(UINT32)) == 1);
-    printf("usrReadFlashMemory OK\n");
-    write_dword_bin_file("increment.bin", buffer, BUFF_SIZE_DWORDS);
-
-
-    xassert(usrEraseFlashSector(0, 1) == 1);
-    printf("usrEraseFlashSector OK\n");
-    xassert(usrReadFlashMemory(0, buffer, BUFF_SIZE_DWORDS * sizeof(UINT32)) == 1);
-    printf("usrReadFlashMemory OK\n");
-    write_dword_bin_file("empty.bin", buffer, BUFF_SIZE_DWORDS);
 
     _Exit(0);
 }
