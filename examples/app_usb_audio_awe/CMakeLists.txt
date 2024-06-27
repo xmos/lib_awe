@@ -26,7 +26,6 @@ set(APP_HW_TARGET xk-audio-316-mc-700.xn)
 include(${CMAKE_CURRENT_LIST_DIR}/${SW_USB_AUDIO_PATH}/deps.cmake)
 list(APPEND APP_DEPENDENT_MODULES "lib_awe")
 
-
 set(APP_PCA_ENABLE ON)
 # Audio Class 2, Async, I2S Master, 8xInput, 8xOutput
 
@@ -77,10 +76,5 @@ set(APP_INCLUDES    src
 
 
 set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../)
-
-# Workaround until xcommon cmake supports mixed archive and source libs
-set(APP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-include(../../lib_awe/lib_build_info_sources.cmake)
-
 
 XMOS_REGISTER_APP()

@@ -6,7 +6,6 @@
 
 #include "xud.h"
 #include "xud_device.h"
-#include "xua_endpoint0.h"
 
 void awe_usb_hid(chanend_t c_hid_to_host, chanend_t c_hid_from_host,
                  chanend_t c_tuning_from_host, chanend_t c_tuning_to_host) {
@@ -16,14 +15,14 @@ void awe_usb_hid(chanend_t c_hid_to_host, chanend_t c_hid_from_host,
     // TODO: these can be combined into one.
     unsigned int g_hid_from_host_buffer[16];
     unsigned int g_hid_to_host_buffer[16];
-    
+
     /* Mark the OUT endpoint to be ready to receive data from host */
     XUD_SetReady_Out(ep_hid_from_host, (unsigned char*)g_hid_from_host_buffer);
 
     int ready_for_next_reply_packlet = 1;
     XUD_Result_t result;
     unsigned length;
-        
+
     /* Wait for response from XUD and service relevant EP */
     SELECT_RES(
         CASE_GUARD_THEN(c_tuning_to_host, ready_for_next_reply_packlet, input_from_awe),
