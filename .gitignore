@@ -21,7 +21,7 @@
 **/CMakeFiles/**
 
 # XMOS temp and intermediate files
-**/*build*/*
+**/*build*/**
 */bin/*
 **/flash_bin_node*
 **/fw-*
@@ -43,8 +43,4 @@ manifest.txt
 # Built documentation
 doc/pdf/*.pdf
 toplevel_doc
-
-
-
-
 doc/user_guide/images/.$*

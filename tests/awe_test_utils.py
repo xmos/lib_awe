@@ -240,7 +240,7 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
 def run_xe(bin_dir, cmds, max_cycles=1000000):
     cmd = f"xsim --max-cycles {max_cycles} --args {bin_dir} {cmds}"
 
-    print(f"Running: {cmd.split}")
+    print(f"Running: {cmd.split()}")
     ret = subprocess.run(cmd.split(), capture_output=True, text=True)
     assert ret.returncode == 0, f"Failed runing {cmd}: {ret.stderr}"
     # print(ret.stderr)
