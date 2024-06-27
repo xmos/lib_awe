@@ -60,13 +60,13 @@ class awe_error_codes:
     def _parse_defines(self):
         define_dict = {}
         define_pattern = re.compile(r"#define\s+(\w+)\s+\(([-\d]+)\)")
-        
+
         with open(self.file, 'r') as ef:
             file_content = ef.read()
             for match in define_pattern.findall(file_content):
                 name, value = match
                 define_dict[int(value)] = name
-        
+
         return define_dict
 
     def lookup(self, err_code):
@@ -201,8 +201,8 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
         for word in chunk:
             b_msg += struct.pack('<I', word)
 
-        b_msg += bytearray([0] * (self.awe_hid_len - len(b_msg))) 
-        
+        b_msg += bytearray([0] * (self.awe_hid_len - len(b_msg)))
+
         try:
             num_bytes_written = self.dev.write(b_msg)
         except IOError as e:
@@ -226,7 +226,7 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
             cmd_len = (awb_data[awb_idx] >> 16) - 1
             # Catch zero padding invalid command at end of AWB
             if cmd_len == -1:
-                break 
+                break
 
             cmd = awb_data[awb_idx : awb_idx + cmd_len]
             err = self.cmd(list(cmd))
@@ -239,7 +239,8 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
 
 def run_xe(bin_dir, cmds, max_cycles=1000000):
     cmd = f"xsim --max-cycles {max_cycles} --args {bin_dir} {cmds}"
-  
+
+    print(f"Running: {cmd.split}")
     ret = subprocess.run(cmd.split(), capture_output=True, text=True)
     assert ret.returncode == 0, f"Failed runing {cmd}: {ret.stderr}"
     # print(ret.stderr)
