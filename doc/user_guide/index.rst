@@ -86,9 +86,9 @@ The thread diagram for the application example is shown below. Note how most of 
 
    Application thread diagram for awe_example
 
-DSP Concepts provide a helpful setup guide which can be found in the file ``User_Guide_for_XMOS_EVK_with_AWE.pdf`` provided in this repo which is designed to help you get up and running as quickly as possible and help you connect to the AudioWeaver designer software.
+DSP Concepts provide a helpful setup guide which can be found in the file ``User_Guide_for_XMOS_EVK_with_AWE.pdf`` provided in this repo which is designed to help you get up and running as quickly as possible and help you connect to the AudioWeaver designer software. A sample design called ``playBasic_3thread.awj`` for use in the Audioweaver Designer software may be found in the ``examples/audioweaver`` directory of the ``lib_awe`` repo.
 
-There are three build profiles provided each one providing a different audio source/sink or tuning data path:
+There are three firmware build profiles provided each one providing a different audio source/sink or tuning data path:
 
 .. list-table:: Example Application Builds
    :widths: 25 50 50
@@ -121,10 +121,10 @@ The feature set of this build is as follows:
     - Asynchronous clocking (local audio clock to hardware)
     - 24 bit Sample resolution
     - 48 kHz sample rate
-    - Tuning to AWE provided over USB HID with VID 0x20b1 and PID 0x0018 supporting live tuning from the Audioweaver application
+    - Tuning to AWE provided over USB HID with VID 0x20b1 and PID 0x0018 supporting live tuning from the Audioweaver software
 
 .. note::
-    When the firmware boots, there is no design loaded so you will not hear any sound played from the host. Please load an AWB from the host using the Audioweaver application.
+    When the firmware boots, there is no design loaded so you will not hear any sound played from the host. Please load an AWB from the host using the Audioweaver software.
 
 
 I2S Build
@@ -137,10 +137,10 @@ The feature set of this build is as follows:
     - Stereo output on the OUT 1/2 3.5 mm analog jack
     - Audio from the host is pumped through the AWE framework before being played on the output jack
     - USB Audio Class 1.0 (Full Speed)
-    - Tuning to AWE provided over USB HID with VID 0x20b1 and PID 0x0018 supporting live tuning from the Audioweaver application
+    - Tuning to AWE provided over USB HID with VID 0x20b1 and PID 0x0018 supporting live tuning from the Audioweaver software
 
     .. note::
-        When the firmware boots, there is no design loaded so you will not hear any sound played from the host. Please load an AWB from the host using the Audioweaver application.
+        When the firmware boots, there is no design loaded so you will not hear any sound played from the host. Please load an AWB from the host using the Audioweaver software.
 
 
 UA_STANDALONE Build
@@ -155,7 +155,7 @@ The feature set of this build is as follows:
     - Asynchronous clocking (local audio clock to hardware)
     - 24 bit Sample resolution
     - 48 kHz sample rate
-    - Tuning to AWE provided by a control thread in the firmware on Tile[0]
+    - Tuning to AWE (including loading of the awb file from constant memory) provided by a control thread in the firmware on Tile[0]
 
 
 The thread diagram for the standalone application example is shown below. In addition to the I2C remote master a new application thread has been added ``awe_standalone_tuning`` which handles loading of the AWB image and volume control via the buttons.
