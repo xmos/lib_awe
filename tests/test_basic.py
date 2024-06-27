@@ -22,12 +22,10 @@ def send_command(xe, cmd):
     cmd_str = cmd_str.replace("0x", "")
     return run_xe(xe, cmd_str)
 
-
 def check_expected(dut, expected):
     for dut_word, expected_word in zip(dut.split(), expected.split()):
         print(f"DUT: {dut_word} Expected: {expected_word}")
         assert int(dut_word, 16) == int(expected_word, 16)
-
 
 def test_target_info():
     dut = send_command(xe_cmd, "PFID_GetTargetInfo")
@@ -40,8 +38,6 @@ def test_target_info():
     print(f"Sample rate: {fs}")
 
     check_expected(dut, expected)
-
-
 
 def test_get_moduleclass_count():
     dut = send_command(xe_cmd, "PFID_GetCIModuleCount")
@@ -56,7 +52,6 @@ def test_get_core_list():
     expected = f"00040000 0000000{cores} 0000000{cores-1} 0004000{cores}"
 
     check_expected(dut, expected)
-
 
 def test_xawe_ctrl_interface():
     stdout = run_xe(xe_xawe, "", max_cycles=10000000)
