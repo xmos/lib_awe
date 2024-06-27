@@ -1,18 +1,18 @@
 // Copyright 2023-2024 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
-#ifndef _awe_conf_h_
-#define _awe_conf_h_
+#ifndef _AWE_CONF_H_
+#define _AWE_CONF_H_
 
-#define AWE_DSP_THREAD_NUM           3
-#define AWE_INPUT_CHANNELS           2
-#define AWE_OUTPUT_CHANNELS          2
-#define AUDIO_INPUT_CHANNELS        16
-#define AUDIO_OUTPUT_CHANNELS       16
+#include "xua.h"
 
-#define AWE_HEAP_SIZE         (44*1024)
+#define AWE_DSP_THREAD_NUM           (3)
+#define AWE_INPUT_CHANNELS           (NUM_USB_CHAN_OUT)
+#define AWE_OUTPUT_CHANNELS          (NUM_USB_CHAN_IN)
+
+#define AWE_HEAP_SIZE                (44*1024)
 
 #if !STANDALONE
-#define AWE_TUNING_OVER_USB_HID      1
+#define AWE_TUNING_OVER_USB_HID      (1)
 #endif
 
 #endif
