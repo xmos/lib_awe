@@ -10,7 +10,7 @@ output.
 import pytest
 from pathlib import Path
 import struct
-from awe_test_utils import awe_cmd_list, awe_error_codes, run_xe
+from awe_test_utils import awe_cmd_list, awe_error_codes, run_xe_sim
 
 xe_cmd = "test_basic/bin/test_awe_basic.xe"
 xe_xawe = "test_xawe_if/bin/test_xawe_if.xe"
@@ -20,7 +20,7 @@ def send_command(xe, cmd):
     crc = 0 ^ cmd
     cmd_str = f"{hex(cmd)} {hex(crc)}"
     cmd_str = cmd_str.replace("0x", "")
-    return run_xe(xe, cmd_str)
+    return run_xe_sim(xe, cmd_str)
 
 
 def check_expected(dut, expected):
@@ -59,7 +59,7 @@ def test_get_core_list():
 
 
 def test_xawe_ctrl_interface():
-    stdout = run_xe(xe_xawe, "", max_cycles=10000000)
+    stdout = run_xe_sim(xe_xawe, "", max_cycles=10000000)
     print(stdout)
 
 # Just for testing some of the utils

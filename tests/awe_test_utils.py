@@ -237,12 +237,33 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
             awb_idx += cmd_len
 
 
-def run_xe(bin_dir, cmds, max_cycles=1000000):
-    cmd = f"xsim --max-cycles {max_cycles} --args {bin_dir} {cmds}"
+def run_xe_sim(bin_path, cmds, max_cycles=1000000):
+    cmd = f"xsim --max-cycles {max_cycles} --args {bin_path} {cmds}"
   
     ret = subprocess.run(cmd.split(), capture_output=True, text=True)
     assert ret.returncode == 0, f"Failed runing {cmd}: {ret.stderr}"
-    # print(ret.stderr)
+
+    return ret.stdout
+
+def run_xe_hw(bin_path, opts=None):
+    options = "" if opts is None else " ".join(opts)
+    cmd = f"xrun {options} {bin_path}"
+  
+    ret = subprocess.run(cmd.split(), capture_output=True, text=True)
+    assert ret.returncode == 0, f"Failed runing {cmd}: {ret.stderr}"
+
+    return ret.stdout
+
+def flash_xe(bin_path, boot_partition_size=None, data_partition_bin=None):
+    if boot_partition_size is None:
+        cmd = f"xflash {bin_path}"
+    else:
+        cmd = f"xflash --factory {bin_path} --boot-partition-size {boot_partition_size}"
+        if data_partition_bin is not None:
+            cmd += f" --data {data_partition_bin}"
+  
+    ret = subprocess.run(cmd.split(), capture_output=True, text=True)
+    assert ret.returncode == 0, f"Failed runing {cmd}: {ret.stderr}"
 
     return ret.stdout
 

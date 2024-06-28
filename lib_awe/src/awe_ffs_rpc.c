@@ -18,8 +18,7 @@ fl_QSPIPorts ports = {
   XS1_CLKBLK_1
 };
 
-///////SERVER SIDE STUFF/////
-#define FFS_SERVER_BUFF_SIZE        256 // 32b words
+#define FFS_SERVER_BUFF_SIZE        256  // 32b words
 #define FLASH_SCRATCH_BUFF_BYTES    4096 // Bytes
 enum {
     FFS_RPC_INIT = 0,
