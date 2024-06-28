@@ -75,7 +75,9 @@ void test_at_address(UINT32 addr){
 
     // TODO GET THIS CALC SORTED
     // Now erase
-    int num_sectors = ((sector_size_bytes - 1) + buff_size_bytes) / sector_size_bytes;
+    UINT32 erase_sector_base_addr = addr - (addr % sector_size_bytes);
+    UINT32 erase_sector_end_addr = addr + buff_size_bytes;
+    int num_sectors = ((sector_size_bytes - 1) + (erase_sector_end_addr - erase_sector_base_addr)) / sector_size_bytes; // round up to sector size
 
     xassert(usrEraseFlashSector(addr, num_sectors) == 1);
     printf("usrEraseFlashSector, num_sectors: (%d) OK\n", num_sectors);
@@ -87,7 +89,7 @@ void test_at_address(UINT32 addr){
     for(int i = 0; i < BUFF_SIZE_DWORDS; i++){
         xassert(buffer[i] == 0xffffffff);
     }
-    printf("Verify OK\n");
+    printf("Verify OK\n\n");
 }
 
 DECLARE_JOB(awe_ffs_test, (chanend_t));
@@ -103,8 +105,8 @@ void awe_ffs_test(chanend_t c_ffs_rpc){
 
     test_at_address(0x0000);
     test_at_address(0x2000);
-    test_at_address(0x4100);
-    test_at_address(0x4e00);
+    test_at_address(0x4100); // In the middle of sector
+    test_at_address(0x4e00); // Straddles a sector
     test_at_address(0x10000);
 
 
