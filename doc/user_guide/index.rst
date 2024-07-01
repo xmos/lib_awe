@@ -195,7 +195,7 @@ You will first need to download both ``lib_awe`` and ``xcommon_cmake`` to your c
 
     cd my_sandbox
     git clone git@github.com:xmos/xcommon_cmake.git
-    git clone git@github.com:xmos/lib_awe.git
+    git clone -b v1.2.0 git@github.com:xmos/xcommon_cmake
 
 Your sandbox root directory listing will look something like this::
 
