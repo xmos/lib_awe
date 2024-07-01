@@ -268,22 +268,30 @@ def flash_xe(bin_path, boot_partition_size=None, data_partition_bin=None):
     return ret.stdout
 
 def filter_awe_packet_log():
-    """Takes the AWE low level packet log and filters out all TX operations and captures then in a file"""
-    # Define the input and output file paths
-    input_file = 'packet_log.txt'  # Replace with your input file path
-    output_file = 'filtered_output.txt'  # Replace with your output file path
+    """Takes the AWE low level packet log and decodes the commands into human readable format"""
+    input_file = Path('flash_fail_packet_log.txt').resolve()
 
-    with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
+    cmds = awe_cmd_list()
+
+    with open(input_file, 'r') as infile:
         for line in infile:
             # Check if the line contains 'TX'
             if 'TX' in line:
                 # Split the line by 'TX' and take the part after 'TX'
-                hex_part = line.split('TX', 1)[1].strip()
+                hex_part = line.split('TX', 1)[1].strip().split()
                 # Write the hex part to the output file
-                outfile.write(hex_part + '\n')
+                header = int(hex_part[0], 16)
+                opcode = header & 0xff
+                key = next(key for key, value in cmds.get_keys().items() if value == opcode)
+                length = header >> 16
+                print(key, opcode, length, hex_part[0])
 
-    # Print a message indicating the process is complete
-    print(f"Filtered hex values have been written to {output_file}")
+            if 'RX' in line:
+                hex_part = line.split('RX', 1)[1].strip().split()
+                # print(" ".join(hex_part))
+                if not "failed" in line:
+                    response = [int(hex_item, 16) for hex_item in hex_part]
+                    print(response)
 
 
 # For testing only
