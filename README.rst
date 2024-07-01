@@ -47,6 +47,7 @@ Required Software (dependencies)
 ================================
 
   * lib_xud (www.github.com/xmos/lib_xud)
+  * xcommon_cmake (www.github.com/xmos/xcommon_xmake) v1.2
 
 Documentation
 =============
