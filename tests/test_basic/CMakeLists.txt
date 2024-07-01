@@ -7,8 +7,8 @@ set(APP_DEPENDENT_MODULES   "lib_awe")
 
 set(APP_COMPILER_FLAGS ${EXTRA_BUILD_FLAGS}     -Os
                                                 -report
-                                                # (8 + 1) * 16 + a bit
-                                                -fcmdline-buffer-bytes=192
+                                                # (8 + 1) * 264 + a bit
+                                                -fcmdline-buffer-bytes=4400
 )
 
 set(APP_INCLUDES src)
