@@ -26,8 +26,10 @@ void awe_main_wrapper(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, 
 
 extern volatile char g_AWE_IsInitialised;
 
+#define SAVE_FILES      0
 
 void write_dword_bin_file(const char *fname, UINT32 addr, UINT32 *data, UINT32 numwords){
+#if SAVE_FILES
     FILE *fptr;
     char full_fname[128];
 
@@ -38,6 +40,7 @@ void write_dword_bin_file(const char *fname, UINT32 addr, UINT32 *data, UINT32 n
         fwrite(&data[i], sizeof(data[0]), 1, fptr);
     }
     fclose(fptr);
+#endif
 }
 
 /* Address is the byte address */
@@ -50,7 +53,7 @@ void test_at_address(UINT32 addr){
     // Extract DP and sector sizes
     UINT32 dp_size = 0;
     UINT32 sector_size_bytes = 0;
-    get_flash_info(&dp_size, &sector_size_bytes);
+    ffs_rpc_get_flash_info(&dp_size, &sector_size_bytes);
     printf("FLASH d.p. size: 0x%x sector size: %u\n", dp_size, sector_size_bytes);
 
     // Grab current contents

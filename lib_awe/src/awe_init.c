@@ -57,7 +57,7 @@ void awe_xcore_init() {
     usrInitFlashFileSystem();
     UINT32 flash_memory_size_in_bytes = 0;
     UINT32 eraseable_sector_size = 0;
-    get_flash_info(&flash_memory_size_in_bytes, &eraseable_sector_size);
+    ffs_rpc_get_flash_info(&flash_memory_size_in_bytes, &eraseable_sector_size);
 
     memset(&g_AWEFlashFSInstance, 0, sizeof(g_AWEFlashFSInstance));
 

@@ -51,7 +51,7 @@ extern void awe_usb_hid(chanend c_hid_to_host, chanend c_hid_from_host, chanend 
         unsafe                                                          \
         {                                                               \
             i_i2c_client = i2c[0];                                      \
-            g_ffs_rpc_client = (unsafe chanend)c_ffs_rpc;               \
+            init_ffs_rpc_client_chanend(c_ffs_rpc);                     \
         }                                                               \
         dsp_main(c_hid_control_from_host, c_hid_control_to_host);       \
     }

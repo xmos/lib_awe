@@ -19,8 +19,16 @@
 /* ----------------------------------------------------------------------
 ** Specify flash memory available for flash file system
 ** ------------------------------------------------------------------- */
-#define FILE_SYSTEM_START_OFFSET 0x00000    // Set to start of data partition
-#define SECTOR_ERASE_TIME_MS    400
+#define FILE_SYSTEM_START_OFFSET    0x00000     // Set to start of data partition which is always address 0 from the FFS point fo view
+#define SECTOR_ERASE_TIME_MS        0           // The low level erase builds in the delays so this can be zeroed
+
+#ifndef FFS_SERVER_BUFF_SIZE
+#define FFS_SERVER_BUFF_SIZE        256         // In 32b words. Can be any non zero size but larger will improve performance slightly but cost 2x this in RAM.
+#endif
+
+#ifndef FLASH_SCRATCH_BUFF_BYTES
+#define FLASH_SCRATCH_BUFF_BYTES    4096        // Bytes. This is used to support read modify-write operations smaller than a block size. If set too small it will hit an exception in write.
+#endif
 
 #ifndef __XC__
 DECLARE_JOB(ffs_server, (chanend_t));
@@ -93,7 +101,7 @@ BOOL usrEraseFlashSector(UINT32 nStartingAddress, UINT32 nNumberOfSectors);
  * @param[out]  UINT32 * sector_size_bytes
  *
  */
-void get_flash_info(UINT32 *dp_size_bytes, UINT32 *sector_size_bytes);
+void ffs_rpc_get_flash_info(UINT32 *dp_size_bytes, UINT32 *sector_size_bytes);
 
 /** Write 4-byte words to flash memory
  * Used by lib_awe for the flash file system only.

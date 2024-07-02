@@ -8,7 +8,7 @@
 #include <quadflashlib.h>
 
 #include "awe_xcore_internal.h"
-
+#include "awe_ffs_rpc.h"
 
 // Ports for QuadSPI access
 fl_QSPIPorts ports = {
@@ -17,14 +17,6 @@ fl_QSPIPorts ports = {
   PORT_SQI_SIO,
   XS1_CLKBLK_1
 };
-
-#ifndef FFS_SERVER_BUFF_SIZE
-#define FFS_SERVER_BUFF_SIZE        256  // 32b words. Can be any size but large will improve performance slightly.
-#endif
-
-#ifndef FLASH_SCRATCH_BUFF_BYTES
-#define FLASH_SCRATCH_BUFF_BYTES    4096 // Bytes. This is used to support read modify-write operations smaller than a block size. If set too small it will hit an exception in write.
-#endif
 
 /* These are the commands for the FFS RPC */
 enum {
@@ -183,7 +175,7 @@ void init_ffs_rpc_client_chanend(chanend_t c_ffs_rpc_client){
 
 BOOL usrInitFlashFileSystem(void)
 {
-    xassert(g_ffs_rpc_client != 0); // Ensure we have a channel connection
+    xassert(g_ffs_rpc_client != 0); // Ensure we have a channel connection. If you hit this then you need to call init_ffs_rpc_client_chanend() on the client side at startup first.
 #if DEBUG_CLIENT
     printchar('$');
 #endif
