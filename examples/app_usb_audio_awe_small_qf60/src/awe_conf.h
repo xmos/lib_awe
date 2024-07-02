@@ -9,6 +9,4 @@
 
 #define AWE_HEAP_SIZE               (78*1024)
 
-#define AWE_TUNING_OVER_USB_HID     (1)
-
 #endif
