@@ -84,6 +84,7 @@ pipeline {
                     sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
                     // Build all example apps
                     sh "cmake  -G \"Unix Makefiles\" -B build"
+                    archiveArtifacts artifacts: "build/manifest.txt", allowEmptyArchive: false
                     sh "xmake -C build -j"
                   } // credentials
                 } // dir

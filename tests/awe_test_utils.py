@@ -60,13 +60,13 @@ class awe_error_codes:
     def _parse_defines(self):
         define_dict = {}
         define_pattern = re.compile(r"#define\s+(\w+)\s+\(([-\d]+)\)")
-        
+
         with open(self.file, 'r') as ef:
             file_content = ef.read()
             for match in define_pattern.findall(file_content):
                 name, value = match
                 define_dict[int(value)] = name
-        
+
         return define_dict
 
     def lookup(self, err_code):
@@ -201,8 +201,8 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
         for word in chunk:
             b_msg += struct.pack('<I', word)
 
-        b_msg += bytearray([0] * (self.awe_hid_len - len(b_msg))) 
-        
+        b_msg += bytearray([0] * (self.awe_hid_len - len(b_msg)))
+
         try:
             num_bytes_written = self.dev.write(b_msg)
         except IOError as e:
@@ -226,7 +226,7 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
             cmd_len = (awb_data[awb_idx] >> 16) - 1
             # Catch zero padding invalid command at end of AWB
             if cmd_len == -1:
-                break 
+                break
 
             cmd = awb_data[awb_idx : awb_idx + cmd_len]
             err = self.cmd(list(cmd))
@@ -296,5 +296,14 @@ def filter_awe_packet_log():
 
 # For testing only
 if __name__ == '__main__':
-    awe = awe_hid_comms()
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description='awe_test_utils')
+
+    parser.add_argument('--pid', type=int, help='PID of target device', default=0x18)
+
+    args = parser.parse_args()
+
+    awe = awe_hid_comms(PID=args.pid)
     awe.send_awb("awb_files/simple_volume.awb")
