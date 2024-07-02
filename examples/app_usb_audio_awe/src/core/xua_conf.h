@@ -138,7 +138,6 @@
 #define AUDIO_IO_TILE      (1)
 #define MIDI_TILE          (1)
 
-#define XUA_DFU_EN         (0)
 #define ENDPOINT_INT_INTERVAL_IN_HID (1)
 #define ENDPOINT_INT_INTERVAL_OUT_HID (1)
 
