@@ -202,7 +202,10 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 #define AWE_HEAP_SIZE // For doxygen only
 #endif
 
-
+/** @brief Enables use of the AWE Flash File System. */
+#ifndef USE_AWE_FLASH_FILE_SYSTEM
+#define USE_AWE_FLASH_FILE_SYSTEM   0
+#endif
 
 #ifndef AWE_INPUT_CHANNELS
 #error "Must define AWE_INPUT_CHANNELS"
