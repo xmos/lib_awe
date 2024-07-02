@@ -286,18 +286,23 @@ To run the application use the following command from the lib_awe/app_usb_audio_
 
     xrun bin/<build>/app_usb_audio_awe_<build>.xe
 
-Alternatively to make the design non-volatile by programming in to flash memory use the following command::
+Alternatively to make the design non-volatile by programming in to flash memory use the following command:
 
 
 .. tab:: UA, I2S_ONLY, UA_STANDALONE
 
     .. code-block:: console
 
+       # UA, I2S_ONLY, UA_STANDALONE
        xflash bin/<build>/app_usb_audio_awe_<build>.xe
 
 .. tab:: UA_FFS
 
-     xflash --factory bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe --boot-partition-size 0x80000
+    .. code-block:: console
+
+       # UA_FFS
+       xflash --factory bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe --boot-partition-size 0x80000
+
 
 The UA_FFS build requires (some of the flash memory to be reserved for the data partition. In this case, the first 512 kB is used for the boot partition and the rest of the flash (for this target 3.5 MB) is available for the FFS.
 

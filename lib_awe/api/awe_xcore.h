@@ -202,7 +202,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 #define AWE_HEAP_SIZE // For doxygen only
 #endif
 
-/** @brief Enables use of the AWE Flash File System. */
+/** @brief Enables use of the AWE Flash File System. Note this will consume in the order of 10 kB of memory on the AWE core and a similar amount for the code that handles the low-level flash accesses. */
 #ifndef USE_AWE_FLASH_FILE_SYSTEM
 #define USE_AWE_FLASH_FILE_SYSTEM   0
 #endif
