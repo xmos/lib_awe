@@ -10,7 +10,7 @@
 #include "awe_xcore_internal.h"
 
 
-// Ports for QuadSPI access on explorerKIT.
+// Ports for QuadSPI access
 fl_QSPIPorts ports = {
   PORT_SQI_CS,
   PORT_SQI_SCLK,
@@ -18,16 +18,25 @@ fl_QSPIPorts ports = {
   XS1_CLKBLK_1
 };
 
-#define FFS_SERVER_BUFF_SIZE        256  // 32b words
-#define FLASH_SCRATCH_BUFF_BYTES    4096 // Bytes
+#ifndef FFS_SERVER_BUFF_SIZE
+#define FFS_SERVER_BUFF_SIZE        256  // 32b words. Can be any size but large will improve performance slightly.
+#endif
+
+#ifndef FLASH_SCRATCH_BUFF_BYTES
+#define FLASH_SCRATCH_BUFF_BYTES    4096 // Bytes. This is used to support read modify-write operations smaller than a block size. If set too small it will hit an exception in write.
+#endif
+
+/* These are the commands for the FFS RPC */
 enum {
     FFS_RPC_INIT = 0,
     FFS_RPC_READ,
     FFS_RPC_WRITE,
     FFS_RPC_ERASE,
-    FFS_RPC_GET_FLASH_INFO
+    FFS_RPC_GET_FLASH_INFO,
+    FFS_RPC_EXIT
 };
 
+/* Enable or disable debug printing */
 #define DEBUG_CLIENT       0
 #define DEBUG_SERVER       0
 
@@ -37,14 +46,15 @@ enum {
 #define dprintf(...)
 #endif
 
-void ffs_server(chanend_t c_ffs_rpc){
+void ffs_server(chanend_t c_ffs_rpc_server){
     dprintf("ffs_server\n");
     uint32_t flash_buffer[FFS_SERVER_BUFF_SIZE];
     char flash_initialised = 0;
+    char ffs_server_active = 1;
 
-    while(1){
+    while(ffs_server_active){
         int ret = 0;
-        uint32_t cmd = chan_in_word(c_ffs_rpc);
+        uint32_t cmd = chan_in_word(c_ffs_rpc_server);
         switch(cmd){
             case FFS_RPC_INIT:
                 dprintf("FFS_RPC_INIT\n");
@@ -53,7 +63,7 @@ void ffs_server(chanend_t c_ffs_rpc){
                 } else {
                     ret = 0;
                 }
-                chan_out_word(c_ffs_rpc, ret == 0);
+                chan_out_word(c_ffs_rpc_server, ret == 0);
                 if(ret == 0){
                     flash_initialised = 1;
                 }
@@ -65,15 +75,15 @@ void ffs_server(chanend_t c_ffs_rpc){
 
                 UINT32 dp_size = fl_getDataPartitionSize();
                 UINT32 sector_size = fl_getDataSectorSize(0); // Makes assumption that sectors all the same size. AWE FFS also does this
-                chan_out_word(c_ffs_rpc, dp_size);
-                chan_out_word(c_ffs_rpc, sector_size);
+                chan_out_word(c_ffs_rpc_server, dp_size);
+                chan_out_word(c_ffs_rpc_server, sector_size);
             break;
 
             case FFS_RPC_READ:
                 (void) cmd; // Avoid compiler bug
                 xassert(flash_initialised);
-                UINT32 nAddress = chan_in_word(c_ffs_rpc);
-                UINT32 nDWordsToRead = chan_in_word(c_ffs_rpc);
+                UINT32 nAddress = chan_in_word(c_ffs_rpc_server);
+                UINT32 nDWordsToRead = chan_in_word(c_ffs_rpc_server);
                 dprintf("FFS_RPC_READ: 0x%x, 0x%x\n", nAddress, nDWordsToRead);
 
                 ret = 0;
@@ -82,45 +92,41 @@ void ffs_server(chanend_t c_ffs_rpc){
                     uint32_t chunk_size_words = (nDWordsToRead - i) > FFS_SERVER_BUFF_SIZE ? FFS_SERVER_BUFF_SIZE :  (nDWordsToRead - i);
                     dprintf("fl_readData: 0x%lx, 0x%lx, 0x%x\n", addr, chunk_size_words * sizeof(uint32_t), (UINT32)flash_buffer);
                     ret |= fl_readData(addr, chunk_size_words * sizeof(uint32_t), (uint8_t *)flash_buffer);
-                    chan_out_word(c_ffs_rpc, chunk_size_words);
-                    chan_out_buf_word(c_ffs_rpc, flash_buffer, chunk_size_words);                    
+                    chan_out_word(c_ffs_rpc_server, chunk_size_words);
+                    chan_out_buf_word(c_ffs_rpc_server, flash_buffer, chunk_size_words);                    
                 }
-                chan_out_word(c_ffs_rpc, 0);
-                chan_out_word(c_ffs_rpc, ret == 0);
+                chan_out_word(c_ffs_rpc_server, 0);
+                chan_out_word(c_ffs_rpc_server, ret == 0);
             break;
 
             case FFS_RPC_WRITE:
                 (void) cmd; // Avoid compiler bug
                 xassert(flash_initialised);
-                nAddress = chan_in_word(c_ffs_rpc);
-                UINT32 nDWordsToWrite = chan_in_word(c_ffs_rpc);
+                nAddress = chan_in_word(c_ffs_rpc_server);
+                UINT32 nDWordsToWrite = chan_in_word(c_ffs_rpc_server);
                 dprintf("FFS_RPC_WRITE: 0x%x, 0x%x\n", nAddress, nDWordsToWrite);
 
                 uint8_t write_sratch_buffer[FLASH_SCRATCH_BUFF_BYTES];
-
                 size_t min_scratch_size = fl_getWriteScratchSize(nAddress, nDWordsToWrite * sizeof(uint32_t)); 
-                // printintln(min_scratch_size);
-                // printintln(sizeof(write_sratch_buffer));
-
-                xassert(min_scratch_size <= sizeof(write_sratch_buffer));
+                xassert(min_scratch_size <= sizeof(write_sratch_buffer)); // If you hit this please increase FLASH_SCRATCH_BUFF_BYTES
 
                 int ret = 0;
                 for(int i = 0; i < nDWordsToWrite; i += FFS_SERVER_BUFF_SIZE){
                     uint32_t addr = nAddress + i * sizeof(uint32_t);
                     uint32_t chunk_size_words = (nDWordsToWrite - i) > FFS_SERVER_BUFF_SIZE ? FFS_SERVER_BUFF_SIZE :  (nDWordsToWrite - i);
-                    chan_out_word(c_ffs_rpc, chunk_size_words);
-                    chan_in_buf_word(c_ffs_rpc, flash_buffer, chunk_size_words);
+                    chan_out_word(c_ffs_rpc_server, chunk_size_words);
+                    chan_in_buf_word(c_ffs_rpc_server, flash_buffer, chunk_size_words);
                     dprintf("fl_writeData: 0x%lx, 0x%lx, 0x%x 0x%x\n", addr, chunk_size_words * sizeof(uint32_t), (unsigned)flash_buffer, (unsigned)write_sratch_buffer);
                     ret |= fl_writeData(addr, chunk_size_words * sizeof(uint32_t), (const unsigned char *)flash_buffer, write_sratch_buffer);
                 }
-                chan_out_word(c_ffs_rpc, ret == 0);
+                chan_out_word(c_ffs_rpc_server, ret == 0);
             break;
 
             case FFS_RPC_ERASE:
                 (void) cmd; // Avoid compiler bug
                 xassert(flash_initialised);
-                UINT32 nStartingAddress = chan_in_word(c_ffs_rpc);
-                UINT32 nNumberOfSectors = chan_in_word(c_ffs_rpc);
+                UINT32 nStartingAddress = chan_in_word(c_ffs_rpc_server);
+                UINT32 nNumberOfSectors = chan_in_word(c_ffs_rpc_server);
 
                 (void)nNumberOfSectors;
                 dprintf("FFS_RPC_ERASE: 0x%x, %u\n", nStartingAddress, nNumberOfSectors);
@@ -153,18 +159,27 @@ void ffs_server(chanend_t c_ffs_rpc){
                     xassert(0); // We didn't get an address hit
                 }
 
-                chan_out_word(c_ffs_rpc, ret == 0);
+                chan_out_word(c_ffs_rpc_server, ret == 0);
             break;
-        }
-    }
+
+            case FFS_RPC_EXIT:
+                (void) cmd; // Avoid compiler bug
+                flash_initialised = 0;
+                ret = fl_disconnect();
+                chan_out_word(c_ffs_rpc_server, ret == 0);
+                ffs_server_active = 0;
+            break;
+        } // switch
+    } // while ffs_server_active
 }
 
-// Global channel end so we don't need to pass it in to these callbacks
+// Global channel end so we don't need to pass this var in to the callbacks
 chanend_t g_ffs_rpc_client = 0;
 
-void init_ffs_rpc_client_chanend(chanend_t ffs_rpc_client){
-    g_ffs_rpc_client = ffs_rpc_client;
+void init_ffs_rpc_client_chanend(chanend_t c_ffs_rpc_client){
+    g_ffs_rpc_client = c_ffs_rpc_client;
 }
+
 
 BOOL usrInitFlashFileSystem(void)
 {
@@ -175,7 +190,8 @@ BOOL usrInitFlashFileSystem(void)
     chan_out_word(g_ffs_rpc_client, FFS_RPC_INIT);
     BOOL bSuccess = chan_in_word(g_ffs_rpc_client);
     return bSuccess;
-} 
+}
+
 
 BOOL usrReadFlashMemory(UINT32 nAddress, UINT32 * pBuffer, UINT32 nDWordsToRead)
 {
@@ -193,7 +209,7 @@ BOOL usrReadFlashMemory(UINT32 nAddress, UINT32 * pBuffer, UINT32 nDWordsToRead)
         chan_in_buf_word(g_ffs_rpc_client, (uint32_t *)addr, chunk_size_words);  
         total_words_read += chunk_size_words;                  
     }
-    chan_in_word(g_ffs_rpc_client); // Needed?
+    chan_in_word(g_ffs_rpc_client);
 
     BOOL bSuccess = chan_in_word(g_ffs_rpc_client);
     return bSuccess;
@@ -237,9 +253,17 @@ BOOL usrEraseFlashSector(UINT32 nStartingAddress, UINT32 nNumberOfSectors)
 }
 
 
-void get_flash_info(UINT32 *dp_size_bytes, UINT32 *sector_size_bytes){
+void ffs_rpc_get_flash_info(UINT32 *dp_size_bytes, UINT32 *sector_size_bytes){
     chan_out_word(g_ffs_rpc_client, FFS_RPC_GET_FLASH_INFO);
     *dp_size_bytes = chan_in_word(g_ffs_rpc_client);
     *sector_size_bytes = chan_in_word(g_ffs_rpc_client);
 }
+
+
+BOOL ffs_rpc_exit_server(void)
+{
+    chan_out_word(g_ffs_rpc_client, FFS_RPC_EXIT);
+    BOOL bSuccess = chan_in_word(g_ffs_rpc_client);
+    return bSuccess;
+} 
 
