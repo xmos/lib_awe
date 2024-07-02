@@ -72,8 +72,9 @@ def test_long_packet():
     error_code = struct.unpack('<i', struct.pack('<I', error_code))[0] # do 2's complement
 
     error_lut = awe_error_codes()
-    print(dut, error_code, error_lut.lookup(error_code))
 
+    # We want a legit error rather than a broken packet
+    assert error_lut.lookup(error_code) == "E_ARGUMENT_ERROR"
 
 
 def test_xawe_ctrl_interface():
