@@ -78,7 +78,7 @@ extern void awe_offload_data_to_dsp_engine(chanend_t c_to_awe,
 /**
 @brief The XMOS AWE instance.
 @details For XMOS this is an array of channel ends which represent
-the public API to the XMOS AWE instance.
+the public API to the XMOS AWE instance and presents a tuning interface suitable for USB, internal use or other IO interfaces specified by the user.
 */
 typedef struct xAWEInstance_t{
     chanend_t c_tuning_from_host;
@@ -180,14 +180,14 @@ INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *val
 INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT32 arraySize, UINT32 *pPos);
 
 
-/** @brief The maximum number of xcore processor threads supported by lib_awe. Cannot be changed by the user. */
+/** @brief The maximum number of xcore processor threads supported by lib_awe which is set to 5. Cannot be changed by the user. */
 #define AWE_DSP_MAX_THREAD_NUM        5
 
 #if defined(__awe_conf_h_exists__)
 #include "awe_conf.h"
 #endif
 
-/** @brief The number of xcore threads used by lib_awe. Modifiable by the user per project. */
+/** @brief The number of xcore threads used by lib_awe. Modifiable by the user per project between 1 and 5. */
 #ifndef AWE_DSP_THREAD_NUM
 #define AWE_DSP_THREAD_NUM              2
 #endif
@@ -215,10 +215,10 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 #error "Must define AWE_OUTPUT_CHANNELS"
 #endif
 
-/** @brief The size of the packet buffer in 32b words used for communicating with AWE over tuning interface. */
+/** @brief The size of the packet buffer in 32b words used for communicating with AWE over tuning interface. This must be set to 264 normally but may be lowered in certain cases where long commands (tuning and or flash file system) are not used. . Please see DSP Concepts documentation for further details. */
 #define AWE_HID_PACKET_BUFFER_SIZE 264
 
-/** @brief The number of audio samples per block processed by AWE. */
+/** @brief The number of audio samples per block processed by AWE. Normally set to 32. Please see DSP Concepts documentation for further details. */
 #define AWE_BLOCK_SIZE              32
 
 #ifndef FAST_HEAP_A_SIZE
