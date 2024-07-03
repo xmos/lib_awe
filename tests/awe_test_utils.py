@@ -10,7 +10,8 @@ import time
 import re
 import subprocess
 import time
-
+from pathlib import Path
+import sys
 
 
 class awe_cmd_list:
@@ -269,7 +270,7 @@ def flash_xe(bin_path, boot_partition_size=None, data_partition_bin=None):
 
 def filter_awe_packet_log():
     """Takes the AWE low level packet log and decodes the commands into human readable format"""
-    input_file = Path('flash_fail_packet_log.txt').resolve()
+    input_file = Path('packet_log.txt').resolve()
 
     cmds = awe_cmd_list()
 
@@ -282,7 +283,11 @@ def filter_awe_packet_log():
                 # Write the hex part to the output file
                 header = int(hex_part[0], 16)
                 opcode = header & 0xff
-                key = next(key for key, value in cmds.get_keys().items() if value == opcode)
+                try:
+                    key = next(key for key, value in cmds.get_keys().items() if value == opcode)
+                except StopIteration:
+                    print(opcode, line)
+
                 length = header >> 16
                 print(key, opcode, length, hex_part[0])
 
@@ -290,17 +295,33 @@ def filter_awe_packet_log():
                 hex_part = line.split('RX', 1)[1].strip().split()
                 # print(" ".join(hex_part))
                 if not "failed" in line:
+                    strng = ""
+                    offset = 0
+                    first_char = 0
+
                     response = [int(hex_item, 16) for hex_item in hex_part]
-                    print(response)
+                    print(len(response), hex_part)
+                    for word in response:
+                        for byte_num in range(4):
+                            byte = (word >> (8 * byte_num)) & 0xff
+                            if byte < 127 and byte >= 32 :
+                                strng += chr(byte)
+                                if first_char == 0:
+                                    first_char = offset
+                            offset += 1
+                    print(f"ascii ({first_char}): {strng}")
+                print()
 
 
 # For testing only
 if __name__ == '__main__':
 
+    # filter_awe_packet_log()
+    # sys.exit(0)
+
     import argparse
 
     parser = argparse.ArgumentParser(description='awe_test_utils')
-
     parser.add_argument('--pid', type=int, help='PID of target device', default=0x18)
 
     args = parser.parse_args()
