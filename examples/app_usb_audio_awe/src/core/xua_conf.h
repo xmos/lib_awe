@@ -9,10 +9,6 @@
 #ifndef _XUA_CONF_H_
 #define _XUA_CONF_H_
 
-#define BCD_DEVICE_J       (7)
-#define BCD_DEVICE_M       (1)
-#define BCD_DEVICE_N       (0)
-
 /*
  * Device configuration option defines to override default defines found lib_xua/api/xua_conf_defaults.h
  *
@@ -20,6 +16,11 @@
  *
  * Note, we check if they are already defined in Makefile
  */
+
+/* Increase the maximum size for DFU image from the default of 128*1024 in lib_xua */
+#ifndef FLASH_MAX_UPGRADE_SIZE
+#define FLASH_MAX_UPGRADE_SIZE (512 * 1024)
+#endif
 
 /*** Defines relating to basic functionality ***/
 /* Enable/Disable MIDI - Default is MIDI off */
@@ -145,8 +146,8 @@
 #define VENDOR_ID          (0x20B1) /* XMOS VID */
 #define PID_AUDIO_2        (0x0018)
 #define PID_AUDIO_1        (0x0017)
-#define PRODUCT_STR_A2     "XMOS xCORE.ai MC (UAC2.0)"
-#define PRODUCT_STR_A1     "XMOS xCORE.ai MC (UAC1.0)"
+#define PRODUCT_STR_A2     "XMOS xCORE.ai AWE (UAC2.0)"
+#define PRODUCT_STR_A1     "XMOS xCORE.ai AWE (UAC1.0)"
 
 /* Board power source - Default is bus-powered */
 #ifndef XUA_POWERMODE
