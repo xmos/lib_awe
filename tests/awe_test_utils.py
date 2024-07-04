@@ -236,7 +236,7 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
 
         # Stop audio first to avoid frequent firmware exception when destroying existing design
         # See https://xmosjira.atlassian.net/wiki/spaces/UAAI/pages/4122148883/DSPC+Integration+snag+list
-        self.cmd([0x20000 + awe_cmd_list.lookup(self, 'PFID_StopAudio')])
+        self.cmd([0x20000 + awe_cmd_list.lookup('PFID_StopAudio')])
         time.sleep(0.001) # 1ms to allow stop audio to complete
 
         awb_idx = 0
@@ -253,6 +253,64 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
                 err_str = awe_error_codes.lookup(self, err_2s_compl)
                 print(f"ERROR response: {err_str}")
             awb_idx += cmd_len
+
+    def load_awb_from_ffs(self, awb_file):
+        # Local helpers
+        def query(msg, length, err_idx=1):
+            self.send([(length << 16) + msg])
+            response = self.get_response()
+
+            if response[err_idx] != 0:
+                err_txt = awe_error_codes.lookup(self, response[err_idx])
+                assert 0, err_txt
+
+            return response
+
+        def extract_file_name(response):
+            attribute = response[2]
+            length_words = response[3]
+            name_words = response[4:4+length_words]
+            file_name = ""
+            # bytearr = 
+            for name_word in name_words:
+                for byte_num in range(4):
+                    byte = (name_word >> (8 * byte_num)) & 0xff
+                    if byte < 127 and byte >= 32 :
+                        file_name += chr(byte)
+                    if byte == 0:
+                        return file_name
+
+
+        response = query(awe_cmd_list.lookup(self, 'PFID_GetTargetInfo'), 2)
+        isFlashSupported = response[5] & 0b10000 != 0
+        assert isFlashSupported, "Flash not supported by firmware"
+
+        response = query(awe_cmd_list.lookup(self, 'PFID_GetFileSystemInfo'), 2)
+        flash_device_size = response[3]
+        assert flash_device_size > 0, "Flash size is zero"
+        word_used_in_ffs = response[7]
+        assert word_used_in_ffs > 0, "Flash empty"
+
+        # iterate through file names to find a filename match
+        response = query(awe_cmd_list.lookup(self, 'PFID_GetFirstFile'), 2)
+        name = extract_file_name(response)
+        last_name = name
+        
+        while True:
+            if awb_file == name:
+                print(f"Found and loading: {name}")
+                self.cmd([0x20000 + awe_cmd_list.lookup(self, 'PFID_ExecuteFile')])
+                self.cmd([0x20000 + awe_cmd_list.lookup(self, 'PFID_StartAudio')])
+
+                return True
+
+            response = query(awe_cmd_list.lookup(self, 'PFID_GetNextFile'), 2)
+            name = extract_file_name(response)
+            if name == last_name:
+                # File not found
+                return False
+            last_name = name
+
 
 
 def run_xe_sim(bin_path, cmds, max_cycles=1000000):
