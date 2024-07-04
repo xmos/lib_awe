@@ -88,7 +88,7 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
 
     def __init__(self, VID=0x20b1, PID=0x18, debug=False):
         np.set_printoptions(formatter={'int':hex})
-        self.awe_hid_len = 56
+        self.awe_hid_len = 56 # Bytes
 
         awe_error_codes.__init__(self)
         awe_cmd_list.__init__(self)
@@ -116,18 +116,29 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
 
 
     def get_response(self, timeout_ms=1000):
-        """ Get the respinse from a command over HID """
+        """ Get the response from a command over HID """
         try:
             response = []
-            data = bytearray(self.dev.read(self.awe_hid_len, timeout_ms))
-            for idx in range(0, self.awe_hid_len, 4):
-                word = struct.unpack('<I', data[idx: idx + 4])[0]
-                if idx == 0:
-                    hdr = data[idx: idx + 4]
-                    num_pckts = hdr[0]
-                    length = hdr[3] // 4
-                else:
-                    response += [word]
+            num_words_received = 0
+
+            # Some longer responses span more than one HID packet
+            while True:
+                data = bytearray(self.dev.read(self.awe_hid_len, timeout_ms))
+
+                for idx in range(0, self.awe_hid_len, 4):
+                    word = struct.unpack('<I', data[idx: idx + 4])[0]
+                    # Strip HID header
+                    if idx == 0:
+                        num_words, sequence = self._decode_hid_header(word)
+                    else:
+                        response += [word]
+                        if len(response) == 1:
+                            length = response[0] >> 16
+                        num_words_received += 1
+
+                # We have received all words
+                if num_words_received >= length:
+                    break
 
         except IOError as e:
             print(f'Error reading response: {e}')
@@ -188,6 +199,12 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
             crc ^= word
 
         return crc
+
+    def _decode_hid_header(self, word):
+        num_words = word >> 24 // 4
+        sequence = ((word >> 8) & 0xff) - 1
+
+        return num_words, sequence
 
     def _gen_hid_header(self, sequence, num_words):
         """ Calaculate the HID header """
