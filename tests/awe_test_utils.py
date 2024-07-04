@@ -255,6 +255,7 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
             awb_idx += cmd_len
 
     def load_awb_from_ffs(self, awb_file):
+        """ Searches through the FFS for a .awb file. If found, it will load it and run it """
         # Local helpers
         def query(msg, length, err_idx=1):
             self.send([(length << 16) + msg])
@@ -280,6 +281,30 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
                     if byte == 0:
                         return file_name
 
+        def build_exe_cmd(file_name):
+            words = [0x00000000] # always starts with a zero word
+            char_count = 0
+            word = 0
+            # build chars into little endian words
+            for c in file_name:
+                word |= ord(c) << ((char_count % 4) * 8)
+                char_count += 1
+                if char_count % 4 == 0:
+                    words += [word]
+                    word = 0
+
+            # add last word of partial chars or zero
+            words += [word]
+
+            cmd = [awe_cmd_list.lookup(self, 'PFID_ExecuteFile') + ((2 + len(words)) << 16)]
+            cmd += words
+
+            return cmd
+
+        # Stop audio first to avoid frequent firmware exception when destroying existing design
+        # See https://xmosjira.atlassian.net/wiki/spaces/UAAI/pages/4122148883/DSPC+Integration+snag+list
+        self.cmd([0x20000 + awe_cmd_list.lookup(self, 'PFID_StopAudio')])
+        time.sleep(0.001) # 1ms to allow stop audio to complete
 
         response = query(awe_cmd_list.lookup(self, 'PFID_GetTargetInfo'), 2)
         isFlashSupported = response[5] & 0b10000 != 0
@@ -298,9 +323,13 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
         
         while True:
             if awb_file == name:
-                print(f"Found and loading: {name}")
-                self.cmd([0x20000 + awe_cmd_list.lookup(self, 'PFID_ExecuteFile')])
+                assert response[2] == 24, f"Incorrect file attribute, expected 24 got {response[2]}"
+                print(f"Found {name} in FFS")
+                self.send(build_exe_cmd(name))
+                err = self.check_response(self.get_response())
+                assert err == 0, f"Execute failed: {err} {awe_error_codes.lookup(self, err)}"
                 self.cmd([0x20000 + awe_cmd_list.lookup(self, 'PFID_StartAudio')])
+                print(f"Loaded..")
 
                 return True
 
@@ -392,6 +421,10 @@ def filter_awe_packet_log():
 if __name__ == '__main__':
 
     # filter_awe_packet_log()
+
+    # awe = awe_hid_comms()
+    # awe.load_awb_from_ffs("playBasic_3thread.awb")
+    # awe.load_awb_from_ffs("simple_volume.awb")
     # sys.exit(0)
 
     import argparse
