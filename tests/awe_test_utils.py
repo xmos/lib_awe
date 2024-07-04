@@ -85,6 +85,7 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
 
     resp_a = 0x30000
     resp_b = 0x40000
+    delay_after_stop_audio_s = 0.01 # This has been tested to be stable at 6ms and above over 5000 iterations. Set to 10ms for margin
 
     def __init__(self, VID=0x20b1, PID=0x18, debug=False):
         np.set_printoptions(formatter={'int':hex})
@@ -236,8 +237,8 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
 
         # Stop audio first to avoid frequent firmware exception when destroying existing design
         # See https://xmosjira.atlassian.net/wiki/spaces/UAAI/pages/4122148883/DSPC+Integration+snag+list
-        self.cmd([0x20000 + awe_cmd_list.lookup('PFID_StopAudio')])
-        time.sleep(0.001) # 1ms to allow stop audio to complete
+        self.cmd([0x20000 + awe_cmd_list.lookup(self, 'PFID_StopAudio')])
+        time.sleep(self.delay_after_stop_audio_s) # to allow stop audio to complete
 
         awb_idx = 0
         while(awb_idx <= awb_data_len):
@@ -304,8 +305,9 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
         # Stop audio first to avoid frequent firmware exception when destroying existing design
         # See https://xmosjira.atlassian.net/wiki/spaces/UAAI/pages/4122148883/DSPC+Integration+snag+list
         self.cmd([0x20000 + awe_cmd_list.lookup(self, 'PFID_StopAudio')])
-        time.sleep(0.001) # 1ms to allow stop audio to complete
+        time.sleep(self.delay_after_stop_audio_s) # to allow stop audio to complete
 
+        # Do some checks
         response = query(awe_cmd_list.lookup(self, 'PFID_GetTargetInfo'), 2)
         isFlashSupported = response[5] & 0b10000 != 0
         assert isFlashSupported, "Flash not supported by firmware"
