@@ -36,7 +36,7 @@ set(APP_COMMON_BUILD_FLAGS                      -fcomment-asm
                                                 -g
                                                 -DUSB_TILE=tile[0]
                                                 -DADAT_TX_USE_SHARED_BUFF=1
-                                                -DQUAD_SPI_FLASH=1
+                                                -DXUA_QUAD_SPI_FLASH=1
                                                 -DMIXER=0)
 
 set(APP_COMPILER_FLAGS_UA                       ${EXTRA_BUILD_FLAGS}
