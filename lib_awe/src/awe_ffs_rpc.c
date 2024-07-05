@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <print.h>
 #include <quadflashlib.h>
+#include <debug_print.h>
 
 #include "awe_xcore_internal.h"
 #include "awe_ffs_rpc.h"
@@ -29,7 +30,6 @@ enum {
 };
 
 /* Enable or disable debug printing */
-#define DEBUG_CLIENT       0
 #define DEBUG_SERVER       0
 
 #if     DEBUG_SERVER
@@ -72,7 +72,7 @@ void ffs_server(chanend_t c_ffs_rpc_server){
             break;
 
             case FFS_RPC_READ:
-                (void) cmd; // Avoid compiler bug
+                (void) cmd; // http://bugzilla/show_bug.cgi?id=18883
                 xassert(flash_initialised);
                 UINT32 nAddress = chan_in_word(c_ffs_rpc_server);
                 UINT32 nDWordsToRead = chan_in_word(c_ffs_rpc_server);
@@ -92,7 +92,7 @@ void ffs_server(chanend_t c_ffs_rpc_server){
             break;
 
             case FFS_RPC_WRITE:
-                (void) cmd; // Avoid compiler bug
+                (void) cmd; // http://bugzilla/show_bug.cgi?id=18883
                 xassert(flash_initialised);
                 nAddress = chan_in_word(c_ffs_rpc_server);
                 UINT32 nDWordsToWrite = chan_in_word(c_ffs_rpc_server);
@@ -115,7 +115,7 @@ void ffs_server(chanend_t c_ffs_rpc_server){
             break;
 
             case FFS_RPC_ERASE:
-                (void) cmd; // Avoid compiler bug
+                (void) cmd; // http://bugzilla/show_bug.cgi?id=18883
                 xassert(flash_initialised);
                 UINT32 nStartingAddress = chan_in_word(c_ffs_rpc_server);
                 UINT32 nNumberOfSectors = chan_in_word(c_ffs_rpc_server);
@@ -155,7 +155,7 @@ void ffs_server(chanend_t c_ffs_rpc_server){
             break;
 
             case FFS_RPC_EXIT:
-                (void) cmd; // Avoid compiler bug
+                (void) cmd; // http://bugzilla/show_bug.cgi?id=18883
                 flash_initialised = 0;
                 ret = fl_disconnect();
                 chan_out_word(c_ffs_rpc_server, ret == 0);
@@ -176,9 +176,6 @@ void init_ffs_rpc_client_chanend(chanend_t c_ffs_rpc_client){
 BOOL usrInitFlashFileSystem(void)
 {
     xassert(g_ffs_rpc_client != 0); // Ensure we have a channel connection. If you hit this then you need to call init_ffs_rpc_client_chanend() on the client side at startup first.
-#if DEBUG_CLIENT
-    printchar('$');
-#endif
     chan_out_word(g_ffs_rpc_client, FFS_RPC_INIT);
     BOOL bSuccess = chan_in_word(g_ffs_rpc_client);
     return bSuccess;
@@ -187,9 +184,6 @@ BOOL usrInitFlashFileSystem(void)
 
 BOOL usrReadFlashMemory(UINT32 nAddress, UINT32 * pBuffer, UINT32 nDWordsToRead)
 {
-#if DEBUG_CLIENT
-    printchar('.');
-#endif
     chan_out_word(g_ffs_rpc_client, FFS_RPC_READ);
     chan_out_word(g_ffs_rpc_client, nAddress);
     chan_out_word(g_ffs_rpc_client, nDWordsToRead);
@@ -210,9 +204,6 @@ BOOL usrReadFlashMemory(UINT32 nAddress, UINT32 * pBuffer, UINT32 nDWordsToRead)
 
 BOOL usrWriteFlashMemory(UINT32 nAddress, UINT32 * pBuffer, UINT32 nDWordsToWrite)
 {
-#if DEBUG_CLIENT
-    printchar('+');
-#endif
     chan_out_word(g_ffs_rpc_client, FFS_RPC_WRITE);
     chan_out_word(g_ffs_rpc_client, nAddress);
     chan_out_word(g_ffs_rpc_client, nDWordsToWrite);
@@ -233,9 +224,6 @@ BOOL usrWriteFlashMemory(UINT32 nAddress, UINT32 * pBuffer, UINT32 nDWordsToWrit
 
 BOOL usrEraseFlashSector(UINT32 nStartingAddress, UINT32 nNumberOfSectors)
 {
-#if DEBUG_CLIENT
-    printchar('-');
-#endif
     chan_out_word(g_ffs_rpc_client, FFS_RPC_ERASE);
     chan_out_word(g_ffs_rpc_client, nStartingAddress);
     chan_out_word(g_ffs_rpc_client, nNumberOfSectors);

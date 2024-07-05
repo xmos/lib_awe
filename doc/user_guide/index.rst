@@ -44,7 +44,7 @@ Finally, a tuning thread is provided which abstracts away the awe_packetProcess(
 
 All of the above threads for the core lib_awe need to be placed on the same tile. Since the majority of one tile's RAM and threads are used by lib_awe it is typical to dedicate one tile to lib_awe and use the other tile for application logic. However, low-memory usage tasks such as I2S may also be placed on the lib_awe tile (when required by hardware IO constraints) and this is demonstrated in the USB Audio Example.
 
-An additional thread may be used in the case where the AWE Flash File System (FFS) is enabled. In this case it acts as a remote flash server meaning that the AWE Core and the flash memory may exist on different tiles. Use of the FFS is optional and can be enable or disabled using defines (see API). The flash server makes use of the API provided in the XMOS tools ``quadflashlib.h``. Documentation regarding this can be found in the `XTC tools manual <https://www.xmos.com/documentation/XM-014363-PC-9/html/tools-guide/tools-ref/libraries/libflash-api/libflash-api.html>`_. 
+An additional thread may be used in the case where the AWE Flash File System (FFS) is enabled. In this case it acts as a remote flash server meaning that the AWE Core and the flash memory may exist on different tiles. Use of the FFS is optional and can be enabled or disabled using defines (see API). The flash server makes use of the API provided in the XMOS tools ``quadflashlib.h``. Documentation regarding this can be found in the `XTC tools manual <https://www.xmos.com/documentation/XM-014363-PC-9/html/tools-guide/tools-ref/libraries/libflash-api/libflash-api.html>`_. 
 
 Lib_awe API
 -----------
@@ -191,7 +191,7 @@ The control works as follows:
 UA_FFS Build
 ............
 
-The US_FFS build is a superset of the UA build. In addition to supporting audio over USB and tuning over USB / HID it has the internal Flash File System (FFS) enabled. This means, via the Audioweaver GUI, you may add files to a file system that is stored in external flash memory. The files may include ``.awb`` compiled design images which can be loaded or even booted from so that the AWE system comes up pre-configured with a particular design.
+The UA_FFS build is a superset of the UA build. In addition to supporting audio and tuning over USB / HID it has the internal Flash File System (FFS) enabled. This means, via the Audioweaver GUI, you may add files to a file system that is stored in external flash memory. The files may include ``.awb`` compiled design images which can be loaded or even booted from so that the AWE system comes up pre-configured with a particular design.
 
 The FFS is stored in the data partition of the flash memory and the boot partition (used for the boot image(s)) is protected from accidental overwriting.
 
@@ -303,9 +303,11 @@ Alternatively to make the design non-volatile by programming in to flash memory 
        # UA_FFS
        xflash --factory bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe --boot-partition-size 0x80000
 
+The figure ``0x80000`` equates to 512 kB which is the amount of space reserved for the boot parition. For this example, the required storage in flash for the application is in the order of 380 kB leaving around 132 kB of space for the application to grow if needed. A simple way to determine the required boot partition size if to run the following command and then inspect the file size of ``boot.bin``::
 
-The UA_FFS build requires (some of the flash memory to be reserved for the data partition. In this case, the first 512 kB is used for the boot partition and the rest of the flash (for this target 3.5 MB) is available for the FFS.
+    xflash -o flash.bin app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe 
 
+In this case the rest of the flash beyond the boot parition (for this target 3.5 MB) is available for the FFS.
 
 
 Once flashed or run, the USB audio device should appear in your host OS's audio settings window.

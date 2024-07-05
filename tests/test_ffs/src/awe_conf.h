@@ -11,6 +11,6 @@
 
 #define AWE_HEAP_SIZE         (30*1024)
 
-#define USE_AWE_FLASH_FILE_SYSTEM    1
+#define AWE_USE_FLASH_FILE_SYSTEM    1
 
 #endif

@@ -203,8 +203,8 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 #endif
 
 /** @brief Enables use of the AWE Flash File System. Note this will consume in the order of 10 kB of memory on the AWE core and a similar amount for the code that handles the low-level flash accesses. */
-#ifndef USE_AWE_FLASH_FILE_SYSTEM
-#define USE_AWE_FLASH_FILE_SYSTEM   0
+#ifndef AWE_USE_FLASH_FILE_SYSTEM
+#define AWE_USE_FLASH_FILE_SYSTEM   0
 #endif
 
 #ifndef AWE_INPUT_CHANNELS
@@ -215,7 +215,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 #error "Must define AWE_OUTPUT_CHANNELS"
 #endif
 
-/** @brief The size of the packet buffer in 32b words used for communicating with AWE over tuning interface. This must be set to 264 normally but may be lowered in certain cases where long commands (tuning and or flash file system) are not used. . Please see DSP Concepts documentation for further details. */
+/** @brief The size of the packet buffer in 32b words used for communicating with AWE over tuning interface. This must be set to 264 normally but may be lowered in certain cases where long commands (tuning and or flash file system) are not used. Please see DSP Concepts documentation for further details. */
 #define AWE_HID_PACKET_BUFFER_SIZE 264
 
 /** @brief The number of audio samples per block processed by AWE. Normally set to 32. Please see DSP Concepts documentation for further details. */

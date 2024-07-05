@@ -17,7 +17,7 @@ static UINT32 g_AWEHeap[AWE_HEAP_SIZE];
 
 UINT32 AWE_Packet_Buffer[AWE_HID_PACKET_BUFFER_SIZE];
 
-#if USE_AWE_FLASH_FILE_SYSTEM
+#if AWE_USE_FLASH_FILE_SYSTEM
 #include "awe_ffs_rpc.h"
 AWEFlashFSInstance2 g_AWEFlashFSInstance;
 #endif
@@ -52,7 +52,7 @@ void awe_xcore_init() {
     g_AWEInstance.pName = "XMOS_USB_Audio";
     g_AWEInstance.userVersion = 0x20230406;
 
-#if USE_AWE_FLASH_FILE_SYSTEM
+#if AWE_USE_FLASH_FILE_SYSTEM
     // Init the remote flash server and fetch flash info for setting up AWE FFS
     usrInitFlashFileSystem();
     UINT32 flash_memory_size_in_bytes = 0;
