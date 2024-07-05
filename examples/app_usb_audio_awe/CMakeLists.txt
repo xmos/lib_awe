@@ -69,15 +69,15 @@ set(APP_COMPILER_FLAGS_simple_volume_InitAWB.c      -DCore0_InitCommands=Core0_I
 # Grab the app sources - we will extend these with HW setup from sw_usb_audio
 file(GLOB_RECURSE APP_XC_SRCS   ${APP_ROOT_DIR}/src/*.xc)
 list(APPEND APP_XC_SRCS         ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src/extensions/audiohw.xc
-                                ../../tests/awb_files/playBasic_3thread_InitAWB.c
-                                ../../tests/awb_files/simple_volume_InitAWB.c)
+                                ../audioweaver/awb_files/playBasic_3thread_InitAWB.c
+                                ../audioweaver/awb_files/simple_volume_InitAWB.c)
 
 set(APP_INCLUDES    src
                     src/core
                     src/extensions
                     ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src/extensions
                     ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src
-                    ../../tests/awb_files)
+                    ../audioweaver/awb_files)
 
 
 set(XMOS_SANDBOX_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../)

@@ -7,6 +7,8 @@
 #include <print.h>
 #include <quadflashlib.h>
 
+#if AWE_USE_FLASH_FILE_SYSTEM
+
 #define DEBUG_PRINT_ENABLEAWE_FFS_SERVER 0
 #define DEBUG_UNIT AWE_FFS_SERVER
 #include "debug_print.h"
@@ -243,3 +245,4 @@ BOOL ffs_rpc_exit_server(void)
     return bSuccess;
 } 
 
+#endif // AWE_USE_FLASH_FILE_SYSTEM

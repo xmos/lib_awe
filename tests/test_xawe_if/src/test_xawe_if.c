@@ -10,8 +10,8 @@
 #include "awe_xcore.h"
 #include "Errors.h"
 
-#include "../../awb_files/simple_volume_InitAWB.h"
-#include "../../awb_files/simple_volume_ControlInterface.h"
+#include "../../../examples/audioweaver/awb_files/simple_volume_InitAWB.h"
+#include "../../../examples/audioweaver/awb_files/simple_volume_ControlInterface.h"
 
 
 DECLARE_JOB(awe_test, (chanend_t, chanend_t, chanend_t));
