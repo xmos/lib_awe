@@ -6,7 +6,10 @@
 #include <stdio.h>
 #include <print.h>
 #include <quadflashlib.h>
-#include <debug_print.h>
+
+#define DEBUG_PRINT_ENABLEAWE_FFS_SERVER 0
+#define DEBUG_UNIT AWE_FFS_SERVER
+#include "debug_print.h"
 
 #include "awe_xcore_internal.h"
 #include "awe_ffs_rpc.h"
@@ -29,17 +32,9 @@ enum {
     FFS_RPC_EXIT
 };
 
-/* Enable or disable debug printing */
-#define DEBUG_SERVER       0
-
-#if     DEBUG_SERVER
-#define dprintf(...) printf(__VA_ARGS__)
-#else
-#define dprintf(...)
-#endif
 
 void ffs_server(chanend_t c_ffs_rpc_server){
-    dprintf("ffs_server\n");
+    debug_printf("ffs_server\n");
     uint32_t flash_buffer[FFS_SERVER_BUFF_SIZE];
     char flash_initialised = 0;
     char ffs_server_active = 1;
@@ -49,7 +44,7 @@ void ffs_server(chanend_t c_ffs_rpc_server){
         uint32_t cmd = chan_in_word(c_ffs_rpc_server);
         switch(cmd){
             case FFS_RPC_INIT:
-                dprintf("FFS_RPC_INIT\n");
+                debug_printf("FFS_RPC_INIT\n");
                 if(!flash_initialised){
                     ret = fl_connect(&ports);
                 } else {
@@ -63,7 +58,7 @@ void ffs_server(chanend_t c_ffs_rpc_server){
 
             case FFS_RPC_GET_FLASH_INFO:
                 xassert(flash_initialised);
-                dprintf("FFS_RPC_GET_FLASH_INFO\n");
+                debug_printf("FFS_RPC_GET_FLASH_INFO\n");
 
                 UINT32 dp_size = fl_getDataPartitionSize();
                 UINT32 sector_size = fl_getDataSectorSize(0); // Makes assumption that sectors all the same size. AWE FFS also does this
@@ -76,13 +71,13 @@ void ffs_server(chanend_t c_ffs_rpc_server){
                 xassert(flash_initialised);
                 UINT32 nAddress = chan_in_word(c_ffs_rpc_server);
                 UINT32 nDWordsToRead = chan_in_word(c_ffs_rpc_server);
-                dprintf("FFS_RPC_READ: 0x%x, 0x%x\n", nAddress, nDWordsToRead);
+                debug_printf("FFS_RPC_READ: 0x%x, 0x%x\n", nAddress, nDWordsToRead);
 
                 ret = 0;
                 for(int i = 0; i < nDWordsToRead; i += FFS_SERVER_BUFF_SIZE){
                     uint32_t addr = nAddress + i * sizeof(uint32_t);
                     uint32_t chunk_size_words = (nDWordsToRead - i) > FFS_SERVER_BUFF_SIZE ? FFS_SERVER_BUFF_SIZE :  (nDWordsToRead - i);
-                    dprintf("fl_readData: 0x%lx, 0x%lx, 0x%x\n", addr, chunk_size_words * sizeof(uint32_t), (UINT32)flash_buffer);
+                    debug_printf("fl_readData: 0x%lx, 0x%lx, 0x%x\n", addr, chunk_size_words * sizeof(uint32_t), (UINT32)flash_buffer);
                     ret |= fl_readData(addr, chunk_size_words * sizeof(uint32_t), (uint8_t *)flash_buffer);
                     chan_out_word(c_ffs_rpc_server, chunk_size_words);
                     chan_out_buf_word(c_ffs_rpc_server, flash_buffer, chunk_size_words);                    
@@ -96,10 +91,11 @@ void ffs_server(chanend_t c_ffs_rpc_server){
                 xassert(flash_initialised);
                 nAddress = chan_in_word(c_ffs_rpc_server);
                 UINT32 nDWordsToWrite = chan_in_word(c_ffs_rpc_server);
-                dprintf("FFS_RPC_WRITE: 0x%x, 0x%x\n", nAddress, nDWordsToWrite);
+                debug_printf("FFS_RPC_WRITE: 0x%x, 0x%x\n", nAddress, nDWordsToWrite);
 
                 uint8_t write_sratch_buffer[FLASH_SCRATCH_BUFF_BYTES];
                 size_t min_scratch_size = fl_getWriteScratchSize(nAddress, nDWordsToWrite * sizeof(uint32_t)); 
+                (void)min_scratch_size;
                 xassert(min_scratch_size <= sizeof(write_sratch_buffer)); // If you hit this please increase FLASH_SCRATCH_BUFF_BYTES
 
                 int ret = 0;
@@ -108,7 +104,7 @@ void ffs_server(chanend_t c_ffs_rpc_server){
                     uint32_t chunk_size_words = (nDWordsToWrite - i) > FFS_SERVER_BUFF_SIZE ? FFS_SERVER_BUFF_SIZE :  (nDWordsToWrite - i);
                     chan_out_word(c_ffs_rpc_server, chunk_size_words);
                     chan_in_buf_word(c_ffs_rpc_server, flash_buffer, chunk_size_words);
-                    dprintf("fl_writeData: 0x%lx, 0x%lx, 0x%x 0x%x\n", addr, chunk_size_words * sizeof(uint32_t), (unsigned)flash_buffer, (unsigned)write_sratch_buffer);
+                    debug_printf("fl_writeData: 0x%lx, 0x%lx, 0x%x 0x%x\n", addr, chunk_size_words * sizeof(uint32_t), (unsigned)flash_buffer, (unsigned)write_sratch_buffer);
                     ret |= fl_writeData(addr, chunk_size_words * sizeof(uint32_t), (const unsigned char *)flash_buffer, write_sratch_buffer);
                 }
                 chan_out_word(c_ffs_rpc_server, ret == 0);
@@ -121,7 +117,7 @@ void ffs_server(chanend_t c_ffs_rpc_server){
                 UINT32 nNumberOfSectors = chan_in_word(c_ffs_rpc_server);
 
                 (void)nNumberOfSectors;
-                dprintf("FFS_RPC_ERASE: 0x%x, %u\n", nStartingAddress, nNumberOfSectors);
+                debug_printf("FFS_RPC_ERASE: 0x%x, %u\n", nStartingAddress, nNumberOfSectors);
 
                 ret = 0;
                 size_t num_sectors = fl_getNumDataSectors();
@@ -132,7 +128,7 @@ void ffs_server(chanend_t c_ffs_rpc_server){
                 int start_sector_found = 0;
                 while(curr_sector < num_sectors){
                     uint32_t curr_sector_size = fl_getDataSectorSize(curr_sector);
-                    dprintf("Found sector: %u, size %lu\n", curr_sector, curr_sector_size);
+                    debug_printf("Found sector: %u, size %lu\n", curr_sector, curr_sector_size);
 
                     if(nStartingAddress >= sector_base_addr && nStartingAddress < sector_base_addr + curr_sector_size){
                         start_sector_found = 1;
@@ -144,7 +140,7 @@ void ffs_server(chanend_t c_ffs_rpc_server){
                 // Erase the sectors
                 if(start_sector_found){
                     for(unsigned sector = curr_sector; sector < curr_sector + nNumberOfSectors; sector++){
-                        dprintf("Erasing sector: %u\n", sector);
+                        debug_printf("Erasing sector: %u\n", sector);
                         ret |= fl_eraseDataSector(sector);
                     }
                 } else {

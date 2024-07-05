@@ -38,7 +38,7 @@ set(APP_COMMON_BUILD_FLAGS                      -fcomment-asm
                                                 -DADAT_TX_USE_SHARED_BUFF=1
                                                 -DXUA_QUAD_SPI_FLASH=1
                                                 -DMIXER=0
-                                                -NDEBUG=1) # Diasable assert
+                                                -DNDEBUG=1) # Diasable assert
 
 set(APP_COMPILER_FLAGS_UA                       ${EXTRA_BUILD_FLAGS}
                                                 ${APP_COMMON_BUILD_FLAGS})
