@@ -37,8 +37,7 @@ set(APP_COMMON_BUILD_FLAGS                      -fcomment-asm
                                                 -DUSB_TILE=tile[0]
                                                 -DADAT_TX_USE_SHARED_BUFF=1
                                                 -DXUA_QUAD_SPI_FLASH=1
-                                                -DMIXER=0
-                                                -DNDEBUG=1) # Diasable assert
+                                                -DMIXER=0)
 
 set(APP_COMPILER_FLAGS_UA                       ${EXTRA_BUILD_FLAGS}
                                                 ${APP_COMMON_BUILD_FLAGS})
@@ -58,6 +57,11 @@ set(APP_COMPILER_FLAGS_UA_STANDALONE            ${EXTRA_BUILD_FLAGS}
 set(APP_COMPILER_FLAGS_UA_FFS                   ${EXTRA_BUILD_FLAGS}
                                                 ${APP_COMMON_BUILD_FLAGS}
                                                 -DAWE_USE_FLASH_FILE_SYSTEM=1)
+
+set(APP_COMPILER_FLAGS_UA_FFS_STANDALONE        ${EXTRA_BUILD_FLAGS}
+                                                ${APP_COMMON_BUILD_FLAGS}
+                                                -DAWE_USE_FLASH_FILE_SYSTEM=1
+                                                -DSTANDALONE=1)
 
 set(APP_COMPILER_FLAGS_playBasic_3thread_InitAWB.c  -DCore0_InitCommands=Core0_InitCommands_Basic_3thread
                                                     -DCore0_InitCommands_Len=Core0_InitCommands_Basic_3thread_Len)

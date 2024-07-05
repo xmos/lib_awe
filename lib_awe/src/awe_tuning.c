@@ -409,6 +409,7 @@ INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
     _send_packet_to_awe(pAWE->c_tuning_from_host, &stop_audio, len - 1); // -1 because CRC appended
     unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, packet, packet_len);
     DEBUG_PRINT_RESPONSE(num_words_rx, packet);
+
     int err = packet[1];
     if(err != E_SUCCESS){
         return err;
@@ -423,6 +424,8 @@ INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
     const unsigned int target_info = (len << 16) + PFID_GetTargetInfo;
     _send_packet_to_awe(pAWE->c_tuning_from_host, &target_info, len - 1); // -1 because CRC appended
     num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, packet, packet_len);
+    DEBUG_PRINT_RESPONSE(num_words_rx, packet);
+
     int isFlashSupported = (packet[5] & 0b10000) != 0;
     if(!isFlashSupported){
         return E_NOSUCHFILE;
@@ -437,6 +440,7 @@ INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
     // Get first filename
     _send_packet_to_awe(pAWE->c_tuning_from_host, &get_first_file, len - 1); // -1 because CRC appended
     num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, packet, packet_len);
+    DEBUG_PRINT_RESPONSE(num_words_rx, packet);
     
     err = packet[1];
     if(err != E_SUCCESS){
@@ -468,6 +472,7 @@ INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
 
             _send_packet_to_awe_dual_array(pAWE->c_tuning_from_host, &execute_file, 1, packet, num_words - 1); // -1 because CRC appended
             num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, packet, packet_len);
+            DEBUG_PRINT_RESPONSE(num_words_rx, packet);
 
             err = packet[1];
             if(err != E_SUCCESS){
@@ -480,6 +485,7 @@ INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
         // Not found, try again. Get next filename
         _send_packet_to_awe(pAWE->c_tuning_from_host, &get_next_file, len - 1); // -1 because CRC appended
         num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, packet, packet_len);
+        DEBUG_PRINT_RESPONSE(num_words_rx, packet);
         
         err = packet[1];
         if(err != E_SUCCESS){
