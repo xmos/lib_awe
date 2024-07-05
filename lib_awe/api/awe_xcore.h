@@ -179,6 +179,19 @@ INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *val
 */
 INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT32 arraySize, UINT32 *pPos);
 
+/**
+* @brief Executes packet commands from a stored file in the FFS. Designer can generate AWB arrays directly from a
+* layout and add using AWE server -> Flash menu.
+* @param[in] pAWE           AWE instance pointer
+* @param[in] fileName       The ASCII filename of the file to be loaded
+* @return                   @ref E_SUCCESS
+*                           @ref E_INVALID_FILE
+*                           @ref E_NOSUCHFILE
+*                           @ref E_BADPACKET
+*/
+INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName);
+
+
 
 /** @brief The maximum number of xcore processor threads supported by lib_awe which is set to 5. Cannot be changed by the user. */
 #define AWE_DSP_MAX_THREAD_NUM        5

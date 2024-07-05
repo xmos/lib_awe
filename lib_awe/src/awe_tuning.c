@@ -3,6 +3,7 @@
 #include <xcore/channel.h>
 #include <xcore/select.h>
 #include <xcore/hwtimer.h>
+#include <xcore/assert.h>
 #include <stdio.h>
 #include <print.h>
 #include "awe_xcore_internal.h"
@@ -112,7 +113,7 @@ void awe_tuning_thread(chanend_t c_control_from_host,
 }
 
 // Sends a single packet. Adds CRC on end
-void _send_packet_to_awe(chanend_t c_tuning_from_host, unsigned int payload[], unsigned int num_words){
+void _send_packet_to_awe(chanend_t c_tuning_from_host, const unsigned int payload[], unsigned int num_words){
     chanend_out_word(c_tuning_from_host, num_words + 1); // + crc
 
     unsigned int crc = 0;
@@ -346,7 +347,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 
     // Send audio stop command
     const unsigned len = 2; // Whole packet length inc CRC
-    unsigned int stop_audio = (len << 16) + PFID_StopAudio;
+    const unsigned int stop_audio = (len << 16) + PFID_StopAudio;
     _send_packet_to_awe(pAWE->c_tuning_from_host, &stop_audio, len - 1); // -1 because CRC appended
     unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
     DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
@@ -385,4 +386,113 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
     }
 
     return E_SUCCESS;
+}
+
+/**
+* @brief Executes packet commands from a stored file in the FFS. Designer can generate AWB arrays directly from a
+* layout and add using AWE server -> Flash menu.
+* @param[in] pAWE           AWE instance pointer
+* @param[in] fileName       The ASCII filename of the file to be loaded
+* @return                   @ref E_SUCCESS
+*                           @ref E_INVALID_FILE
+*                           @ref E_NOSUCHFILE
+*                           @ref E_BADPACKET
+*/
+INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
+    const unsigned packet_len = 16;
+    xassert(MAX_FILENAME_LENGTH_IN_DWORDS <= packet_len);
+    unsigned int packet[packet_len] = {0};
+
+    // Send audio stop command
+    const unsigned len = 2; // Whole packet length inc CRC
+    unsigned int stop_audio = (len << 16) + PFID_StopAudio;
+    _send_packet_to_awe(pAWE->c_tuning_from_host, &stop_audio, len - 1); // -1 because CRC appended
+    unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, packet, packet_len);
+    DEBUG_PRINT_RESPONSE(num_words_rx, packet);
+    int err = packet[1];
+    if(err != E_SUCCESS){
+        return err;
+    }
+
+    // Required to allow audio to stop before issuing destroy as part of AWB load
+    hwtimer_t tmr = hwtimer_alloc();
+    hwtimer_delay(tmr, AWE_AUDIO_STOP_TO_DESTROY_DELAY_MS * XS1_TIMER_KHZ);
+    hwtimer_free(tmr);
+
+    // Check for FFS being enabled
+    const unsigned int target_info = (len << 16) + PFID_GetTargetInfo;
+    _send_packet_to_awe(pAWE->c_tuning_from_host, &target_info, len - 1); // -1 because CRC appended
+    num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, packet, packet_len);
+    int isFlashSupported = (packet[5] & 0b10000) != 0;
+    if(!isFlashSupported){
+        return E_NOSUCHFILE;
+    }
+
+    // Now iterate through file names to find a filename match
+    // store commands about to be used
+    const unsigned int get_first_file = (len << 16) + PFID_GetFirstFile;
+    const unsigned int get_next_file = (len << 16) + PFID_GetNextFile;
+    const unsigned int execute_file = (len << 16) + PFID_ExecuteFile;
+
+    // Get first filename
+    _send_packet_to_awe(pAWE->c_tuning_from_host, &get_first_file, len - 1); // -1 because CRC appended
+    num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, packet, packet_len);
+    
+    err = packet[1];
+    if(err != E_SUCCESS){
+        return err;
+    }
+
+    // Pointer into the string section of the respone. Only valid directly after get_xxxx_file as we re-use packet for Tx
+    char *found_file_name = (char *)&packet[4];
+
+    char last_filename[MAX_FILENAME_LENGTH + 1] = {0};
+    strcpy(last_filename, found_file_name);
+
+    while(1){
+        // Extract the filename
+        int attribute = packet[2];
+        
+        // Check against desired filename
+        if(strcmp(found_file_name, fileName) == 0){
+            // Check attribute
+            if(attribute != (COMPILED_SCRIPT | COMMAND_SCRIPT)){
+                return E_INVALID_FILE;
+            }
+
+            // Build command packet to load AWB from FFS
+            memset(packet, 0, sizeof(packet)); // always starts with a zero word and is zero padded to a word boundary so zero all
+            int char_count = strlen(fileName);
+            strcpy((char*)&packet[1], fileName);
+            int num_words = (char_count >> 2) + 1; // CMD, string + at least one byte (up to 4) zero padding to a word
+
+            _send_packet_to_awe_dual_array(pAWE->c_tuning_from_host, &execute_file, 1, packet, num_words - 1); // -1 because CRC appended
+            num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, packet, packet_len);
+
+            err = packet[1];
+            if(err != E_SUCCESS){
+                return err;
+            }
+
+            return E_SUCCESS;
+        }
+
+        // Not found, try again. Get next filename
+        _send_packet_to_awe(pAWE->c_tuning_from_host, &get_next_file, len - 1); // -1 because CRC appended
+        num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, packet, packet_len);
+        
+        err = packet[1];
+        if(err != E_SUCCESS){
+            return err;
+        }
+
+        // Same file found again. Out of files in the FFS and desired one not found.
+        if(strcmp(found_file_name, last_filename) == 0){
+            return E_NOSUCHFILE;
+        }
+
+        strcpy(last_filename, found_file_name);
+    }
+
+    return E_SUCCESS; // Unreachable but keep compiler happy
 }
