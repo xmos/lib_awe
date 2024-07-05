@@ -165,7 +165,7 @@
 
 #if STANDALONE
 #include "user_main_standalone.h"
-#elif USE_AWE_FLASH_FILE_SYSTEM
+#elif AWE_USE_FLASH_FILE_SYSTEM
 #include "user_main_ffs.h"
 #else
 #include "user_main.h"
