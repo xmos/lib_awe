@@ -7,7 +7,8 @@ Tests the FFS callbacks using the app in test_ffs
 import pytest
 from pathlib import Path
 import struct
-from awe_test_utils import flash_xe, run_xe_hw
+from awe_test_utils import flash_xe, run_xe_hw, awe_hid_comms
+import time
 
 xe_ffs = "test_ffs/bin/test_ffs_rpc.xe"
 xe_demo_ffs = "../examples/app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe"
@@ -19,9 +20,18 @@ def test_xawe_ctrl_interface():
 
 
 def test_load_awb_from_ffs():
-    # pytest.skip() # Until we have HW in place
-    stdout = flash_xe(xe_demo_ffs, boot_partition_size=0x80000, data_partition_bin="awb_files/data_partition_ffs.bin")
-    print(stdout)
+    pytest.skip() # Until we have HW test in place
+
+    stdout = flash_xe(xe_demo_ffs, boot_partition_size=0x80000, data_partition_bin="../examples/audioweaver/awb_files/data_partition_ffs.bin")
+    time.sleep(5) # Wait for HID to come up
+
+    awe = awe_hid_comms()
+
+    # hammer the loading mechanism 400 times
+    for i in range(200):
+        assert awe.load_awb_from_ffs("playBasic_3thread.awb")
+        assert awe.load_awb_from_ffs("simple_volume.awb")
+
 
 
 # For local testing only
