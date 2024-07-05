@@ -9,12 +9,8 @@
 #ifndef _XUA_CONF_H_
 #define _XUA_CONF_H_
 
-#define BCD_DEVICE_J       (7)
-#define BCD_DEVICE_M       (1)
-#define BCD_DEVICE_N       (0)
 
-/*
- * Device configuration option defines to override default defines found lib_xua/api/xua_conf_defaults.h
+/* Device configuration option defines to override default defines found lib_xua/api/xua_conf_defaults.h
  *
  * Build can be customised but changing and adding defines here
  *
