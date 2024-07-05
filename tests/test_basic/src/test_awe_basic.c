@@ -48,21 +48,22 @@ void awe_test(uint32_t *msg_to_awe_buffer, int msg_len, chanend_t c_tuning_from_
     
     uint32_t msg_from_awe_buffer[16] = {0};
     int num_words_rx = 0;
+    int rx_msg_len = 100000; // A big number which we will re-write
     
     send_ctrl_to_awe(c_tuning_from_host, msg_to_awe_buffer, msg_len);
 
     SELECT_RES(
         CASE_THEN(c_tuning_to_host, input_from_awe),
-        DEFAULT_GUARD_THEN(num_words_rx >= msg_len, completed)
+        DEFAULT_GUARD_THEN(num_words_rx >= rx_msg_len, completed)
         )
     {
     input_from_awe:
         chanend_check_end_token(c_tuning_to_host);
         chanend_out_word(c_tuning_to_host, 13);
         chanend_out_end_token(c_tuning_to_host);
-        int num_words = chanend_in_word(c_tuning_to_host);
-        msg_from_awe_buffer[0] = ((num_words << 2) << 24) | 0x00000001;
-        for(int i = 0; i < num_words; i++) {
+        rx_msg_len = chanend_in_word(c_tuning_to_host); // get actual length
+        msg_from_awe_buffer[0] = ((rx_msg_len << 2) << 24) | 0x00000001;
+        for(int i = 0; i < rx_msg_len; i++) {
             msg_from_awe_buffer[i+1] = chanend_in_word(c_tuning_to_host);
             printf("%lx\n", msg_from_awe_buffer[i+1]);
             num_words_rx++;
@@ -89,7 +90,7 @@ int main(int argc, char** argv){
     channel_t c_tuning_to_host = chan_alloc();
     channel_t c_data = chan_alloc();
 
-    uint32_t msg_to_awe_buffer[16] = {0};
+    uint32_t msg_to_awe_buffer[AWE_HID_PACKET_BUFFER_SIZE] = {0};
     int num_words = parse_cmd_line(argc, argv, msg_to_awe_buffer);
 
     PAR_JOBS(

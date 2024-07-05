@@ -15,10 +15,11 @@
 #define AWE_OUTPUT_CHANNELS          (NUM_USB_CHAN_IN)
 #endif
 
+#if !AWE_USE_FLASH_FILE_SYSTEM
 #define AWE_HEAP_SIZE                (44*1024)
-
-#if !STANDALONE
-#define AWE_TUNING_OVER_USB_HID      (1)
+#else
+#define AWE_HEAP_SIZE                (41*1024)
 #endif
+
 
 #endif

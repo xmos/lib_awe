@@ -13,6 +13,8 @@
 #error "AWE_DSP_MAX_THREAD_NUM should be 5 or tuning needs to be extended"
 #endif
 
+#define AWE_AUDIO_STOP_TO_DESTROY_DELAY_MS  10 // 10ms. (6ms has been tested safe over 5000 iterations)
+
 // TODO: cleanup stacksize
 #pragma stackfunction 1024
 void awe_tuning_thread(chanend_t c_control_from_host,
@@ -355,7 +357,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 
     // Required to allow audio to stop before issuing destroy as part of AWB load
     hwtimer_t tmr = hwtimer_alloc();
-    hwtimer_delay(tmr, 10 * XS1_TIMER_KHZ); // 10ms. (6ms has been tested safe over 5000 iterations)
+    hwtimer_delay(tmr, AWE_AUDIO_STOP_TO_DESTROY_DELAY_MS * XS1_TIMER_KHZ);
     hwtimer_free(tmr);
 
     // Send AWB file commands

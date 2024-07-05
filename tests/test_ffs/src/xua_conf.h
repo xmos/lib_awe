@@ -9,18 +9,13 @@
 #ifndef _XUA_CONF_H_
 #define _XUA_CONF_H_
 
-/*
- * Device configuration option defines to override default defines found lib_xua/api/xua_conf_defaults.h
+
+/* Device configuration option defines to override default defines found lib_xua/api/xua_conf_defaults.h
  *
  * Build can be customised but changing and adding defines here
  *
  * Note, we check if they are already defined in Makefile
  */
-
-/* Increase the maximum size for DFU image from the default of 128*1024 in lib_xua */
-#ifndef FLASH_MAX_UPGRADE_SIZE
-#define FLASH_MAX_UPGRADE_SIZE (512 * 1024)
-#endif
 
 /*** Defines relating to basic functionality ***/
 /* Enable/Disable MIDI - Default is MIDI off */
@@ -66,12 +61,12 @@
 /*** Defines relating to channel counts ***/
 /* Number of I2S channels to DACs*/
 #ifndef I2S_CHANS_DAC
-#define I2S_CHANS_DAC      (2)
+#define I2S_CHANS_DAC      (8)
 #endif
 
 /* Number of I2S channels from ADCs */
 #ifndef I2S_CHANS_ADC
-#define I2S_CHANS_ADC      (2)
+#define I2S_CHANS_ADC      (8)
 #endif
 
 /* Number of USB streaming channels - by default calculate by counting audio interfaces */
@@ -124,13 +119,10 @@
 
 /* Maximum frequency device runs at */
 #ifndef MAX_FREQ
-#define MAX_FREQ           (48000)
+#define MAX_FREQ           (192000)
 #endif
 
-/* Minimum frequency device runs at */
-#ifndef MIN_FREQ
-#define MIN_FREQ           (48000)
-#endif
+#define EXCLUDE_USB_AUDIO_MAIN
 
 /*** Defines relating to feature placement regarding tiles ***/
 #define XUD_TILE           (0)
@@ -139,15 +131,14 @@
 #define AUDIO_IO_TILE      (1)
 #define MIDI_TILE          (1)
 
-#define ENDPOINT_INT_INTERVAL_IN_HID (1)
-#define ENDPOINT_INT_INTERVAL_OUT_HID (1)
+#define XUA_DFU_EN         (0)
 
 /*** Defines relating to USB descriptor strings and ID's ***/
 #define VENDOR_ID          (0x20B1) /* XMOS VID */
 #define PID_AUDIO_2        (0x0018)
 #define PID_AUDIO_1        (0x0017)
-#define PRODUCT_STR_A2     "XMOS xCORE.ai AWE (UAC2.0)"
-#define PRODUCT_STR_A1     "XMOS xCORE.ai AWE (UAC1.0)"
+#define PRODUCT_STR_A2     "XMOS xCORE.ai MC (UAC2.0)"
+#define PRODUCT_STR_A1     "XMOS xCORE.ai MC (UAC1.0)"
 
 /* Board power source - Default is bus-powered */
 #ifndef XUA_POWERMODE
@@ -159,15 +150,6 @@
 #define HID_CONTROLS       (0)
 #endif
 
-#if !STANDALONE
-#define HID_OUT_REQUIRED   (1)
-#endif
+#define HID_OUT_REQUIRED   (0)
 
-#if STANDALONE
-#include "user_main_standalone.h"
-#elif AWE_USE_FLASH_FILE_SYSTEM
-#include "user_main_ffs.h"
-#else
-#include "user_main.h"
-#endif
 #endif

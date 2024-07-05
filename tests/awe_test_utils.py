@@ -10,7 +10,8 @@ import time
 import re
 import subprocess
 import time
-
+from pathlib import Path
+import sys
 
 
 class awe_cmd_list:
@@ -84,10 +85,11 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
 
     resp_a = 0x30000
     resp_b = 0x40000
+    delay_after_stop_audio_s = 0.01 # This has been tested to be stable at 6ms and above over 5000 iterations. Set to 10ms for margin
 
     def __init__(self, VID=0x20b1, PID=0x18, debug=False):
         np.set_printoptions(formatter={'int':hex})
-        self.awe_hid_len = 56
+        self.awe_hid_len = 56 # Bytes
 
         awe_error_codes.__init__(self)
         awe_cmd_list.__init__(self)
@@ -115,18 +117,29 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
 
 
     def get_response(self, timeout_ms=1000):
-        """ Get the respinse from a command over HID """
+        """ Get the response from a command over HID """
         try:
             response = []
-            data = bytearray(self.dev.read(self.awe_hid_len, timeout_ms))
-            for idx in range(0, self.awe_hid_len, 4):
-                word = struct.unpack('<I', data[idx: idx + 4])[0]
-                if idx == 0:
-                    hdr = data[idx: idx + 4]
-                    num_pckts = hdr[0]
-                    length = hdr[3] // 4
-                else:
-                    response += [word]
+            num_words_received = 0
+
+            # Some longer responses span more than one HID packet
+            while True:
+                data = bytearray(self.dev.read(self.awe_hid_len, timeout_ms))
+
+                for idx in range(0, self.awe_hid_len, 4):
+                    word = struct.unpack('<I', data[idx: idx + 4])[0]
+                    # Strip HID header
+                    if idx == 0:
+                        num_words, sequence = self._decode_hid_header(word)
+                    else:
+                        response += [word]
+                        if len(response) == 1:
+                            length = response[0] >> 16
+                        num_words_received += 1
+
+                # We have received all words
+                if num_words_received >= length:
+                    break
 
         except IOError as e:
             print(f'Error reading response: {e}')
@@ -188,6 +201,12 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
 
         return crc
 
+    def _decode_hid_header(self, word):
+        num_words = word >> 24 // 4
+        sequence = ((word >> 8) & 0xff) - 1
+
+        return num_words, sequence
+
     def _gen_hid_header(self, sequence, num_words):
         """ Calaculate the HID header """
         header = 0x100 * (sequence + 1) + 1
@@ -219,7 +238,7 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
         # Stop audio first to avoid frequent firmware exception when destroying existing design
         # See https://xmosjira.atlassian.net/wiki/spaces/UAAI/pages/4122148883/DSPC+Integration+snag+list
         self.cmd([0x20000 + awe_cmd_list.lookup(self, 'PFID_StopAudio')])
-        time.sleep(0.001) # 1ms to allow stop audio to complete
+        time.sleep(self.delay_after_stop_audio_s) # to allow stop audio to complete
 
         awb_idx = 0
         while(awb_idx <= awb_data_len):
@@ -236,41 +255,183 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
                 print(f"ERROR response: {err_str}")
             awb_idx += cmd_len
 
-def run_xe(bin_dir, cmds, max_cycles=1000000):
-    cmd = f"xsim --max-cycles {max_cycles} --args {bin_dir} {cmds}"
+    def load_awb_from_ffs(self, awb_file):
+        """ Searches through the FFS for a .awb file. If found, it will load it and run it """
+        # Local helpers
+        def query(msg, length, err_idx=1):
+            self.send([(length << 16) + msg])
+            response = self.get_response()
 
+            if response[err_idx] != 0:
+                err_txt = awe_error_codes.lookup(self, response[err_idx])
+                assert 0, err_txt
+
+            return response
+
+        def extract_file_name(response):
+            attribute = response[2]
+            length_words = response[3]
+            name_words = response[4:4+length_words]
+            file_name = ""
+            # bytearr = 
+            for name_word in name_words:
+                for byte_num in range(4):
+                    byte = (name_word >> (8 * byte_num)) & 0xff
+                    if byte < 127 and byte >= 32 :
+                        file_name += chr(byte)
+                    if byte == 0:
+                        return file_name
+
+        def build_exe_cmd(file_name):
+            words = [0x00000000] # always starts with a zero word
+            char_count = 0
+            word = 0
+            # build chars into little endian words
+            for c in file_name:
+                word |= ord(c) << ((char_count % 4) * 8)
+                char_count += 1
+                if char_count % 4 == 0:
+                    words += [word]
+                    word = 0
+
+            # add last word of partial chars or zero
+            words += [word]
+
+            cmd = [awe_cmd_list.lookup(self, 'PFID_ExecuteFile') + ((2 + len(words)) << 16)]
+            cmd += words
+
+            return cmd
+
+        # Stop audio first to avoid frequent firmware exception when destroying existing design
+        # See https://xmosjira.atlassian.net/wiki/spaces/UAAI/pages/4122148883/DSPC+Integration+snag+list
+        self.cmd([0x20000 + awe_cmd_list.lookup(self, 'PFID_StopAudio')])
+        time.sleep(self.delay_after_stop_audio_s) # to allow stop audio to complete
+
+        # Do some checks
+        response = query(awe_cmd_list.lookup(self, 'PFID_GetTargetInfo'), 2)
+        isFlashSupported = response[5] & 0b10000 != 0
+        assert isFlashSupported, "Flash not supported by firmware"
+
+        response = query(awe_cmd_list.lookup(self, 'PFID_GetFileSystemInfo'), 2)
+        flash_device_size = response[3]
+        assert flash_device_size > 0, "Flash size is zero"
+        word_used_in_ffs = response[7]
+        assert word_used_in_ffs > 0, "Flash empty"
+
+        # iterate through file names to find a filename match
+        response = query(awe_cmd_list.lookup(self, 'PFID_GetFirstFile'), 2)
+        name = extract_file_name(response)
+        last_name = name
+        
+        while True:
+            if awb_file == name:
+                assert response[2] == 24, f"Incorrect file attribute, expected 24 got {response[2]}"
+                print(f"Found {name} in FFS")
+                self.send(build_exe_cmd(name))
+                err = self.check_response(self.get_response())
+                assert err == 0, f"Execute failed: {err} {awe_error_codes.lookup(self, err)}"
+                self.cmd([0x20000 + awe_cmd_list.lookup(self, 'PFID_StartAudio')])
+                print(f"Loaded..")
+
+                return True
+
+            response = query(awe_cmd_list.lookup(self, 'PFID_GetNextFile'), 2)
+            name = extract_file_name(response)
+            if name == last_name:
+                # File not found
+                return False
+            last_name = name
+
+
+
+def run_xe_sim(bin_path, cmds, max_cycles=1000000):
+    cmd = f"xsim --max-cycles {max_cycles} --args {bin_path} {cmds}"
+  
     ret = subprocess.run(cmd.split(), capture_output=True, text=True)
     assert ret.returncode == 0, f"Failed runing {cmd}: {ret.stderr}"
-    # print(ret.stderr)
+
+    return ret.stdout
+
+def run_xe_hw(bin_path, opts=None):
+    options = "" if opts is None else " ".join(opts)
+    cmd = f"xrun {options} {bin_path}"
+  
+    ret = subprocess.run(cmd.split(), capture_output=True, text=True)
+    assert ret.returncode == 0, f"Failed runing {cmd}: {ret.stderr}"
+
+    return ret.stdout
+
+def flash_xe(bin_path, boot_partition_size=None, data_partition_bin=None):
+    if boot_partition_size is None:
+        cmd = f"xflash {bin_path}"
+    else:
+        cmd = f"xflash --factory {bin_path} --boot-partition-size {boot_partition_size}"
+        if data_partition_bin is not None:
+            cmd += f" --data {data_partition_bin}"
+  
+    ret = subprocess.run(cmd.split(), capture_output=True, text=True)
+    assert ret.returncode == 0, f"Failed runing {cmd}: {ret.stderr}"
 
     return ret.stdout
 
 def filter_awe_packet_log():
-    """Takes the AWE low level packet log and filters out all TX operations and captures then in a file"""
-    # Define the input and output file paths
-    input_file = 'packet_log.txt'  # Replace with your input file path
-    output_file = 'filtered_output.txt'  # Replace with your output file path
+    """Takes the AWE low level packet log and decodes the commands into human readable format"""
+    input_file = Path('packet_log.txt').resolve()
 
-    with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
+    cmds = awe_cmd_list()
+
+    with open(input_file, 'r') as infile:
         for line in infile:
             # Check if the line contains 'TX'
             if 'TX' in line:
                 # Split the line by 'TX' and take the part after 'TX'
-                hex_part = line.split('TX', 1)[1].strip()
+                hex_part = line.split('TX', 1)[1].strip().split()
                 # Write the hex part to the output file
-                outfile.write(hex_part + '\n')
+                header = int(hex_part[0], 16)
+                opcode = header & 0xff
+                try:
+                    key = next(key for key, value in cmds.get_keys().items() if value == opcode)
+                except StopIteration:
+                    print(opcode, line)
 
-    # Print a message indicating the process is complete
-    print(f"Filtered hex values have been written to {output_file}")
+                length = header >> 16
+                print(key, opcode, length, hex_part[0])
+
+            if 'RX' in line:
+                hex_part = line.split('RX', 1)[1].strip().split()
+                # print(" ".join(hex_part))
+                if not "failed" in line:
+                    strng = ""
+                    offset = 0
+                    first_char = 0
+
+                    response = [int(hex_item, 16) for hex_item in hex_part]
+                    print(len(response), hex_part)
+                    for word in response:
+                        for byte_num in range(4):
+                            byte = (word >> (8 * byte_num)) & 0xff
+                            if byte < 127 and byte >= 32 :
+                                strng += chr(byte)
+                                if first_char == 0:
+                                    first_char = offset
+                            offset += 1
+                    print(f"ascii ({first_char}): {strng}")
+                print()
 
 
 # For testing only
 if __name__ == '__main__':
 
+    # filter_awe_packet_log()
+
+    # awe = awe_hid_comms()
+    # awe.load_awb_from_ffs("playBasic_3thread.awb")
+    # awe.load_awb_from_ffs("simple_volume.awb")
+    # sys.exit(0)
+
     import argparse
 
     parser = argparse.ArgumentParser(description='awe_test_utils')
-
     parser.add_argument('--pid', type=int, help='PID of target device', default=0x18)
 
     args = parser.parse_args()
