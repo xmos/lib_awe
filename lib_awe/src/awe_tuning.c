@@ -355,7 +355,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 
     // Required to allow audio to stop before issuing destroy as part of AWB load
     hwtimer_t tmr = hwtimer_alloc();
-    hwtimer_delay(tmr, XS1_TIMER_KHZ); // 1ms
+    hwtimer_delay(tmr, 10 * XS1_TIMER_KHZ); // 10ms. (6ms has been tested safe over 5000 iterations)
     hwtimer_free(tmr);
 
     // Send AWB file commands
