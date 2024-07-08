@@ -266,6 +266,35 @@ INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *val
 }
 
 
+/*---------------------------------------Profiling Functions----------------------------------------------------*/
+INT32 xawe_getAverageLayoutCycles(const xAWEInstance_t *pAWE, UINT32 *average_cycles){
+    const int layout_idx = -1; // -1 is all layouts
+    UINT32 payload[] = {PACKET_HEADER(2, coreID, PFID_GetProfileValues), layout_idx};
+    _send_packet_to_awe(pAWE->c_tuning_from_host, payload, NUM_WORDS(payload));
+    const unsigned response_packet_len = 5;
+    unsigned int response_packet[response_packet_len] = {0};
+    unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
+    DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
+
+    *average_cycles = response_packet[2];
+
+    return response_packet[1];
+}
+
+INT32 xawe_GetHeapSize(const xAWEInstance_t *pAWE, UINT32 *heap_free){
+    UINT32 payload[] = {PACKET_HEADER(1, coreID, PFID_GetHeapSize)};
+    _send_packet_to_awe(pAWE->c_tuning_from_host, payload, NUM_WORDS(payload));
+    const unsigned response_packet_len = 9;
+    unsigned int response_packet[response_packet_len] = {0};
+    unsigned num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
+    DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
+
+    *heap_free = response_packet[2];
+
+    return response_packet[1];
+}
+
+
 /*------------------------------------------Loader Functions----------------------------------------------------*/
 INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT32 arraySize, UINT32 *pPos){
     // Zero the position pointer

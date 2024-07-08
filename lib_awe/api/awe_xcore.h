@@ -163,6 +163,28 @@ INT32 xawe_ctrlSetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, const voi
 INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length, UINT32 mask);
 
 
+/**
+ * @brief Get the profiling info of the signal processing.
+ * Returns cycles in 24.8 format, so shift right by 8 bits for integer value. To get CPU cycles, multiply by target cpuSpeed / profileSpeed.
+ * If a previous pump is not complete and the layout is ready to pump again, an overflow is detected.
+ * In when in this state, the awe_getAverageLayoutCycles api will return the averageCycles = AWE_PUMP_OVF_MAX_AVG_CYCLES (0xFFFFFFFF).
+ * @param [in] pAWE                     AWE instance pointer
+ * @param [in] average_cycles           Pointer the output (average layout cycles)
+ * @return                              @ref E_SUCCESS,
+ *                                      @ref E_BADPACKET
+ */
+INT32 xawe_getAverageLayoutCycles(const xAWEInstance_t *pAWE, UINT32 *average_cycles);
+
+/**
+ * @brief Get the amount of main heap free.
+ * Returns the heap size in 32 bit words.
+ * @param [in] pAWE                     AWE instance pointer
+ * @param [in] heap_free                Pointer the output (heap free in 32 bit words)
+ * @return                              @ref E_SUCCESS,
+ *                                      @ref E_BADPACKET
+ */
+INT32 xawe_GetHeapSize(const xAWEInstance_t *pAWE, UINT32 *heap_free);
+
 /*------------------------------------------Loader Functions----------------------------------------------------*/
 /**
 * @brief Executes packet commands from an in-memory array. Designer can generate AWB arrays directly from a layout.
