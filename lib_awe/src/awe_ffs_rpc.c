@@ -11,7 +11,7 @@
 #define DEBUG_PRINT_ENABLEAWE_FFS_SERVER 0
 #define DEBUG_UNIT AWE_FFS_SERVER
 #include "debug_print.h"
-#include <xassert.h>
+#include "xassert.h"
 
 #include "awe_xcore_internal.h"
 #include "awe_ffs_rpc.h"

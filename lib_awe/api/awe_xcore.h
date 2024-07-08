@@ -181,7 +181,8 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 
 /**
 * @brief Executes packet commands from a stored file in the FFS. Designer can generate AWB arrays directly from a
-* layout and add using AWE server -> Flash menu.
+* layout and add using AWE server -> Flash menu. Only available when AWE_USE_FLASH_FILE_SYSTEM is enabled and at
+* least one valid .awb file has been loaded into the the FFS.
 * @param[in] pAWE           AWE instance pointer
 * @param[in] fileName       The ASCII filename of the file to be loaded
 * @return                   @ref E_SUCCESS
