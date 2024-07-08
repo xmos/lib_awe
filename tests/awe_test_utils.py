@@ -359,7 +359,7 @@ def run_xe_hw(bin_path, opts=None):
     ret = subprocess.run(cmd.split(), capture_output=True, text=True)
     assert ret.returncode == 0, f"Failed runing {cmd}: {ret.stderr}"
 
-    return ret.stdout
+    return ret.stdout + ret.stderr
 
 def flash_xe(bin_path, boot_partition_size=None, data_partition_bin=None):
     if boot_partition_size is None:
