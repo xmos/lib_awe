@@ -176,6 +176,7 @@ INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *val
 *                           @ref E_END_OF_FILE
 *                           @ref E_MESSAGE_LENGTH_TOO_LONG
 *                           @ref E_BADPACKET
+*                           @ref E_NO_CORE
 */
 INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT32 arraySize, UINT32 *pPos);
 
@@ -189,6 +190,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 *                           @ref E_INVALID_FILE
 *                           @ref E_NOSUCHFILE
 *                           @ref E_BADPACKET
+*                           @ref E_NO_CORE
 */
 INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName);
 

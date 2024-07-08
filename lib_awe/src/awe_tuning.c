@@ -387,6 +387,16 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
         cmd_idx += num_words_tx - 1;
     }
 
+    // Check valid
+    const unsigned int layout_valid = (len << 16) + 130; // PFID_GetLayoutCoreAffinity missing from ProxyIds.h
+    _send_packet_to_awe(pAWE->c_tuning_from_host, &layout_valid, len - 1); // -1 because CRC appended
+    num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, response_packet, response_packet_len);
+    DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
+
+    if(response_packet[1] == 0xffffffff){
+        return E_NO_CORE;
+    }
+
     return E_SUCCESS;
 }
 
@@ -400,6 +410,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 *                           @ref E_INVALID_FILE
 *                           @ref E_NOSUCHFILE
 *                           @ref E_BADPACKET
+*                           @ref E_NO_CORE
 */
 INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
     const unsigned packet_len = 4 + MAX_FILENAME_LENGTH_IN_DWORDS + 1; // See https://w.dspconcepts.com/hubfs/Docs-AWECoreOS/AWECoreOS_UserGuide/a00075.html#message-structure
@@ -479,6 +490,16 @@ INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
             err = packet[1];
             if(err != E_SUCCESS){
                 return err;
+            }
+
+            // Check valid
+            const unsigned int layout_valid = (len << 16) + 130; // PFID_GetLayoutCoreAffinity missing from ProxyIds.h
+            _send_packet_to_awe(pAWE->c_tuning_from_host, &layout_valid, len - 1); // -1 because CRC appended
+            num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, packet, packet_len);
+            DEBUG_PRINT_RESPONSE(num_words_rx, packet);
+
+            if(packet[1] == 0xffffffff){
+                return E_NO_CORE;
             }
 
             return E_SUCCESS;
