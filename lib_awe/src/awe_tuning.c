@@ -184,16 +184,6 @@ unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, unsigned int packe
 const unsigned coreID = 0;
 
 
-/**
- * @brief Set a scalar or array value of a module variable by handle
- * @param [in] pAWE                     instance pointer
- * @param [in] handle                   packed object handle
- * @param [in] value                    value(s) to set
- * @param [in] arrayOffset              array index if array
- * @param [in] length                   number of elements. 1 if scaler
- * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED,
- *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS
- */
 INT32 xawe_ctrlSetValue(const xAWEInstance_t *pAWE, UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length){
     UINT32 payload1[] = {PACKET_HEADER(4 + length, coreID, PFID_SetValueHandle), handle, length, arrayOffset};
     _send_packet_to_awe_dual_array(pAWE->c_tuning_from_host, payload1, NUM_WORDS(payload1), (const unsigned int *)value, length);
@@ -206,15 +196,6 @@ INT32 xawe_ctrlSetValue(const xAWEInstance_t *pAWE, UINT32 handle, const void *v
 }
 
 
-/**
- * @brief Get a scalar or array value of a module variable by handle
- * @param [in] pAWE                     instance pointer
- * @param [out] value                   value(s) to get
- * @param [in] arrayOffset              array index if array
- * @param [in] length                   number of elements. 1 if scaler
- * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED,
- *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS
- */
 INT32 xawe_ctrlGetValue(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length){
     UINT32 payload[] = {PACKET_HEADER(4, coreID, PFID_GetValueHandle), handle, length, arrayOffset};
     _send_packet_to_awe(pAWE->c_tuning_from_host, payload, NUM_WORDS(payload));
@@ -231,14 +212,6 @@ INT32 xawe_ctrlGetValue(const xAWEInstance_t *pAWE, UINT32 handle, void *value, 
 }
 
 
-/**
- * @brief Set the runtime status of a module.
- * 0 = Active,    1 = Bypass,    2 = Mute,    3 = Inactive
- * @param [in] pAWE                     instance pointer
- * @param [in] handle                   packed object handle
- * @param [in] status                   status to set
- * @return                              @ref E_SUCCESS,  @ref E_NOT_MODULE,  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS
- */
 INT32 xawe_ctrlSetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 status){
     UINT32 payload[] = {PACKET_HEADER(3, coreID, PFID_SetStatusHandle), handle, status};
     _send_packet_to_awe(pAWE->c_tuning_from_host, payload, NUM_WORDS(payload));
@@ -251,14 +224,6 @@ INT32 xawe_ctrlSetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 statu
 }
 
 
-/**
- * @brief Get the runtime status of a module.
- * 0 = Active,    1 = Bypass,    2 = Mute,    3 = Inactive
- * @param [in] pAWE                     instance pointer
- * @param [in] handle                   packed object handle
- * @param [out] status                  status to get
- * @return                              @ref E_SUCCESS,  @ref E_NOT_MODULE,  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS,  @ref E_PARAMETER_ERROR
- */
 INT32 xawe_ctrlGetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *status){
     UINT32 payload[] = {PACKET_HEADER(2, coreID, PFID_GetStatusHandle), handle};
     _send_packet_to_awe(pAWE->c_tuning_from_host, payload, NUM_WORDS(payload));
@@ -272,18 +237,6 @@ INT32 xawe_ctrlGetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *stat
 }
 
 
-/**
- * @brief Set a scalar or array value of a module variable by handle with mask. A mask allows you to only call module's set function
- *      for a single variable.
- * @param [in] pAWE                     instance pointer
- * @param [in] handle                   packed object handle
- * @param [in] value                    value(s) to set
- * @param [in] arrayOffset              array index if array
- * @param [in] length                   number of elements if array. 1 if scaler
- * @param [in] mask                     mask to use - 0 to not call set function
- * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,
- *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE
- */
 INT32 xawe_ctrlSetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length, UINT32 mask){
     UINT32 payload1[] = {PACKET_HEADER(5 + length, coreID, PFID_SetValueHandleMask), handle, length, arrayOffset, mask};
     _send_packet_to_awe_dual_array(pAWE->c_tuning_from_host, payload1, NUM_WORDS(payload1), (const unsigned int *)value, length);
@@ -296,18 +249,6 @@ INT32 xawe_ctrlSetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, const voi
 }
 
 
-/**
- * @brief Get a scalar or array value of a module variable by handle with mask. A mask allows you to only call module's set function
- *      for a single variable.
- * @param [in] pAWE                     instance pointer
- * @param [in] handle                   packed object handle
- * @param [out] value                   value(s) to get
- * @param [in] arrayOffset              array index if array
- * @param [in] length                   number of elements if array. 1 if scaler
- * @param [in] mask                     mask to use - 0 to not call get function
- * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,
- *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE
- */
 INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length, UINT32 mask){
     UINT32 payload[] = {PACKET_HEADER(5, coreID, PFID_GetValueHandleMask), handle, length, arrayOffset, mask};
     _send_packet_to_awe(pAWE->c_tuning_from_host, payload, NUM_WORDS(payload));
@@ -326,19 +267,6 @@ INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *val
 
 
 /*------------------------------------------Loader Functions----------------------------------------------------*/
-/**
-* @brief Executes packet commands from an in-memory array. Designer can generate AWB arrays directly from a layout.
-* @param[in] pAWE           AWE instance pointer
-* @param[in] pCommands      Buffer with commands to execute
-* @param[in] arraySize      Number of DWords in command buffer
-* @param[out] pPos          Report failing word index
-* @return                   @ref E_SUCCESS
-*                           @ref E_EXCEPTION
-*                           @ref E_UNEXPECTED_EOF
-*                           @ref E_END_OF_FILE
-*                           @ref E_MESSAGE_LENGTH_TOO_LONG
-*                           @ref E_BADPACKET
-*/
 INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT32 arraySize, UINT32 *pPos){
     // Zero the position pointer
     *pPos = 0;
@@ -401,17 +329,6 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 }
 
 
-/**
-* @brief Executes packet commands from a stored file in the FFS. Designer can generate AWB arrays directly from a
-* layout and add using AWE server -> Flash menu.
-* @param[in] pAWE           AWE instance pointer
-* @param[in] fileName       The ASCII filename of the file to be loaded
-* @return                   @ref E_SUCCESS
-*                           @ref E_INVALID_FILE
-*                           @ref E_NOSUCHFILE
-*                           @ref E_BADPACKET
-*                           @ref E_NO_CORE
-*/
 INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
     const unsigned packet_len = 4 + MAX_FILENAME_LENGTH_IN_DWORDS + 1; // See https://w.dspconcepts.com/hubfs/Docs-AWECoreOS/AWECoreOS_UserGuide/a00075.html#message-structure
     unsigned int packet[packet_len] = {0};
