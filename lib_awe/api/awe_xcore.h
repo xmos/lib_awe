@@ -188,6 +188,7 @@ INT32 xawe_GetHeapSize(const xAWEInstance_t *pAWE, UINT32 *heap_free);
 /*------------------------------------------Loader Functions----------------------------------------------------*/
 /**
 * @brief Executes packet commands from an in-memory array. Designer can generate AWB arrays directly from a layout.
+* Effectively this loads an AWB array and checks that it is valid. It automatically destroys any exitsing layout.
 * @param[in] pAWE           AWE instance pointer
 * @param[in] pCommands      Buffer with commands to execute
 * @param[in] arraySize      Number of DWords in command buffer
@@ -204,8 +205,9 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 
 /**
 * @brief Executes packet commands from a stored file in the FFS. Designer can generate AWB arrays directly from a
-* layout and add using AWE server -> Flash menu. Only available when AWE_USE_FLASH_FILE_SYSTEM is enabled and at
-* least one valid .awb file has been loaded into the the FFS.
+* layout and add using AWE server -> Flash menu. 
+* Effectively this loads an AWB array and checks that it is valid. It automatically destroys any exitsing layout.
+* Only available when AWE_USE_FLASH_FILE_SYSTEM is enabled and a valid .awb file has been pre-written into the FFS.
 * @param[in] pAWE           AWE instance pointer
 * @param[in] fileName       The ASCII filename of the file to be loaded
 * @return                   @ref E_SUCCESS
