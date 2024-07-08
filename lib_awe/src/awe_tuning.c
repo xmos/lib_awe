@@ -271,6 +271,7 @@ INT32 xawe_ctrlGetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *stat
     return ((int)(*status) < 0 ? E_NOT_OBJECT : 0);
 }
 
+
 /**
  * @brief Set a scalar or array value of a module variable by handle with mask. A mask allows you to only call module's set function
  *      for a single variable.
@@ -293,6 +294,7 @@ INT32 xawe_ctrlSetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, const voi
 
     return response_packet[1];
 }
+
 
 /**
  * @brief Get a scalar or array value of a module variable by handle with mask. A mask allows you to only call module's set function
@@ -364,6 +366,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
     unsigned int cmd_idx = 0;
     while(cmd_idx < arraySize){
         unsigned int *msg_payload = (unsigned int *)&pCommands[cmd_idx];
+        // Zero word always appended to end of AWB
         if(*msg_payload == PFID_Undefined){
             break;
         }
@@ -386,6 +389,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 
     return E_SUCCESS;
 }
+
 
 /**
 * @brief Executes packet commands from a stored file in the FFS. Designer can generate AWB arrays directly from a
@@ -456,7 +460,7 @@ INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
 
         // Check against desired filename
         if(strcmp(found_file_name, fileName) == 0){
-            // Check attribute
+            // Check attribute to see if it is a runnable compiled script
             if(attribute != (COMPILED_SCRIPT | COMMAND_SCRIPT)){
                 return E_INVALID_FILE;
             }
@@ -466,7 +470,7 @@ INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
             int char_count = strlen(fileName);
             strcpy((char*)&packet[1], fileName);
             int num_words_filename = 1 + (char_count >> 2) + 1; // padding 0 word, string + least one byte (up to 4) zero padding to a word
-            const unsigned int execute_file_cmd = ((1 + num_words_filename + 1) << 16) + PFID_ExecuteFile; // CMD + filename 
+            const unsigned int execute_file_cmd = ((1 + num_words_filename + 1) << 16) + PFID_ExecuteFile; // CMD + filename + CRC
 
             _send_packet_to_awe_dual_array(pAWE->c_tuning_from_host, &execute_file_cmd, 1, packet, num_words_filename);
             num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, packet, packet_len);
@@ -497,6 +501,6 @@ INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
 
         strcpy(last_filename, found_file_name);
     }
-
+    
     return E_SUCCESS; // Unreachable but keep compiler happy
 }
