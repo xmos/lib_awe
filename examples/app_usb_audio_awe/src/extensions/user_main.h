@@ -18,7 +18,6 @@ extern unsafe chanend g_ffs_rpc_client;
 
 /* Board hardware setup */
 extern unsafe client interface i2c_master_if i_i2c_client;
-extern void interface_saver(client interface i2c_master_if i);
 extern void board_setup();
 
 /* I2C interface ports */
