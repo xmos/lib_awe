@@ -437,4 +437,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     awe = awe_hid_comms(PID=args.pid)
-    awe.send_awb("awb_files/simple_volume.awb")
+    awe.send_awb("../examples/audioweaver/awb_files/simple_volume.awb")

@@ -112,6 +112,9 @@ void awe_tuning_thread(chanend_t c_control_from_host,
     }
 }
 
+// For debugging AWE tuning commands. Will print packets to and from AWE
+#define DEBUG_PACKETS     0
+
 // Sends a single packet. Adds CRC on end
 void _send_packet_to_awe(chanend_t c_tuning_from_host, const unsigned int payload[], unsigned int num_words){
     chanend_out_word(c_tuning_from_host, num_words + 1); // + crc
@@ -119,20 +122,18 @@ void _send_packet_to_awe(chanend_t c_tuning_from_host, const unsigned int payloa
     unsigned int crc = 0;
     for(int i = 0; i < num_words; i++) {
         chanend_out_word(c_tuning_from_host, payload[i]);
-        // printhexln(payload[i]);
+        if(DEBUG_PACKETS) printhexln(payload[i]);
         crc ^= payload[i];
     }
     chanend_out_word(c_tuning_from_host, crc);
-    // printhexln(crc);
+    if(DEBUG_PACKETS) printhexln(crc);
 
     chanend_out_end_token(c_tuning_from_host);
     chanend_check_end_token(c_tuning_from_host);
-    // printchar('\n');
+    if(DEBUG_PACKETS) printchar('\n');
 
 }
 
-// For debugging AWE tuning commands. Will print packets to and from AWE
-#define DEBUG_PACKETS     0
 
 // Sends a concatonated packet consisting of two single packets. Adds CRC on end
 void _send_packet_to_awe_dual_array(chanend_t c_tuning_from_host, const unsigned int payload1[], unsigned int num_words1, const unsigned int payload2[], unsigned int num_words2){
@@ -163,10 +164,8 @@ unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, unsigned int packe
     chanend_out_word(c_tuning_to_host, max_packet_words);
     chanend_out_end_token(c_tuning_to_host);
     unsigned num_words = chanend_in_word(c_tuning_to_host);
-    if(DEBUG_PACKETS) printintln(num_words);
     for(unsigned i = 0; i < num_words; i++) {
         packet_buffer[i] = chanend_in_word(c_tuning_to_host);
-        if(DEBUG_PACKETS) printhexln(packet_buffer[i]);
     }
     chanend_out_end_token(c_tuning_to_host);
     chanend_check_end_token(c_tuning_to_host);
@@ -399,8 +398,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 *                           @ref E_BADPACKET
 */
 INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
-    const unsigned packet_len = 16;
-    xassert(MAX_FILENAME_LENGTH_IN_DWORDS <= packet_len);
+    const unsigned packet_len = 4 + MAX_FILENAME_LENGTH_IN_DWORDS + 1; // See https://w.dspconcepts.com/hubfs/Docs-AWECoreOS/AWECoreOS_UserGuide/a00075.html#message-structure
     unsigned int packet[packet_len] = {0};
 
     // Send audio stop command
@@ -435,7 +433,6 @@ INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
     // store commands about to be used
     const unsigned int get_first_file = (len << 16) + PFID_GetFirstFile;
     const unsigned int get_next_file = (len << 16) + PFID_GetNextFile;
-    const unsigned int execute_file = (len << 16) + PFID_ExecuteFile;
 
     // Get first filename
     _send_packet_to_awe(pAWE->c_tuning_from_host, &get_first_file, len - 1); // -1 because CRC appended
@@ -447,16 +444,16 @@ INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
         return err;
     }
 
-    // Pointer into the string section of the respone. Only valid directly after get_xxxx_file as we re-use packet for Tx
+    // Pointer into the string section of the respone. Only valid directly after get_xxxx_file as we re-use packet for Tx execute_file
     char *found_file_name = (char *)&packet[4];
 
     char last_filename[MAX_FILENAME_LENGTH + 1] = {0};
     strcpy(last_filename, found_file_name);
 
     while(1){
-        // Extract the filename
+        // Extract the file details
         int attribute = packet[2];
-        
+
         // Check against desired filename
         if(strcmp(found_file_name, fileName) == 0){
             // Check attribute
@@ -468,9 +465,10 @@ INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName){
             memset(packet, 0, sizeof(packet)); // always starts with a zero word and is zero padded to a word boundary so zero all
             int char_count = strlen(fileName);
             strcpy((char*)&packet[1], fileName);
-            int num_words = (char_count >> 2) + 1; // CMD, string + at least one byte (up to 4) zero padding to a word
+            int num_words_filename = 1 + (char_count >> 2) + 1; // padding 0 word, string + least one byte (up to 4) zero padding to a word
+            const unsigned int execute_file_cmd = ((1 + num_words_filename + 1) << 16) + PFID_ExecuteFile; // CMD + filename 
 
-            _send_packet_to_awe_dual_array(pAWE->c_tuning_from_host, &execute_file, 1, packet, num_words - 1); // -1 because CRC appended
+            _send_packet_to_awe_dual_array(pAWE->c_tuning_from_host, &execute_file_cmd, 1, packet, num_words_filename);
             num_words_rx = _get_packet_from_awe(pAWE->c_tuning_to_host, packet, packet_len);
             DEBUG_PRINT_RESPONSE(num_words_rx, packet);
 
