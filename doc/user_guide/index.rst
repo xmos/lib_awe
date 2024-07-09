@@ -58,7 +58,7 @@ In order to use the functions, one needs to configure the library to use the cor
   AWE_INPUT_CHANNELS              0 or more
   AWE_OUTPUT_CHANNELS             0 or more
   AWE_BLOCK_SIZE                  32
-  AWE_HEAP_SIZE                   4096
+  AWE_HEAP_SIZE_LONG_WORDS        16384
   =============================== ===========
 
 Some values are, at present, pre-set:
@@ -285,7 +285,7 @@ To build using xcommon-cmake:
 
 This will build both the UA (USB Audio) and I2S (I2S only for data transport but with USB/HID enabled for control) binaries. All of the required dependencies will be downloaded at this step. This will only happen the first time you build.
 
-The application uses approximately 30-48 kB on Tile[0] depending on build and 510 kB on Tile[1], of 512 kB on each tile when allocating a generous 44 k long-words for ``AWE_HEAP_SIZE``.
+The application uses approximately 30-48 kB on Tile[0] depending on build and 510 kB on Tile[1], of 512 kB on each tile when allocating a generous 44 k long-words for ``AWE_HEAP_SIZE_LONG_WORDS``.
 
 Running the Examples
 ....................

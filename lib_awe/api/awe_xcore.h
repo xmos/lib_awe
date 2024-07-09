@@ -237,9 +237,9 @@ INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName);
 #endif
 
 /** @brief The amound of heap memory in long words (32 bit) that can be used by lib_awe. Modifiable by the user per project. */
-#ifndef AWE_HEAP_SIZE
-#error "Please define AWE_HEAP_SIZE to allocate the number of long words (32 bit) for AWE main heap"
-#define AWE_HEAP_SIZE // For doxygen only
+#ifndef AWE_HEAP_SIZE_LONG_WORDS
+#error "Please define AWE_HEAP_SIZE_LONG_WORDS to allocate the number of long words (32 bit) for AWE main heap"
+#define AWE_HEAP_SIZE_LONG_WORDS // For doxygen only
 #endif
 
 /** @brief Enables use of the AWE Flash File System. Note this will consume in the order of 10 kB of memory on the AWE core and a similar amount for the code that handles the low-level flash accesses. */
