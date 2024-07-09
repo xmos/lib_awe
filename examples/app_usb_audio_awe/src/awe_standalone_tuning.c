@@ -1,6 +1,5 @@
 // Copyright 2024 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
-#include <xcore/channel.h>
 #include <xcore/port.h>
 #include <xcore/hwtimer.h>
 #include <print.h>
@@ -49,7 +48,7 @@ int wait_for_button_change(port_t p_buttons){
 }
 
 void awe_standalone_tuning(chanend_t control_from_host, chanend_t control_to_host){
-    xAWEInstance_t pAWE = {control_from_host, control_to_host};
+    xAWEInstance_t pAWE = {control_from_host, control_to_host, lock_alloc()};
 
     // AWB image state
     awb_state_t awb_state_old = AWB_NONE;

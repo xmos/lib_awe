@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <xcore/channel.h>
+#include <xcore/lock.h>
 
 /**
  * \addtogroup lib_awe lib_awe
@@ -83,6 +84,7 @@ the public API to the XMOS AWE instance and presents a tuning interface suitable
 typedef struct xAWEInstance_t{
     chanend_t c_tuning_from_host;
     chanend_t c_tuning_to_host;
+    lock_t l_api_lock;
 } xAWEInstance_t;
 
 /** @brief Type definition to make the xawe API reflect the AWE API*/
