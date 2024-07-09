@@ -34,7 +34,7 @@ def test_load_awb_from_ffs_host():
         assert awe.load_awb_from_ffs("simple_volume.awb")
 
 def test_load_awb_from_ffs_device():
-    # pytest.skip() # Until we have HW test in place
+    pytest.skip() # Until we have HW test in place
 
     output = run_xe_hw(xe_ffs_rpc_device, opts=["--io"])
 
