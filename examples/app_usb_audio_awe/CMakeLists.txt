@@ -27,7 +27,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/${SW_USB_AUDIO_PATH}/deps.cmake)
 list(APPEND APP_DEPENDENT_MODULES "lib_awe")
 
 set(APP_PCA_ENABLE ON)
-# Audio Class 2, Async, I2S Master, 8xInput, 8xOutput
 
 set(APP_COMMON_BUILD_FLAGS                      -fcomment-asm
                                                 -O3
@@ -35,10 +34,8 @@ set(APP_COMMON_BUILD_FLAGS                      -fcomment-asm
                                                 -lquadflash
                                                 -g
                                                 -DUSB_TILE=tile[0]
-                                                -DADAT_TX_USE_SHARED_BUFF=1
                                                 -DXUA_QUAD_SPI_FLASH=1
-                                                -DMIXER=0
-                                                -DNDEBUG=1) # Diasable assert
+                                                -DMIXER=0)
 
 set(APP_COMPILER_FLAGS_UA                       ${EXTRA_BUILD_FLAGS}
                                                 ${APP_COMMON_BUILD_FLAGS})
@@ -53,10 +50,12 @@ set(APP_COMPILER_FLAGS_I2S                      ${EXTRA_BUILD_FLAGS}
 
 set(APP_COMPILER_FLAGS_UA_STANDALONE            ${EXTRA_BUILD_FLAGS}
                                                 ${APP_COMMON_BUILD_FLAGS}
-                                                -DSTANDALONE=1)
+                                                -DSTANDALONE_TUNING=1)
 
-set(APP_COMPILER_FLAGS_UA_FFS                   ${EXTRA_BUILD_FLAGS}
-                                                ${APP_COMMON_BUILD_FLAGS}
+set(APP_COMPILER_FLAGS_UA_FFS                   ${APP_COMPILER_FLAGS_UA}
+                                                -DAWE_USE_FLASH_FILE_SYSTEM=1)
+
+set(APP_COMPILER_FLAGS_UA_FFS_STANDALONE        ${APP_COMPILER_FLAGS_UA_STANDALONE}
                                                 -DAWE_USE_FLASH_FILE_SYSTEM=1)
 
 set(APP_COMPILER_FLAGS_playBasic_3thread_InitAWB.c  -DCore0_InitCommands=Core0_InitCommands_Basic_3thread

@@ -7,6 +7,8 @@
 #define AWE_INPUT_CHANNELS           2
 #define AWE_OUTPUT_CHANNELS          2
 
-#define AWE_HEAP_SIZE_LONG_WORDS     (44*1024)
+#define AWE_HEAP_SIZE_LONG_WORDS     (30*1024)
+
+#define AWE_USE_FLASH_FILE_SYSTEM    1
 
 #endif

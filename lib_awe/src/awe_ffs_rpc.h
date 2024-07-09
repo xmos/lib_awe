@@ -103,15 +103,13 @@ BOOL usrEraseFlashSector(UINT32 nStartingAddress, UINT32 nNumberOfSectors);
  */
 void ffs_rpc_get_flash_info(UINT32 *dp_size_bytes, UINT32 *sector_size_bytes);
 
-/** Write 4-byte words to flash memory
+/** Exit the FFS server thread. Can be used to dynamically free up resources at runtime
+ * if the FFS server is no longer needed, for example, after loading an AWB image.
+ * You will need to re-spawn ffs_server() if any flash commands are needed after that.
  * Used by lib_awe for the flash file system only.
  *
- * @param[in]  UINT32  nAddress - address in flash to start writing (byte address)
- * @param[in]  UINT32 * pBuffer  - buffer to write into
- * @param[in]  UINT32  nDWordsToWrite - number of 4-bytes elements to write
- *
- * @retval     TRUE  - write succeeded
- * @retval     FALSE - write failed
+ * @retval     TRUE  - exit succeeded
+ * @retval     FALSE - exit failed
  */
 BOOL ffs_rpc_exit_server(void);
 

@@ -30,6 +30,8 @@ typedef enum awb_state_t{
     AWB_SIMPLE_VOLUME
 }awb_state_t;
 
+char *awb_filenames[] = {"", "playBasic_3thread.awb", "simple_volume.awb"};
+
 void delay_ms(unsigned delay_ms){
     hwtimer_t tmr = hwtimer_alloc();
     hwtimer_delay(tmr, XS1_TIMER_KHZ * delay_ms);
@@ -114,6 +116,14 @@ void awe_standalone_tuning(chanend_t control_from_host, chanend_t control_to_hos
 
                 }
                 // Load the AWB
+#if AWE_USE_FLASH_FILE_SYSTEM
+                char *awb_filename = awb_filenames[awb_state];
+                int err = xawe_loadAWBfromFFS(&pAWE, awb_filename);
+                if(err != E_SUCCESS){
+                    printstrln("ERROR - xawe_loadAWBfromFFS failed");
+                    printintln(err);
+                }
+#else
                 unsigned int pPos = 0;
                 int err = xawe_loadAWBfromArray(&pAWE, awb_array, awb_array_len, &pPos);
                 if(err != E_SUCCESS){
@@ -121,6 +131,7 @@ void awe_standalone_tuning(chanend_t control_from_host, chanend_t control_to_hos
                     printintln(err);
                     printintln(pPos);
                 }
+#endif
                 awb_state_old = awb_state;
             }
         }

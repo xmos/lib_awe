@@ -7,6 +7,6 @@
 #define AWE_INPUT_CHANNELS           2
 #define AWE_OUTPUT_CHANNELS          2
 
-#define AWE_HEAP_SIZE         (35*1024)
+#define AWE_HEAP_SIZE_LONG_WORDS     (35*1024)
 
 #endif

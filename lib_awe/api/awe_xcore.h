@@ -163,9 +163,32 @@ INT32 xawe_ctrlSetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, const voi
 INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length, UINT32 mask);
 
 
+/**
+ * @brief Get the profiling info of the signal processing.
+ * Returns cycles in 24.8 format, so shift right by 8 bits for integer value. To get CPU cycles, multiply by target cpuSpeed / profileSpeed.
+ * If a previous pump is not complete and the layout is ready to pump again, an overflow is detected.
+ * In when in this state, the awe_getAverageLayoutCycles api will return the averageCycles = AWE_PUMP_OVF_MAX_AVG_CYCLES (0xFFFFFFFF).
+ * @param [in] pAWE                     AWE instance pointer
+ * @param [in] average_cycles           Pointer the output (average layout cycles)
+ * @return                              @ref E_SUCCESS,
+ *                                      @ref E_BADPACKET
+ */
+INT32 xawe_getAverageLayoutCycles(const xAWEInstance_t *pAWE, UINT32 *average_cycles);
+
+/**
+ * @brief Get the amount of main heap free.
+ * Returns the heap size in 32 bit words.
+ * @param [in] pAWE                     AWE instance pointer
+ * @param [in] heap_free                Pointer the output (heap free in 32 bit words)
+ * @return                              @ref E_SUCCESS,
+ *                                      @ref E_BADPACKET
+ */
+INT32 xawe_GetHeapSize(const xAWEInstance_t *pAWE, UINT32 *heap_free);
+
 /*------------------------------------------Loader Functions----------------------------------------------------*/
 /**
 * @brief Executes packet commands from an in-memory array. Designer can generate AWB arrays directly from a layout.
+* Effectively this loads an AWB array and checks that it is valid. It automatically destroys any exitsing layout.
 * @param[in] pAWE           AWE instance pointer
 * @param[in] pCommands      Buffer with commands to execute
 * @param[in] arraySize      Number of DWords in command buffer
@@ -176,8 +199,25 @@ INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *val
 *                           @ref E_END_OF_FILE
 *                           @ref E_MESSAGE_LENGTH_TOO_LONG
 *                           @ref E_BADPACKET
+*                           @ref E_NO_CORE
 */
 INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT32 arraySize, UINT32 *pPos);
+
+/**
+* @brief Executes packet commands from a stored file in the FFS. Designer can generate AWB arrays directly from a
+* layout and add using AWE server -> Flash menu. 
+* Effectively this loads an AWB array and checks that it is valid. It automatically destroys any exitsing layout.
+* Only available when AWE_USE_FLASH_FILE_SYSTEM is enabled and a valid .awb file has been pre-written into the FFS.
+* @param[in] pAWE           AWE instance pointer
+* @param[in] fileName       The ASCII filename of the file to be loaded
+* @return                   @ref E_SUCCESS
+*                           @ref E_INVALID_FILE
+*                           @ref E_NOSUCHFILE
+*                           @ref E_BADPACKET
+*                           @ref E_NO_CORE
+*/
+INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName);
+
 
 
 /** @brief The maximum number of xcore processor threads supported by lib_awe which is set to 5. Cannot be changed by the user. */
@@ -197,9 +237,9 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 #endif
 
 /** @brief The amound of heap memory in long words (32 bit) that can be used by lib_awe. Modifiable by the user per project. */
-#ifndef AWE_HEAP_SIZE
-#error "Please define AWE_HEAP_SIZE to allocate the number of long words (32 bit) for AWE main heap"
-#define AWE_HEAP_SIZE // For doxygen only
+#ifndef AWE_HEAP_SIZE_LONG_WORDS
+#error "Please define AWE_HEAP_SIZE_LONG_WORDS to allocate the number of long words (32 bit) for AWE main heap"
+#define AWE_HEAP_SIZE_LONG_WORDS // For doxygen only
 #endif
 
 /** @brief Enables use of the AWE Flash File System. Note this will consume in the order of 10 kB of memory on the AWE core and a similar amount for the code that handles the low-level flash accesses. */

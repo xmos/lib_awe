@@ -159,15 +159,10 @@
 #define HID_CONTROLS       (0)
 #endif
 
-#if !STANDALONE
+#if !STANDALONE_TUNING
 #define HID_OUT_REQUIRED   (1)
 #endif
 
-#if STANDALONE
-#include "user_main_standalone.h"
-#elif AWE_USE_FLASH_FILE_SYSTEM
-#include "user_main_ffs.h"
-#else
 #include "user_main.h"
-#endif
-#endif
+
+#endif // _XUA_CONF_H_
