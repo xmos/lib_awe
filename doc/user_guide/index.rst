@@ -319,7 +319,7 @@ Alternatively to make the design non-volatile by programming in to flash memory 
       # UA_FFS
       xflash --factory bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe --boot-partition-size 0x80000 --data ../examples/audioweaver/awb_files/data_partition_ffs.bin
 
-The figure ``0x80000`` equates to 512 kB which is the amount of space reserved for the boot partition. For this example, the required storage in flash for the application is in the order of 380 kB leaving around 132 kB of space for the application to grow if needed. A simple way to determine the required boot partition size if to run the following command and then inspect the file size of ``boot.bin``::
+The figure ``0x80000`` equates to 512 kB which is the amount of space reserved for the boot partition. For this example, the required storage in flash for the application is in the order of 380 kB leaving around 132 kB of space for the application to grow if needed. A simple way to determine the required boot partition size if to run the following command and then inspect the file size of ``flash.bin``::
 
     xflash -o flash.bin app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe 
 
