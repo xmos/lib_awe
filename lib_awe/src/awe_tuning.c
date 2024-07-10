@@ -128,7 +128,9 @@ void init_awe_tuning_instance(chanend_t c_tuning_from_host,
 
 // Sends a single packet. Adds CRC on end
 void _send_packet_to_awe(chanend_t c_tuning_from_host, lock_t l_api_lock, const unsigned int payload[], unsigned int num_words){
-    lock_acquire(l_api_lock);
+    if(l_api_lock != 0){
+        lock_acquire(l_api_lock);
+    }
     chanend_out_word(c_tuning_from_host, num_words + 1); // + crc
 
     unsigned int crc = 0;
@@ -149,7 +151,9 @@ void _send_packet_to_awe(chanend_t c_tuning_from_host, lock_t l_api_lock, const 
 
 // Sends a concatonated packet consisting of two single packets. Adds CRC on end
 void _send_packet_to_awe_dual_array(chanend_t c_tuning_from_host, lock_t l_api_lock, const unsigned int payload1[], unsigned int num_words1, const unsigned int payload2[], unsigned int num_words2){
-    lock_acquire(l_api_lock);
+    if(l_api_lock != 0){
+        lock_acquire(l_api_lock);
+    }
     chanend_out_word(c_tuning_from_host, num_words1 + num_words2 + 1); // + crc
 
     unsigned int crc = 0;
@@ -183,7 +187,10 @@ unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, lock_t l_api_lock,
     chanend_out_end_token(c_tuning_to_host);
     chanend_check_end_token(c_tuning_to_host);
 
-    lock_release(l_api_lock);
+    if(l_api_lock != 0){
+        lock_release(l_api_lock);
+    }
+
     return num_words;
 }
 
@@ -311,6 +318,8 @@ INT32 xawe_GetHeapSize(UINT32 *heap_free){
 
 /*------------------------------------------Loader Functions----------------------------------------------------*/
 INT32 xawe_loadAWBfromArray(const UINT32 *pCommands, UINT32 arraySize, UINT32 *pPos){
+    lock_acquire(g_xAWETuningInstance.l_api_lock);
+
     // Zero the position pointer
     *pPos = 0;
 
@@ -320,11 +329,12 @@ INT32 xawe_loadAWBfromArray(const UINT32 *pCommands, UINT32 arraySize, UINT32 *p
     // Send audio stop command
     const unsigned len = 2; // Whole packet length inc CRC
     const unsigned int stop_audio = (len << 16) + PFID_StopAudio;
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, &stop_audio, len - 1); // -1 because CRC appended
-    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, response_packet, response_packet_len);
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, &stop_audio, len - 1); // -1 because CRC appended
+    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, response_packet, response_packet_len);
     DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
     int err = response_packet[1];
     if(err != E_SUCCESS){
+        lock_release(g_xAWETuningInstance.l_api_lock);
         return err;
     }
 
@@ -344,8 +354,8 @@ INT32 xawe_loadAWBfromArray(const UINT32 *pCommands, UINT32 arraySize, UINT32 *p
 
         unsigned int num_words_tx = PACKET_LENGTH_WORDS(msg_payload);
         *pPos += num_words_tx - 1;
-        _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, msg_payload, num_words_tx - 1); // -1 because CRC appended
-        unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, response_packet, response_packet_len);
+        _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, msg_payload, num_words_tx - 1); // -1 because CRC appended
+        unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, response_packet, response_packet_len);
         DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
         if(num_words_rx == 4){
             err = response_packet[2];
@@ -353,6 +363,7 @@ INT32 xawe_loadAWBfromArray(const UINT32 *pCommands, UINT32 arraySize, UINT32 *p
             err = response_packet[1];
         }
         if(err != E_SUCCESS){
+            lock_release(g_xAWETuningInstance.l_api_lock);
             return err;
         }
         cmd_idx += num_words_tx - 1;
@@ -360,31 +371,36 @@ INT32 xawe_loadAWBfromArray(const UINT32 *pCommands, UINT32 arraySize, UINT32 *p
 
     // Check valid
     const unsigned int layout_valid = (len << 16) + 130; // PFID_GetLayoutCoreAffinity missing from ProxyIds.h
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, &layout_valid, len - 1); // -1 because CRC appended
-    num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, response_packet, response_packet_len);
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, &layout_valid, len - 1); // -1 because CRC appended
+    num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, response_packet, response_packet_len);
     DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
 
     if(response_packet[1] == 0xffffffff){
+        lock_release(g_xAWETuningInstance.l_api_lock);
         return E_NO_CORE;
     }
 
+    lock_release(g_xAWETuningInstance.l_api_lock);
     return E_SUCCESS;
 }
 
 
 INT32 xawe_loadAWBfromFFS(const char *fileName){
+    lock_acquire(g_xAWETuningInstance.l_api_lock);
+
     const unsigned packet_len = 4 + MAX_FILENAME_LENGTH_IN_DWORDS + 1; // See https://w.dspconcepts.com/hubfs/Docs-AWECoreOS/AWECoreOS_UserGuide/a00075.html#message-structure
     unsigned int packet[packet_len] = {0};
 
     // Send audio stop command
     const unsigned len = 2; // Whole packet length inc CRC
     unsigned int stop_audio = (len << 16) + PFID_StopAudio;
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, &stop_audio, len - 1); // -1 because CRC appended
-    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, packet, packet_len);
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, &stop_audio, len - 1); // -1 because CRC appended
+    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, packet, packet_len);
     DEBUG_PRINT_RESPONSE(num_words_rx, packet);
 
     int err = packet[1];
     if(err != E_SUCCESS){
+        lock_release(g_xAWETuningInstance.l_api_lock);
         return err;
     }
 
@@ -395,12 +411,13 @@ INT32 xawe_loadAWBfromFFS(const char *fileName){
 
     // Check for FFS being enabled
     const unsigned int target_info = (len << 16) + PFID_GetTargetInfo;
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, &target_info, len - 1); // -1 because CRC appended
-    num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, packet, packet_len);
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, &target_info, len - 1); // -1 because CRC appended
+    num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, packet, packet_len);
     DEBUG_PRINT_RESPONSE(num_words_rx, packet);
 
     int isFlashSupported = (packet[5] & 0b10000) != 0;
     if(!isFlashSupported){
+        lock_release(g_xAWETuningInstance.l_api_lock);
         return E_NOSUCHFILE;
     }
 
@@ -410,12 +427,13 @@ INT32 xawe_loadAWBfromFFS(const char *fileName){
     const unsigned int get_next_file = (len << 16) + PFID_GetNextFile;
 
     // Get first filename
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, &get_first_file, len - 1); // -1 because CRC appended
-    num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, packet, packet_len);
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, &get_first_file, len - 1); // -1 because CRC appended
+    num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, packet, packet_len);
     DEBUG_PRINT_RESPONSE(num_words_rx, packet);
 
     err = packet[1];
     if(err != E_SUCCESS){
+        lock_release(g_xAWETuningInstance.l_api_lock);
         return err;
     }
 
@@ -443,8 +461,8 @@ INT32 xawe_loadAWBfromFFS(const char *fileName){
             int num_words_filename = 1 + (char_count >> 2) + 1; // padding 0 word, string + least one byte (up to 4) zero padding to a word
             const unsigned int execute_file_cmd = ((1 + num_words_filename + 1) << 16) + PFID_ExecuteFile; // CMD + filename + CRC
 
-            _send_packet_to_awe_dual_array(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, &execute_file_cmd, 1, packet, num_words_filename);
-            num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, packet, packet_len);
+            _send_packet_to_awe_dual_array(g_xAWETuningInstance.c_tuning_from_host, 0, &execute_file_cmd, 1, packet, num_words_filename);
+            num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, packet, packet_len);
             DEBUG_PRINT_RESPONSE(num_words_rx, packet);
 
             err = packet[1];
@@ -454,34 +472,39 @@ INT32 xawe_loadAWBfromFFS(const char *fileName){
 
             // Check valid
             const unsigned int layout_valid = (len << 16) + 130; // PFID_GetLayoutCoreAffinity missing from ProxyIds.h
-            _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, &layout_valid, len - 1); // -1 because CRC appended
-            num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, packet, packet_len);
+            _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, &layout_valid, len - 1); // -1 because CRC appended
+            num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, packet, packet_len);
             DEBUG_PRINT_RESPONSE(num_words_rx, packet);
 
             if(packet[1] == 0xffffffff){
+                lock_release(g_xAWETuningInstance.l_api_lock);
                 return E_NO_CORE;
             }
 
+            lock_release(g_xAWETuningInstance.l_api_lock);
             return E_SUCCESS;
         }
 
         // Not found, try again. Get next filename
-        _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, &get_next_file, len - 1); // -1 because CRC appended
-        num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, packet, packet_len);
+        _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, &get_next_file, len - 1); // -1 because CRC appended
+        num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, packet, packet_len);
         DEBUG_PRINT_RESPONSE(num_words_rx, packet);
 
         err = packet[1];
         if(err != E_SUCCESS){
+            lock_release(g_xAWETuningInstance.l_api_lock);
             return err;
         }
 
         // Same file found again. Out of files in the FFS and desired one not found.
         if(strcmp(found_file_name, last_filename) == 0){
+            lock_release(g_xAWETuningInstance.l_api_lock);
             return E_NOSUCHFILE;
         }
 
         strcpy(last_filename, found_file_name);
     }
 
+    lock_release(g_xAWETuningInstance.l_api_lock);
     return E_SUCCESS; // Unreachable but keep compiler happy
 }
