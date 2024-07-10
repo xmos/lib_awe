@@ -3,9 +3,13 @@
 #ifndef AWE_XCORE_H
 #define AWE_XCORE_H
 
+#ifdef __XC__
+#define channend_t chanend
+#else
 #include <stdint.h>
 #include <xcore/channel.h>
 #include <xcore/lock.h>
+#endif
 
 /**
  * \addtogroup lib_awe lib_awe
@@ -75,19 +79,14 @@ extern void awe_offload_data_to_dsp_engine(chanend_t c_to_awe,
                                            unsigned toAWE[],
                                            unsigned fromAWE[]);
 
-
 /**
-@brief The XMOS AWE instance.
-@details For XMOS this is an array of channel ends which represent
-the public API to the XMOS AWE instance and presents a tuning interface suitable for USB, internal use or other IO interfaces specified by the user.
-*/
-typedef struct xAWETuningInstance_t{
-    chanend_t c_tuning_from_host;
-    chanend_t c_tuning_to_host;
-    lock_t l_api_lock;
-} xAWETuningInstance_t;
+ * @brief Initialise the client side of the tuning interface which will typically connect to the host.
+ * May be on the same or a different tile from AWE.
+ * All tuning clients must be on the same tile.
+ * \param c_tuning_from_host       Channel end for tuning communication from host side (to AWE)
+ * \param c_tuning_from_host       Channel end for tuning communication to host side (from AWE)
 
-
+ */
 void init_awe_tuning_instance(chanend_t c_tuning_from_host,
                                chanend_t c_tuning_to_host);
 
@@ -277,5 +276,9 @@ INT32 xawe_loadAWBfromFFS(const char *fileName);
 
 #undef INT32
 #undef UINT32
+
+#ifdef __XC__
+#undef channend_t
+#endif
 
 #endif

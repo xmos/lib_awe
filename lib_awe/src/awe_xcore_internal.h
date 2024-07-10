@@ -13,6 +13,18 @@
 extern AWEInstance2 g_AWEInstance;
 extern UINT32 AWE_Packet_Buffer[AWE_HID_PACKET_BUFFER_SIZE];
 
+/**
+@brief The XMOS AWE instance.
+@details For XMOS this is an array of channel ends which represent
+the public API to the XMOS AWE instance and presents a tuning interface suitable for USB, internal use or other IO interfaces specified by the user.
+*/
+typedef struct xAWETuningInstance_t{
+    chanend_t c_tuning_from_host;
+    chanend_t c_tuning_to_host;
+    lock_t l_api_lock;
+} xAWETuningInstance_t;
+
+
 /** Function that initialises all global data structures
  */
 void awe_xcore_init();
