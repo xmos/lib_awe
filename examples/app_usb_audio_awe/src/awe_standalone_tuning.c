@@ -47,8 +47,7 @@ int wait_for_button_change(port_t p_buttons){
     return current_val;
 }
 
-void awe_standalone_tuning(chanend_t control_from_host, chanend_t control_to_host){
-    xAWEInstance_t pAWE = {control_from_host, control_to_host, lock_alloc()};
+void awe_standalone_tuning(void){
 
     // AWB image state
     awb_state_t awb_state_old = AWB_NONE;
@@ -72,7 +71,7 @@ void awe_standalone_tuning(chanend_t control_from_host, chanend_t control_to_hos
         if(buttons != buttons_not_pressed){
             switch(buttons){
                 case 0x03:
-                    awb_state = AWB_BASIC_3THREAD;                                                                                                                                                                                                          
+                    awb_state = AWB_BASIC_3THREAD;
                 break;
                 case 0x05:
                     awb_state = AWB_SIMPLE_VOLUME;
@@ -84,7 +83,7 @@ void awe_standalone_tuning(chanend_t control_from_host, chanend_t control_to_hos
                         if(volume < -50.0){
                             volume = 0.0;
                         }
-                        int err = xawe_ctrlSetValue(&pAWE, AWE_Volume1_gain_HANDLE, &volume, 0, 1);
+                        int err = xawe_ctrlSetValue(AWE_Volume1_gain_HANDLE, &volume, 0, 1);
                         if(err != E_SUCCESS){
                             printstrln("ERROR - setting volume failed");
                             printintln(err);
@@ -117,14 +116,14 @@ void awe_standalone_tuning(chanend_t control_from_host, chanend_t control_to_hos
                 // Load the AWB
 #if AWE_USE_FLASH_FILE_SYSTEM
                 char *awb_filename = awb_filenames[awb_state];
-                int err = xawe_loadAWBfromFFS(&pAWE, awb_filename);
+                int err = xawe_loadAWBfromFFS(awb_filename);
                 if(err != E_SUCCESS){
                     printstrln("ERROR - xawe_loadAWBfromFFS failed");
                     printintln(err);
                 }
 #else
                 unsigned int pPos = 0;
-                int err = xawe_loadAWBfromArray(&pAWE, awb_array, awb_array_len, &pPos);
+                int err = xawe_loadAWBfromArray(awb_array, awb_array_len, &pPos);
                 if(err != E_SUCCESS){
                     printstrln("ERROR - xawe_loadAWBfromArray failed");
                     printintln(err);
