@@ -23,13 +23,13 @@ void awe_usb_hid(chanend_t c_hid_to_host, chanend_t c_hid_from_host) {
     /* Mark the OUT endpoint to be ready to receive data from host */
     XUD_SetReady_Out(ep_hid_from_host, (unsigned char*)g_hid_from_host_buffer);
 
-    int ready_for_next_reply_packlet = 0; // This guards the select which receives responses from AWE
+    int ready_for_next_response_packet = 0; // This guards the select which receives responses from AWE
     XUD_Result_t result;
     unsigned length;
 
     /* Wait for response from XUD and service relevant EP */
     SELECT_RES(
-        CASE_GUARD_THEN(g_xAWETuningInstance.c_tuning_to_host, ready_for_next_reply_packlet, input_from_awe),
+        CASE_GUARD_THEN(g_xAWETuningInstance.c_tuning_to_host, ready_for_next_response_packet, input_from_awe),
         CASE_THEN(c_hid_from_host, xud_hid_output),
         CASE_THEN(c_hid_to_host, xud_hid_input)
         )
@@ -48,7 +48,7 @@ void awe_usb_hid(chanend_t c_hid_to_host, chanend_t c_hid_from_host) {
         chanend_check_end_token(g_xAWETuningInstance.c_tuning_to_host);
         // If we have transmitted the whole response then unlock the tuning channels
         if(response_finished){
-            ready_for_next_reply_packlet = 0;
+            ready_for_next_response_packet = 0;
             lock_release(g_xAWETuningInstance.l_api_lock);
         }
 
@@ -74,7 +74,7 @@ void awe_usb_hid(chanend_t c_hid_to_host, chanend_t c_hid_from_host) {
             chanend_check_end_token(g_xAWETuningInstance.c_tuning_from_host);
         }
         XUD_SetReady_Out(ep_hid_from_host, (unsigned char*)g_hid_from_host_buffer);
-        ready_for_next_reply_packlet = 1;
+        ready_for_next_response_packet = 1;
 
         continue;
     xud_hid_input:  /* HID IN to host */
