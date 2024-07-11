@@ -24,7 +24,7 @@ void awe_tuning_thread(chanend_t c_tuning_from_host,
                        chanend_t c_tuning_to_host,
                        chanend_t c_deferred_work[AWE_DSP_MAX_THREAD_NUM]) {
     int input_message_word_count = 0;
-    int full_packet_in_words = 0;
+    int full_packet_in_words = 0;   // This allows large messages to span multiple transfers
     int output_message_word_count = 0;
     int num_words, max_words;
     int deferred_thread_mask = 0;
@@ -90,6 +90,7 @@ void awe_tuning_thread(chanend_t c_tuning_from_host,
                 full_packet_in_words = AWE_HID_PACKET_BUFFER_SIZE;
             }
             output_message_word_count = 0;
+            // Trigger client side to receive response
             chanend_out_end_token(c_tuning_to_host);
         }
         continue;
@@ -105,9 +106,12 @@ void awe_tuning_thread(chanend_t c_tuning_from_host,
             int x = AWE_Packet_Buffer[output_message_word_count++];
             chanend_out_word(c_tuning_to_host, x);
         }
+        int response_finished = (output_message_word_count >= full_packet_in_words);
+        chanend_out_word(c_tuning_to_host, response_finished);
         chanend_out_end_token(c_tuning_to_host);
         chanend_check_end_token(c_tuning_to_host);
-        if (output_message_word_count < full_packet_in_words) {
+        if (!response_finished) {
+            // Trigger another transfer until whole of reply message sent.
             chanend_out_end_token(c_tuning_to_host);
         }
         continue;
