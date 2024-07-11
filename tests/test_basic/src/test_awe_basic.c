@@ -26,7 +26,7 @@ int parse_cmd_line(int argc, char** argv, uint32_t msg_to_awe_buffer[]){
         fprintf(stderr, "payload\t0x%8lx\n", word);
     }
     if(count != argc - 1) {
-        fprintf(stderr, "Mismatch in number of commands and header in xcore test app\n");        
+        fprintf(stderr, "Mismatch in number of commands and header in xcore test app\n");
         exit(1);
     }
 
@@ -45,11 +45,11 @@ void send_ctrl_to_awe(chanend_t c_tuning_from_host, uint32_t msg_to_awe_buffer[]
 
 DECLARE_JOB(awe_test, (uint32_t*, int, chanend_t, chanend_t, chanend_t));
 void awe_test(uint32_t *msg_to_awe_buffer, int msg_len, chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_t c_data){
-    
+
     uint32_t msg_from_awe_buffer[16] = {0};
     int num_words_rx = 0;
     int rx_msg_len = 100000; // A big number which we will re-write
-    
+
     send_ctrl_to_awe(c_tuning_from_host, msg_to_awe_buffer, msg_len);
 
     SELECT_RES(
@@ -68,6 +68,7 @@ void awe_test(uint32_t *msg_to_awe_buffer, int msg_len, chanend_t c_tuning_from_
             printf("%lx\n", msg_from_awe_buffer[i+1]);
             num_words_rx++;
         }
+        chanend_in_word(c_tuning_to_host); // Consume finished? token
         chanend_out_end_token(c_tuning_to_host);
         chanend_check_end_token(c_tuning_to_host);
         continue;
