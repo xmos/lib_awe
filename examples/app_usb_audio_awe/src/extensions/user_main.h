@@ -48,16 +48,6 @@ extern void init_awe_tuning_instance(chanend c_tuning_from_host, chanend c_tunin
     CHAN_FOR_FFS
 
 
-/* Macros which will depend on how tuning is provided to AWE */
-#if STANDALONE_TUNING
-#define TUNING_TASK     awe_standalone_tuning();
-#else
-#define TUNING_TASK     awe_usb_hid(c_xud_in[ENDPOINT_NUMBER_IN_HID],   \
-                                    c_xud_out[ENDPOINT_NUMBER_OUT_HID]);
-#endif  /* STANDALONE_TUNING */
-
-
-
 #define USER_MAIN_CORES                                                 \
     on tile[0]: {                                                       \
         board_setup();                                                  \
@@ -65,7 +55,9 @@ extern void init_awe_tuning_instance(chanend c_tuning_from_host, chanend c_tunin
         par {                                                           \
             i2c_master(i2c, 1, p_scl, p_sda, 100);                      \
             FFS_SERVER_TASK                                             \
-            TUNING_TASK                                                 \
+            awe_standalone_tuning();                                    \
+            awe_usb_hid(c_xud_in[ENDPOINT_NUMBER_IN_HID],               \
+                        c_xud_out[ENDPOINT_NUMBER_OUT_HID]);            \
         }                                                               \
     }                                                                   \
     on tile[1]: {                                                       \
