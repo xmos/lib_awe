@@ -175,23 +175,33 @@ void _send_packet_to_awe_dual_array(chanend_t c_tuning_from_host, lock_t l_api_l
     chanend_check_end_token(c_tuning_from_host);
 }
 
-// Gets a whole packet (icnluding CRC) from awe
+// Gets a whole packet (including CRC) from awe
 unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, lock_t l_api_lock, unsigned int packet_buffer[], unsigned max_packet_words){
-    chanend_check_end_token(c_tuning_to_host);
-    chanend_out_word(c_tuning_to_host, max_packet_words);
-    chanend_out_end_token(c_tuning_to_host);
-    unsigned num_words = chanend_in_word(c_tuning_to_host);
-    for(unsigned i = 0; i < num_words; i++) {
-        packet_buffer[i] = chanend_in_word(c_tuning_to_host);
+
+    // Messages may be split across multiple packets
+    int response_finished = 0;
+    unsigned int total_words = 0;
+
+    while(!response_finished){
+        chanend_check_end_token(c_tuning_to_host);
+        chanend_out_word(c_tuning_to_host, max_packet_words);
+        chanend_out_end_token(c_tuning_to_host);
+        unsigned num_words = chanend_in_word(c_tuning_to_host);
+        total_words += num_words;
+        for(unsigned i = 0; i < num_words; i++) {
+            packet_buffer[i] = chanend_in_word(c_tuning_to_host);
+        }
+        response_finished = chanend_in_word(g_xAWETuningInstance.c_tuning_to_host);
+
+        chanend_out_end_token(c_tuning_to_host);
+        chanend_check_end_token(c_tuning_to_host);
     }
-    chanend_out_end_token(c_tuning_to_host);
-    chanend_check_end_token(c_tuning_to_host);
 
     if(l_api_lock != 0){
         lock_release(l_api_lock);
     }
 
-    return num_words;
+    return total_words;
 }
 
 #define NUM_WORDS(packet) (sizeof(packet) / sizeof(packet[0]))
