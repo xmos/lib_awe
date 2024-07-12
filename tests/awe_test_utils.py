@@ -110,8 +110,8 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
         """ Send and receive in one hit - cmd is text command and payload is list of uints. CRC gets added automatically"""
         if payload is None:
             payload = []
-        msg = [((1 + len(payload) + 1) << 16) + awe_cmd_list.lookup(self, cmd)]
-        msg += payload
+        header = [((1 + len(payload) + 1) << 16) + awe_cmd_list.lookup(self, cmd)] # Len = Header + payload + CRC
+        msg = header + payload
         
         return self.cmd_raw(msg)
 
