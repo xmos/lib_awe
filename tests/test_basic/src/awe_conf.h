@@ -7,8 +7,6 @@
 #define AWE_INPUT_CHANNELS           2
 #define AWE_OUTPUT_CHANNELS          2
 
-#define AWE_HEAP_SIZE         (35*1024)
-
-#define AWE_TUNING_OVER_USB_HID      1
+#define AWE_HEAP_SIZE_LONG_WORDS     (35*1024)
 
 #endif

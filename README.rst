@@ -62,5 +62,5 @@ This package is supported by XMOS Ltd. Issues can be raised against the software
 Known Issues
 ============
 
-  * None
+  * The DSP Concepts AWE Flash File System assumes that erase sectors are of a constant size. The FFS uses the data partition which is beyond the boot partition and so this is generally the case, however please check your chosen flash device for this property if enabling the FFS.
 

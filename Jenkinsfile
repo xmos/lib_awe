@@ -176,7 +176,7 @@ pipeline {
                       sh "cmake -G \"Unix Makefiles\" -B build"
                       sh "xmake -C build -j"
                     }
-                    sh "python -m pytest -k \"not lib\" --junitxml=junit_main.xml"
+                    sh "python -m pytest -v -k \"not lib and not ffs\" --junitxml=junit_main.xml"
                     junit "junit_main.xml"
                   } // withTools
                 } // withVenv

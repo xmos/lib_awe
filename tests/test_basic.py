@@ -10,17 +10,23 @@ output.
 import pytest
 from pathlib import Path
 import struct
-from awe_test_utils import awe_cmd_list, awe_error_codes, run_xe
+from awe_test_utils import awe_cmd_list, awe_error_codes, run_xe_sim
 
 xe_cmd = "test_basic/bin/test_awe_basic.xe"
 xe_xawe = "test_xawe_if/bin/test_xawe_if.xe"
 
-def send_command(xe, cmd):
-    cmd = 0x00020000 + awe_cmd_list().lookup(cmd)
+def send_command(xe, cmd, payload=[]):
+    cmd = ((2 + len(payload)) << 16) + awe_cmd_list().lookup(cmd)
     crc = 0 ^ cmd
-    cmd_str = f"{hex(cmd)} {hex(crc)}"
+    payload_str = ""
+    for item in payload:
+        payload_str += f"{item:x} "
+        crc ^= item
+
+    cmd_str = f"{hex(cmd)} {payload_str} {hex(crc)}"
     cmd_str = cmd_str.replace("0x", "")
-    return run_xe(xe, cmd_str)
+
+    return run_xe_sim(xe, cmd_str, max_cycles = 1000000 if len(payload) == 0 else 10000000 )
 
 
 def check_expected(dut, expected):
@@ -57,9 +63,22 @@ def test_get_core_list():
 
     check_expected(dut, expected)
 
+def test_long_packet():
+    # 264 max packet length so cmd + id + len + offset + payload + CRC
+    payload = [0] + [259] + [0] + [i for i in range(259)]
+    dut = send_command(xe_cmd, "PFID_SetValueHandle", payload=payload)
+    response = dut.split()
+    error_code = int(response[1], 16)
+    error_code = struct.unpack('<i', struct.pack('<I', error_code))[0] # do 2's complement
+
+    error_lut = awe_error_codes()
+
+    # We want a legit error rather than a broken packet
+    assert error_lut.lookup(error_code) == "E_ARGUMENT_ERROR"
+
 
 def test_xawe_ctrl_interface():
-    stdout = run_xe(xe_xawe, "", max_cycles=10000000)
+    stdout = run_xe_sim(xe_xawe, "", max_cycles=10000000)
     print(stdout)
 
 # Just for testing some of the utils

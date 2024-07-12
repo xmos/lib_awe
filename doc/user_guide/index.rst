@@ -44,6 +44,7 @@ Finally, a tuning thread is provided which abstracts away the awe_packetProcess(
 
 All of the above threads for the core lib_awe need to be placed on the same tile. Since the majority of one tile's RAM and threads are used by lib_awe it is typical to dedicate one tile to lib_awe and use the other tile for application logic. However, low-memory usage tasks such as I2S may also be placed on the lib_awe tile (when required by hardware IO constraints) and this is demonstrated in the USB Audio Example.
 
+An additional thread may be used in the case where the AWE Flash File System (FFS) is enabled. In this case it acts as a remote flash server meaning that the AWE Core and the flash memory may exist on different tiles. Use of the FFS is optional and can be enabled or disabled using defines (see API). The flash server makes use of the API provided in the XMOS tools ``quadflashlib.h``. Documentation regarding this can be found in the `XTC tools manual <https://www.xmos.com/documentation/XM-014363-PC-9/html/tools-guide/tools-ref/libraries/libflash-api/libflash-api.html>`_. 
 
 Lib_awe API
 -----------
@@ -57,7 +58,7 @@ In order to use the functions, one needs to configure the library to use the cor
   AWE_INPUT_CHANNELS              0 or more
   AWE_OUTPUT_CHANNELS             0 or more
   AWE_BLOCK_SIZE                  32
-  AWE_HEAP_SIZE                   4096
+  AWE_HEAP_SIZE_LONG_WORDS        16384
   =============================== ===========
 
 Some values are, at present, pre-set:
@@ -107,12 +108,18 @@ There are three firmware build profiles provided each one providing a different 
    * - UA_STANDALONE
      - USB Audio to target, Line out from target
      - Internal to firmware
+   * - UA_FFS
+     - USB Audio to target, Line out from target
+     - USB / HID with Flash File System enabled
+   * - UA_FFS_STANDALONE
+     - USB Audio to target, Line out from target
+     - Internal to firmware with Flash File System enabled
 
 UA Build
 ........
 
 
-The feature set of this build is as follows:
+The feature set of this build profile is as follows:
 
     - USB Audio Class 2.0 (High Speed)
     - Stereo input from the host
@@ -130,7 +137,7 @@ The feature set of this build is as follows:
 I2S Build
 .........
 
-The feature set of this build is as follows:
+The feature set of this build profile is as follows:
 
 
     - Stereo input from the IN 1/2 3.5 mm analog jack
@@ -146,7 +153,7 @@ The feature set of this build is as follows:
 UA_STANDALONE Build
 ...................
 
-The feature set of this build is as follows:
+The feature set of this build profile is as follows:
 
     - USB Audio Class 2.0 (High Speed)
     - Stereo input from the host
@@ -184,6 +191,30 @@ The control works as follows:
 .. note::
     When the firmware boots, there is no design loaded so you will not hear any sound played from the host. Please press button 2 or 1 to load an AWB and enable audio processing.
 
+UA_FFS Build
+............
+
+The UA_FFS build profile is a superset of the UA build. In addition to supporting audio and tuning over USB / HID it has the internal Flash File System (FFS) enabled. This means, via the Audioweaver GUI, you may add files to a file system that is stored in external flash memory. The files may include ``.awb`` compiled design images which can be loaded or even booted from so that the AWE system comes up pre-configured with a particular design.
+
+The FFS is stored in the data partition of the flash memory and the boot partition (used for the boot image(s)) is protected from accidental overwriting.
+
+For more details on using the FFS from Audioweaver please consult the DSP Concepts documentation.
+
+.. note::
+    When using the FFS ensure that the timeout setting in the AWE Server "Change Connection" dialogue is increased to 5000 ms. This is because some of the low-level flash operations may exceed the 1500 ms default timeout setting which will cause communications errors.
+
+A thread diagram showing the addition of the FFS flash server thread, which manages the low-level flash accesses can be seen below.
+
+.. figure:: ./images/awe_example_ua_ffs.png
+   :width: 75%
+
+   Application thread diagram for awe_example with FFS
+
+
+UA_FFS_STANDALONE Build
+.......................
+
+The UA_FFS_STANDALONE build profile is closest to the UA_STANDALONE build profile except with the FFS enabled. The button assignment is the same as UA_STANDALONE except that, instead of loading the AWB files from C arrays, they are loaded from file in the FFS. As with the UA_FFS build profile, the USB tuning interface is disabled and handled internally by firmware from the task contained in ``awe_standalone_tuning.c``.
 
 
 Building the Examples
@@ -254,7 +285,7 @@ To build using xcommon-cmake:
 
 This will build both the UA (USB Audio) and I2S (I2S only for data transport but with USB/HID enabled for control) binaries. All of the required dependencies will be downloaded at this step. This will only happen the first time you build.
 
-The application uses approximately 30-48 kB on Tile[0] depending on build and 510 kB on Tile[1], of 512 kB on each tile when allocating a generous 44 k long-words for ``AWE_HEAP_SIZE``.
+The application uses approximately 30-48 kB on Tile[0] depending on build and 510 kB on Tile[1], of 512 kB on each tile when allocating a generous 44 k long-words for ``AWE_HEAP_SIZE_LONG_WORDS``.
 
 Running the Examples
 ....................
@@ -263,11 +294,39 @@ To run the application use the following command from the lib_awe/app_usb_audio_
 
     xrun bin/<build>/app_usb_audio_awe_<build>.xe
 
-Alternatively to make the design non-volatile by programming in to flash memory use the following command::
+Alternatively to make the design non-volatile by programming in to flash memory use the following command:
 
-    xflash bin/<build>/app_usb_audio_awe_<build>.xe
 
-The USB audio device should appear in your host OS's audio settings window.
+.. tab:: UA, I2S_ONLY, UA_STANDALONE
+
+    .. code-block:: console
+
+       # UA, I2S_ONLY, UA_STANDALONE
+       xflash bin/<build>/app_usb_audio_awe_<build>.xe
+
+.. tab:: UA_FFS
+
+    .. code-block:: console
+
+       # UA_FFS
+       xflash --factory bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe --boot-partition-size 0x80000
+
+
+.. tab:: UA_FFS_STANDALONE
+
+   .. code-block:: console
+
+      # UA_FFS
+      xflash --factory bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe --boot-partition-size 0x80000 --data ../examples/audioweaver/awb_files/data_partition_ffs.bin
+
+The figure ``0x80000`` equates to 512 kB which is the amount of space reserved for the boot partition. For this example, the required storage in flash for the application is in the order of 380 kB leaving around 132 kB of space for the application to grow if needed. A simple way to determine the required boot partition size if to run the following command and then inspect the file size of ``flash.bin``::
+
+    xflash -o flash.bin app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe 
+
+In this case the rest of the flash beyond the boot partition (for this target 3.5 MB) is available for the FFS.
+
+
+Once flashed or run, the USB audio device should appear in your host OS's audio settings window (except for I2S_ONLY).
 
 .. note::
     No audio will be passed through from the host to the 3.5 mm jack until an AWE design is loaded.
