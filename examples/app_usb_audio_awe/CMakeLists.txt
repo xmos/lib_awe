@@ -76,22 +76,14 @@ set(APP_COMPILER_FLAGS_simple_volume_InitAWB.c      -DCore0_InitCommands=Core0_I
                                                     -DCore0_InitCommands_Len=Core0_InitCommands_simple_volume_Len)
 
 
-<<<<<<< HEAD
 set(APP_XC_SRCS                 src/extensions/XUD_HAL.xc
                                 src/extensions/audiostream.xc
                                 ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src/extensions/audiohw.xc)
 
 set(APP_C_SRCS                  src/awe_audio.c
                                 src/awe_standalone_tuning.c
-                                ../../tests/awb_files/playBasic_3thread_InitAWB.c
-                                ../../tests/awb_files/simple_volume_InitAWB.c)
-=======
-# Grab the app sources - we will extend these with HW setup from sw_usb_audio
-file(GLOB_RECURSE APP_XC_SRCS   ${APP_ROOT_DIR}/src/*.xc)
-list(APPEND APP_XC_SRCS         ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src/extensions/audiohw.xc
                                 ../audioweaver/awb_files/playBasic_3thread_InitAWB.c
                                 ../audioweaver/awb_files/simple_volume_InitAWB.c)
->>>>>>> b37331c6ad14fc4b41f4ae778ac8019158af85c3
 
 set(APP_INCLUDES    src
                     src/core
