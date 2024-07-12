@@ -82,7 +82,7 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
     """
         See: https://dspconcepts.com/sites/default/files/forum/awe-core-integration-guide.pdf
     """
-
+    # these are the two common response packet formats
     resp_a = 0x30000
     resp_b = 0x40000
     delay_after_stop_audio_s = 0.01 # This has been tested to be stable at 6ms and above over 5000 iterations. Set to 10ms for margin
@@ -245,7 +245,7 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
 
         # Stop audio first to avoid frequent firmware exception when destroying existing design
         # See https://xmosjira.atlassian.net/wiki/spaces/UAAI/pages/4122148883/DSPC+Integration+snag+list
-        self.cmd_raw([0x20000 + awe_cmd_list.lookup(self, 'PFID_StopAudio')])
+        self.cmd('PFID_StopAudio')
         time.sleep(self.delay_after_stop_audio_s) # to allow stop audio to complete
 
         awb_idx = 0
@@ -312,7 +312,7 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
 
         # Stop audio first to avoid frequent firmware exception when destroying existing design
         # See https://xmosjira.atlassian.net/wiki/spaces/UAAI/pages/4122148883/DSPC+Integration+snag+list
-        self.cmd_raw([0x20000 + awe_cmd_list.lookup(self, 'PFID_StopAudio')])
+        self.cmd('PFID_StopAudio')
         time.sleep(self.delay_after_stop_audio_s) # to allow stop audio to complete
 
         # Do some checks
@@ -338,7 +338,7 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
                 self.send(build_exe_cmd(name))
                 err = self.check_response(self.get_response())
                 assert err == 0, f"Execute failed: {err} {awe_error_codes.lookup(self, err)}"
-                self.cmd_raw([0x20000 + awe_cmd_list.lookup(self, 'PFID_StartAudio')])
+                self.cmd('PFID_StartAudio')
                 print(f"Loaded..")
 
                 return True
