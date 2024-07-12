@@ -27,7 +27,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/${SW_USB_AUDIO_PATH}/deps.cmake)
 list(APPEND APP_DEPENDENT_MODULES "lib_awe")
 
 set(APP_PCA_ENABLE ON)
-# Audio Class 2, Async, I2S Master, 8xInput, 8xOutput
 
 set(APP_COMMON_BUILD_FLAGS                      -fcomment-asm
                                                 -O3
@@ -39,17 +38,28 @@ set(APP_COMMON_BUILD_FLAGS                      -fcomment-asm
                                                 -DXUA_QUAD_SPI_FLASH=1
                                                 -DMIXER=0)
 
+# Build Configurations:
+
+# Audio transport:   USB
+# Tuning interface:  USB HID
+# DFU:               USB
 set(APP_COMPILER_FLAGS_UA                       ${EXTRA_BUILD_FLAGS}
                                                 ${APP_COMMON_BUILD_FLAGS})
 
+# Audio transport:   I2S
+# Tuning interface:  USB HID
+# DFU:               USB
 set(APP_COMPILER_FLAGS_I2S                      ${EXTRA_BUILD_FLAGS}
                                                 ${APP_COMMON_BUILD_FLAGS}
                                                 -DCODEC_MASTER=1
-                                                -DAUDIO_CLASS=1
+                                                -DAUDIO_CLASS=2
                                                 -DNUM_USB_CHAN_OUT=0
                                                 -DNUM_USB_CHAN_IN=0
                                                 -DI2S_ONLY=1)
 
+# Audio transport:   USB
+# Tuning interface:  No
+# DFU:               USB
 set(APP_COMPILER_FLAGS_UA_STANDALONE            ${EXTRA_BUILD_FLAGS}
                                                 ${APP_COMMON_BUILD_FLAGS}
                                                 -DSTANDALONE=1)
