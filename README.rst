@@ -41,7 +41,7 @@ Related Application Notes
 
 The following application notes use this library:
 
-  * None
+  * AN020016: Audio Weaver on xcore.ai Example
 
 Required Software (dependencies)
 ================================
