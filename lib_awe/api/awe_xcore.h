@@ -278,7 +278,7 @@ INT32 xawe_loadAWBfromFFS(const char *fileName);
 #undef UINT32
 
 #ifdef __XC__
-#undef channend_t
+#undef chanend_t
 #endif
 
 #endif
