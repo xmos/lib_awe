@@ -159,6 +159,7 @@
 #define HID_CONTROLS       (0)
 #endif
 
+/* Note, the items below are based on application specific define */
 #if !STANDALONE_TUNING
 #define HID_OUT_REQUIRED   (1)
 #endif
