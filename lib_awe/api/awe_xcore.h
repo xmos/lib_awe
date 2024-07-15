@@ -4,7 +4,7 @@
 #define AWE_XCORE_H
 
 #ifdef __XC__
-#define channend_t chanend
+#define chanend_t chanend
 #else
 #include <stdint.h>
 #include <xcore/channel.h>
