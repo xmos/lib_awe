@@ -37,18 +37,36 @@ set(APP_COMMON_BUILD_FLAGS                      -fcomment-asm
                                                 -DXUA_QUAD_SPI_FLASH=1
                                                 -DMIXER=0)
 
+# Build Configurations:
+
+# Audio transport:   USB
+# Tuning interface:  USB HID
+# DFU:               USB
 set(APP_COMPILER_FLAGS_UA                       ${EXTRA_BUILD_FLAGS}
                                                 ${APP_COMMON_BUILD_FLAGS})
 
+# Audio transport:   I2S
+# Tuning interface:  USB HID
+# DFU:               USB
 set(APP_COMPILER_FLAGS_I2S                      ${EXTRA_BUILD_FLAGS}
                                                 ${APP_COMMON_BUILD_FLAGS}
                                                 -DCODEC_MASTER=1
-                                                -DAUDIO_CLASS=1
+                                                -DAUDIO_CLASS=2
                                                 -DNUM_USB_CHAN_OUT=0
                                                 -DNUM_USB_CHAN_IN=0
                                                 -DI2S_ONLY=1)
 
+# Audio transport:   USB
+# Tuning interface:  No
+# DFU:               USB
+set(APP_COMPILER_FLAGS_UA_STANDALONE            ${EXTRA_BUILD_FLAGS}
+                                                ${APP_COMMON_BUILD_FLAGS}
+                                                -DSTANDALONE_TUNING=1)
+
 set(APP_COMPILER_FLAGS_UA_FFS                   ${APP_COMPILER_FLAGS_UA}
+                                                -DAWE_USE_FLASH_FILE_SYSTEM=1)
+
+set(APP_COMPILER_FLAGS_UA_FFS_STANDALONE        ${APP_COMPILER_FLAGS_UA_STANDALONE}
                                                 -DAWE_USE_FLASH_FILE_SYSTEM=1)
 
 set(APP_COMPILER_FLAGS_playBasic_3thread_InitAWB.c  -DCore0_InitCommands=Core0_InitCommands_Basic_3thread
@@ -58,9 +76,12 @@ set(APP_COMPILER_FLAGS_simple_volume_InitAWB.c      -DCore0_InitCommands=Core0_I
                                                     -DCore0_InitCommands_Len=Core0_InitCommands_simple_volume_Len)
 
 
-# Grab the app sources - we will extend these with HW setup from sw_usb_audio
-file(GLOB_RECURSE APP_XC_SRCS   ${APP_ROOT_DIR}/src/*.xc)
-list(APPEND APP_XC_SRCS         ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src/extensions/audiohw.xc
+set(APP_XC_SRCS                 src/extensions/XUD_HAL.xc
+                                src/extensions/audiostream.xc
+                                ${SW_USB_AUDIO_PATH}/app_usb_aud_xk_316_mc/src/extensions/audiohw.xc)
+
+set(APP_C_SRCS                  src/awe_audio.c
+                                src/awe_standalone_tuning.c
                                 ../audioweaver/awb_files/playBasic_3thread_InitAWB.c
                                 ../audioweaver/awb_files/simple_volume_InitAWB.c)
 
