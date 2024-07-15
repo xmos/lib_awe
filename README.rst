@@ -41,7 +41,7 @@ Related Application Notes
 
 The following application notes use this library:
 
-  * AN020016: Audio Weaver on xcore.ai Example
+  * AN020016: XMOS xcore.ai USB Audio AWE Examples
 
 Required Software (dependencies)
 ================================
