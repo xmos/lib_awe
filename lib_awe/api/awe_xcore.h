@@ -3,8 +3,13 @@
 #ifndef AWE_XCORE_H
 #define AWE_XCORE_H
 
+#ifdef __XC__
+#define chanend_t chanend
+#else
 #include <stdint.h>
 #include <xcore/channel.h>
+#include <xcore/lock.h>
+#endif
 
 /**
  * \addtogroup lib_awe lib_awe
@@ -51,7 +56,7 @@
  *                    [ AWE_INPUT_CHANNELS words, CT_END] over c_data, then
  *                    input [ AWE_OUTPUT_CHANNELS, CT_END ] from c_data.
  */
-extern void awe_xcore_main(chanend_t c_control_from_host,
+extern void awe_xcore_main(chanend_t c_tuning_from_host,
                            chanend_t c_tuning_to_host,
                            chanend_t c_data);
 
@@ -74,16 +79,16 @@ extern void awe_offload_data_to_dsp_engine(chanend_t c_to_awe,
                                            unsigned toAWE[],
                                            unsigned fromAWE[]);
 
-
 /**
-@brief The XMOS AWE instance.
-@details For XMOS this is an array of channel ends which represent
-the public API to the XMOS AWE instance and presents a tuning interface suitable for USB, internal use or other IO interfaces specified by the user.
-*/
-typedef struct xAWEInstance_t{
-    chanend_t c_tuning_from_host;
-    chanend_t c_tuning_to_host;
-} xAWEInstance_t;
+ * @brief Initialise the client side of the tuning interface which will typically connect to the host.
+ * May be on the same or a different tile from AWE.
+ * All tuning clients must be on the same tile.
+ * \param c_tuning_from_host       Channel end for tuning communication from host side (to AWE)
+ * \param c_tuning_from_host       Channel end for tuning communication to host side (from AWE)
+
+ */
+void init_awe_tuning_instance(chanend_t c_tuning_from_host,
+                               chanend_t c_tuning_to_host);
 
 /** @brief Type definition to make the xawe API reflect the AWE API*/
 #define INT32 int
@@ -92,7 +97,6 @@ typedef struct xAWEInstance_t{
 
 /**
  * @brief Get a scalar or array value of a module variable by handle
- * @param [in] pAWE                     instance pointer
  * @param [in] handle                   packed object handle
  * @param [out] value                   value(s) to get
  * @param [in] arrayOffset              array index if array
@@ -100,11 +104,10 @@ typedef struct xAWEInstance_t{
  * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED,
  *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS
  */
-INT32 xawe_ctrlGetValue(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length);
+INT32 xawe_ctrlGetValue(UINT32 handle, void *value, INT32 arrayOffset, UINT32 length);
 
 /**
  * @brief Set a scalar or array value of a module variable by handle
- * @param [in] pAWE                     instance pointer
  * @param [in] handle                   packed object handle
  * @param [in] value                    value(s) to set
  * @param [in] arrayOffset              array index if array
@@ -112,32 +115,29 @@ INT32 xawe_ctrlGetValue(const xAWEInstance_t *pAWE, UINT32 handle, void *value, 
  * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,  @ref E_CLASS_NOT_SUPPORTED,
  *  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS
  */
-INT32 xawe_ctrlSetValue(const xAWEInstance_t *pAWE, UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length);
+INT32 xawe_ctrlSetValue(UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length);
 
 /**
  * @brief Set the runtime status of a module.
  * 0 = Active,    1 = Bypass,    2 = Mute,    3 = Inactive
- * @param [in] pAWE                     instance pointer
  * @param [in] handle                   packed object handle
  * @param [in] status                   status to set
  * @return                              @ref E_SUCCESS,  @ref E_NOT_MODULE,  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS
  */
-INT32 xawe_ctrlSetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 status);
+INT32 xawe_ctrlSetStatus(UINT32 handle, UINT32 status);
 
 /**
  * @brief Get the runtime status of a module.
  * 0 = Active,    1 = Bypass,    2 = Mute,    3 = Inactive
- * @param [in] pAWE                     instance pointer
  * @param [in] handle                   packed object handle
  * @param [out] status                  status to get
  * @return                              @ref E_SUCCESS,  @ref E_NOT_MODULE,  @ref E_LINKEDLIST_CORRUPT,  @ref E_NO_MORE_OBJECTS,  @ref E_PARAMETER_ERROR
  */
-INT32 xawe_ctrlGetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *status);
+INT32 xawe_ctrlGetStatus(UINT32 handle, UINT32 *status);
 
 /**
  * @brief Set a scalar or array value  of a module variable by handle with mask. A mask allows you to only call module's set function
  *      for a single variable.
- * @param [in] pAWE                     instance pointer
  * @param [in] handle                   packed object handle
  * @param [in] value                    value(s) to set
  * @param [in] arrayOffset              array index if array
@@ -146,12 +146,11 @@ INT32 xawe_ctrlGetStatus(const xAWEInstance_t *pAWE, UINT32 handle, UINT32 *stat
  * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,
  *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE
  */
-INT32 xawe_ctrlSetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length, UINT32 mask);
+INT32 xawe_ctrlSetValueMask(UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length, UINT32 mask);
 
 /**
  * @brief Get a scalar or array value of a module variable by handle with mask. A mask allows you to only call module's set function
  *      for a single variable.
- * @param [in] pAWE                     instance pointer
  * @param [in] handle                   packed object handle
  * @param [out] value                   value(s) to get
  * @param [in] arrayOffset              array index if array
@@ -160,7 +159,7 @@ INT32 xawe_ctrlSetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, const voi
  * @return                              @ref E_SUCCESS,  @ref E_ARGUMENT_ERROR,  @ref E_BAD_MEMBER_INDEX,
  *  @ref E_CLASS_NOT_SUPPORTED,  @ref E_OBJECT_ID_NOT_FOUND,  @ref E_NOT_MODULE
  */
-INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *value, INT32 arrayOffset, UINT32 length, UINT32 mask);
+INT32 xawe_ctrlGetValueMask(UINT32 handle, void *value, INT32 arrayOffset, UINT32 length, UINT32 mask);
 
 
 /**
@@ -168,28 +167,25 @@ INT32 xawe_ctrlGetValueMask(const xAWEInstance_t *pAWE, UINT32 handle, void *val
  * Returns cycles in 24.8 format, so shift right by 8 bits for integer value. To get CPU cycles, multiply by target cpuSpeed / profileSpeed.
  * If a previous pump is not complete and the layout is ready to pump again, an overflow is detected.
  * In when in this state, the awe_getAverageLayoutCycles api will return the averageCycles = AWE_PUMP_OVF_MAX_AVG_CYCLES (0xFFFFFFFF).
- * @param [in] pAWE                     AWE instance pointer
  * @param [in] average_cycles           Pointer the output (average layout cycles)
  * @return                              @ref E_SUCCESS,
  *                                      @ref E_BADPACKET
  */
-INT32 xawe_getAverageLayoutCycles(const xAWEInstance_t *pAWE, UINT32 *average_cycles);
+INT32 xawe_getAverageLayoutCycles(UINT32 *average_cycles);
 
 /**
  * @brief Get the amount of main heap free.
  * Returns the heap size in 32 bit words.
- * @param [in] pAWE                     AWE instance pointer
  * @param [in] heap_free                Pointer the output (heap free in 32 bit words)
  * @return                              @ref E_SUCCESS,
  *                                      @ref E_BADPACKET
  */
-INT32 xawe_GetHeapSize(const xAWEInstance_t *pAWE, UINT32 *heap_free);
+INT32 xawe_GetHeapSize(UINT32 *heap_free);
 
 /*------------------------------------------Loader Functions----------------------------------------------------*/
 /**
 * @brief Executes packet commands from an in-memory array. Designer can generate AWB arrays directly from a layout.
 * Effectively this loads an AWB array and checks that it is valid. It automatically destroys any exitsing layout.
-* @param[in] pAWE           AWE instance pointer
 * @param[in] pCommands      Buffer with commands to execute
 * @param[in] arraySize      Number of DWords in command buffer
 * @param[out] pPos          Report failing word index
@@ -201,11 +197,11 @@ INT32 xawe_GetHeapSize(const xAWEInstance_t *pAWE, UINT32 *heap_free);
 *                           @ref E_BADPACKET
 *                           @ref E_NO_CORE
 */
-INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT32 arraySize, UINT32 *pPos);
+INT32 xawe_loadAWBfromArray(const UINT32 *pCommands, UINT32 arraySize, UINT32 *pPos);
 
 /**
 * @brief Executes packet commands from a stored file in the FFS. Designer can generate AWB arrays directly from a
-* layout and add using AWE server -> Flash menu. 
+* layout and add using AWE server -> Flash menu.
 * Effectively this loads an AWB array and checks that it is valid. It automatically destroys any exitsing layout.
 * Only available when AWE_USE_FLASH_FILE_SYSTEM is enabled and a valid .awb file has been pre-written into the FFS.
 * @param[in] pAWE           AWE instance pointer
@@ -216,7 +212,7 @@ INT32 xawe_loadAWBfromArray(xAWEInstance_t *pAWE, const UINT32 *pCommands, UINT3
 *                           @ref E_BADPACKET
 *                           @ref E_NO_CORE
 */
-INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName);
+INT32 xawe_loadAWBfromFFS(const char *fileName);
 
 
 
@@ -280,5 +276,9 @@ INT32 xawe_loadAWBfromFFS(xAWEInstance_t *pAWE, const char *fileName);
 
 #undef INT32
 #undef UINT32
+
+#ifdef __XC__
+#undef chanend_t
+#endif
 
 #endif

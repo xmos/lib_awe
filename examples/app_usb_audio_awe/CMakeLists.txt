@@ -40,14 +40,16 @@ set(APP_COMMON_BUILD_FLAGS                      -fcomment-asm
 # Build Configurations:
 
 # Audio transport:   USB
-# Tuning interface:  USB HID
+# Tuning interface:  USB HID + Internal
 # DFU:               USB
+# FFS:               Disabled
 set(APP_COMPILER_FLAGS_UA                       ${EXTRA_BUILD_FLAGS}
                                                 ${APP_COMMON_BUILD_FLAGS})
 
 # Audio transport:   I2S
-# Tuning interface:  USB HID
+# Tuning interface:  USB HID + Internal
 # DFU:               USB
+# FFS:               Disabled
 set(APP_COMPILER_FLAGS_I2S                      ${EXTRA_BUILD_FLAGS}
                                                 ${APP_COMMON_BUILD_FLAGS}
                                                 -DCODEC_MASTER=1
@@ -57,17 +59,12 @@ set(APP_COMPILER_FLAGS_I2S                      ${EXTRA_BUILD_FLAGS}
                                                 -DI2S_ONLY=1)
 
 # Audio transport:   USB
-# Tuning interface:  No
+# Tuning interface:  USB HID + Internal
 # DFU:               USB
-set(APP_COMPILER_FLAGS_UA_STANDALONE            ${EXTRA_BUILD_FLAGS}
-                                                ${APP_COMMON_BUILD_FLAGS}
-                                                -DSTANDALONE_TUNING=1)
-
+# FFS:               Enabled
 set(APP_COMPILER_FLAGS_UA_FFS                   ${APP_COMPILER_FLAGS_UA}
                                                 -DAWE_USE_FLASH_FILE_SYSTEM=1)
 
-set(APP_COMPILER_FLAGS_UA_FFS_STANDALONE        ${APP_COMPILER_FLAGS_UA_STANDALONE}
-                                                -DAWE_USE_FLASH_FILE_SYSTEM=1)
 
 set(APP_COMPILER_FLAGS_playBasic_3thread_InitAWB.c  -DCore0_InitCommands=Core0_InitCommands_Basic_3thread
                                                     -DCore0_InitCommands_Len=Core0_InitCommands_Basic_3thread_Len)
