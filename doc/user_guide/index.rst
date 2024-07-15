@@ -72,7 +72,7 @@ Some values are, at present, pre-set:
   =============================== ===========
 
 
-A single function is provided to wrap the entire lib_awe implementation and automatically spawns all of the worker and helper threads. In addition, where USB/HID is used as the control interface, an API is provided which takes care of translating messages to and from the HID endpoint and to and from the lib_awe tuning thread. Other interfaces may be used such as UART or I2C although these are not yet implemented.
+A single function is provided to wrap the entire lib_awe implementation and automatically spawns all of the worker and helper threads. In addition, where USB/HID is used as the control interface, an API is provided which takes care of translating messages to and from the HID endpoint and to and from the lib_awe tuning thread. Other interfaces may be used such as UART or I2C although these are not currently implemented.
 
 .. doxygengroup:: lib_awe
     :content-only:
