@@ -116,7 +116,7 @@ The feature set of this build profile is as follows:
     - USB Audio Class 2.0 (High Speed)
     - Stereo input from the host
     - Stereo output on the OUT 1/2 3.5 mm analog jack
-    - Audio from the host is pumped through the AWE framework before being played on the output jack
+    - Audio from the host is processed by the AWE framework before being played on the output jack
     - Asynchronous clocking (local audio clock to hardware)
     - 24 bit Sample resolution
     - 48 kHz sample rate
