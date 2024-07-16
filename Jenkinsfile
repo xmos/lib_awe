@@ -187,8 +187,12 @@ pipeline {
           }
           steps {
             println "Stage running on ${env.NODE_NAME}"
+            // We are going to build the example doc too for convinience
+            sh "git clone git@github.com:xmosnotes/${EXAMPLE}.git"
+
             dir("${REPO}") {
               checkout scm
+              sh "tree" // Debug
               sh "docker pull ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION"
 
               // Build lib docs
