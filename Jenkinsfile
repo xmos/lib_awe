@@ -210,8 +210,8 @@ pipeline {
                       -v ${WORKSPACE}/${EXAMPLE}:/build \
                       ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION -v"""
               // Zip and archive doc files
-              zip dir: "../${EXAMPLE}/doc/_build/html/", zipFile: "awe_example_html.zip"
-              archiveArtifacts artifacts: "awe_example_html.zip"
+              zip dir: "../${EXAMPLE}/doc/_build/html/", zipFile: "${EXAMPLE}_html.zip"
+              archiveArtifacts artifacts: "${EXAMPLE}_html.zip"
               sh "cp ../${EXAMPLE}/doc/_build/pdf/*.pdf ." // archiveArtifacts doesn't like going up a dir
               archiveArtifacts artifacts: "*.pdf", allowEmptyArchive: true
             }
