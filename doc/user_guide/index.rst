@@ -25,6 +25,9 @@ use:
 * <https://github.com/xmos/lib_xua.git> for the USB Audio library
   design
 
+.. note::
+    The ``lib_awe.a`` file is not provided as part of the lib_awe repository for security reasons. Please obtain this file from your XMOS contact directly.
+
 Architecture
 ------------
 
