@@ -24,6 +24,7 @@ pipeline {
   }
   environment {
     REPO = 'lib_awe'
+    EXAMPLE = 'an02016'
     PIP_VERSION = "24.0"
     PYTHON_VERSION = "3.11"
     XMOSDOC_VERSION = "v5.4"
@@ -40,6 +41,7 @@ pipeline {
 
             sh "git clone -b v1.2.1 git@github.com:xmos/infr_scripts_py"
             sh "git clone -b v1.5.0 git@github.com:xmos/infr_apps"
+            sh "git clone git@github.com:xmosnotes/${EXAMPLE}.git"
             get_xcommon_cmake()
 
             dir("${REPO}") {
@@ -75,37 +77,26 @@ pipeline {
             } // dir
           } //step
         }  // Library checks
-        stage('Build examples cmake/xcommon_cmake') {
+        stage('Build examples xcommon_cmake') {
           steps {
             withTools(params.TOOLS_VERSION) {
               withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
                 dir("${REPO}") {
                   withCredentials([file(credentialsId: 'DSPCAWE_8.D.1.1', variable: 'DSPC_AWE_LIB')]) {
                     sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
-                    // Build all example apps
-                    sh "cmake  -G \"Unix Makefiles\" -B build"
-                    archiveArtifacts artifacts: "build/manifest.txt", allowEmptyArchive: false
-                    sh "xmake -C build -j"
-                  } // credentials
+                  }
+                }
+                dir("${EXAMPLE}") {
+                  // Build all example apps
+                  sh "cmake  -G \"Unix Makefiles\" -B build"
+                  archiveArtifacts artifacts: "build/manifest.txt", allowEmptyArchive: false
+                  archiveArtifacts artifacts: "**/*.xe", allowEmptyArchive: false
+                  stash name: "xe_files", includes: "**/*.xe"
                 } // dir
-                archiveArtifacts artifacts: "${REPO}/**/*.xe", allowEmptyArchive: false
-                stash name: "xe_files", includes: "${REPO}/**/*.xe"
               } // withEnv
             } // withTools
           } // steps
         }  // Build examples XCCM
-        stage('Build examples xmake/xcommon') {
-          steps {
-            withTools(params.TOOLS_VERSION) {
-              dir("${REPO}") {
-                  // Build all apps in the examples directory
-                  // Disable xmake build for now until fixed
-                  // sh "xmake -j"
-              } // dir
-            // archiveArtifacts artifacts: "${REPO}/**/bin/*.xe", allowEmptyArchive: false
-            } // withTools
-          } // steps
-        }  // Build examples
       } // stages
       post {
         cleanup {
