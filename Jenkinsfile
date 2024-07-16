@@ -90,6 +90,7 @@ pipeline {
                   // Build all example apps
                   sh "cmake  -G \"Unix Makefiles\" -B build"
                   archiveArtifacts artifacts: "build/manifest.txt", allowEmptyArchive: false
+                  sh "xmake -C build -j"
                   archiveArtifacts artifacts: "**/*.xe", allowEmptyArchive: false
                   stash name: "xe_files", includes: "**/*.xe"
                 } // dir
