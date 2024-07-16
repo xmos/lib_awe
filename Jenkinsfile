@@ -192,7 +192,6 @@ pipeline {
 
             dir("${REPO}") {
               checkout scm
-              sh "tree .." // Debug
               sh "docker pull ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION"
 
               // Build lib docs
@@ -211,6 +210,7 @@ pipeline {
                       -v ${WORKSPACE}/${EXAMPLE}:/build \
                       ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION -v"""
               // Zip and archive doc files
+              sh "tree .." // Debug
               zip dir: "../${EXAMPLE}/doc/_build/html/", zipFile: "awe_example_html.zip"
               archiveArtifacts artifacts: "awe_example_html.zip"
               archiveArtifacts artifacts: "../${EXAMPLE}/doc/_build/**/*.pdf", allowEmptyArchive: true
