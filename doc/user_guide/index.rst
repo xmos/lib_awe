@@ -5,11 +5,11 @@ AWE Library User Guide
 Introduction
 ------------
 
-AudioWeaver is a tool and libraries for implementing Digital Signal Processing algorithms. It comprises a GUI and a set of libraries. Standard building blocks such as filters, equalisers, echo cancellers, can be assembled in the GUI and then executed on a device. A control library is available that enables on-line control of the blocks.
+AudioWeaver is a tool and libraries for implementing Digital Signal Processing algorithms. It comprises a GUI and a set of libraries. Standard building blocks such as filters, equalisers, echo cancellers, can be assembled in the GUI and then executed on a device. A control library is available that enables on-line tuning of the processing blocks.
 
 XCORE is a programmable multi-core device with flexible DSP and IO interfaces. The IO interfaces can be programmed to, for example, I2S, TDM, USB, ADAT or S/PDIF interfaces (or indeed any other interface), and the DSP capability can be used to operate on data that is received from or sent to these interfaces. In addition to interfaces and DSP, XCORE devices can also execute control code or even ML inference engines.
 
-Lib_awe is a port of AudioWeaver for XMOS's powerful xcore.ai device. It contains code for software threads which wrap the core library and provide easy interfacing to both audio streaming components such as I2S and USB Audio as well as control interfacing to allow control and loading of pre-built designs from a host or internally from the device.
+Lib_awe is a port of AudioWeaver for XMOS's powerful xcore.ai device. It contains code for software threads which wrap the core library and provide easy interfacing to both audio streaming components such as I2S and USB Audio as well as tuning interfacing to allow control and loading of pre-built designs from a host or internally from the device.
 
 It utilises xcore.ai's multi-threaded architecture and vector processing unit to provide very high performance and predictable timing required by embedded systems.
 
@@ -36,32 +36,36 @@ Lib_awe provides an interface to the audio streaming and control functions using
    lib_awe thread diagram
 
 
-Lib_Awe consists of a group of threads. There are a statically define number (maximum 5) of DSP worker threads which perform the AWE core functionality within the AudioWeaver runtime core.
+Lib_awe consists of a group of threads. There are a statically defined number (maximum 5) of DSP worker threads which perform the AWE core functionality within the Audioweaver runtime core.
 
-To support audio streaming an audio transport thread provides a channel interface to the Audio Weaver awe_audioImportSamples() and awe_audioExportSamples() functions. The purpose of this thread is to simplify connection to XMOS audio streaming components and user application logic and allows placement of the user selected application logic on different tiles.
+To support audio streaming an audio transport thread provides a channel interface to the Audioweaver ``awe_audioImportSamples()`` and ``awe_audioExportSamples()`` functions. The purpose of this thread is to simplify connection to XMOS audio streaming components and user application logic and allows placement of the user application logic on a different tile.
 
-Finally, a tuning thread is provided which abstracts away the awe_packetProcess() function calls and provides a channel API and again provides a channel based interface allowing placement of control to be on a different tile. In AWE language, this provides a ``tuning interface`` which is different from a ``control interface`` in that the control interface uses function calls. The same functionality is available for both AWE approaches however for the XCORE port the ``tuning interface`` method is default since it allows logic to be placed on a remote tile which does not share the memory space with the AWE tile.
+Finally, a tuning thread is provided which abstracts away the awe_packetProcess() function calls and provides a channel API and again provides a channel based interface allowing placement of control to be on a different tile. In AWE language, this provides a ``tuning interface`` which is different from a ``control interface`` in that the control interface uses function calls and tuning is a remote operation. The same functionality is available for both AWE approaches however, for the XCORE port, the ``tuning interface`` method is default since it allows control logic to be placed on a remote tile that does not share the memory space with the AWE tile.
 
-The channel-based tuning interface supports multiple clients. The USB/HID and internal ``xawe_*****`` commands (see API) implement a mutex which allows multiple instances of tuning to be used at the same time so long as they are all on the same tile. The majority of the tuning commands consist of a command and a response however it should be noted that, when loading an AWB file (which is essentially a block of commands) from AWE Designer, interrupting the load with other commands may result in undefined behavior. The internal ``awe_loadAWB***`` commands which can be used from the firmware do implement locking around the whole operation and so cannot be interrupted.
+The channel-based tuning interface supports multiple clients. The USB/HID and internal ``xawe_*****`` commands (see API) implement a mutex which allows multiple instances of tuning to be used at the same time so long as they are all on the same tile. The majority of the tuning commands consist of a command and a response however it should be noted that, when loading an AWB file (which is essentially a block of commands) from AWE Designer, interrupting the load with other commands may result in undefined behavior. The internal ``awe_loadAWB***`` commands that can be used from the firmware do implement locking around the whole image load operation and so cannot be interrupted by an external tuning command.
 
-All of the above threads for the core lib_awe need to be placed on the same tile. Since the majority of one tile's RAM and threads are used by lib_awe it is typical to dedicate one tile to lib_awe and use the other tile for application logic. However, low-memory usage tasks such as I2S may also be placed on the lib_awe tile (when required by hardware IO constraints) and this is demonstrated in the USB Audio Example.
+All of the above threads for the core lib_awe need to be placed on the same tile. Since the majority of one tile's RAM and many of the threads are used by lib_awe it is typical to dedicate one tile to lib_awe and use the other tile for application logic. However, low-memory usage tasks such as I2S may also be placed on the lib_awe tile (when required by hardware IO constraints) and this is demonstrated in the USB Audio Example.
 
-An additional thread may be used in the case where the AWE Flash File System (FFS) is enabled. In this case it acts as a remote flash server meaning that the AWE Core and the flash memory may exist on different tiles. Use of the FFS is optional and can be enabled or disabled using defines (see API). The flash server makes use of the API provided in the XMOS tools ``quadflashlib.h``. Documentation regarding this can be found in the `XTC tools manual <https://www.xmos.com/documentation/XM-014363-PC-9/html/tools-guide/tools-ref/libraries/libflash-api/libflash-api.html>`_.
+An additional thread may be used in the case where the AWE Flash File System (FFS) is enabled. The FFS can be used to store compiled AWE design files. It provides a remote flash memory access server meaning that the AWE Core and the flash memory IO may exist on different tiles. Use of the FFS is optional and can be enabled or disabled using defines (see API). The flash server makes use of the API provided in the XMOS tools ``quadflashlib.h``. Documentation regarding this can be found in the `XTC tools manual <https://www.xmos.com/documentation/XM-014363-PC-9/html/tools-guide/tools-ref/libraries/libflash-api/libflash-api.html>`_.
 
 Lib_awe API
 -----------
 
 In order to use the functions, one needs to configure the library to use the correct number of audio channels, threads, and heaps. To this effect, create a file ``awe_conf.h`` in your project that defines the following values:
 
-  =============================== ===========
+  =============================== ============
   Define                          Values
-  =============================== ===========
+  =============================== ============
   AWE_DSP_THREAD_NUM              1..5
   AWE_INPUT_CHANNELS              0 or more
   AWE_OUTPUT_CHANNELS             0 or more
-  AWE_BLOCK_SIZE                  32
-  AWE_HEAP_SIZE_LONG_WORDS        16384
-  =============================== ===========
+  AWE_BLOCK_SIZE                  32 nominal
+  AWE_HEAP_SIZE_LONG_WORDS        1024 or more
+  =============================== ============
+
+The ``AWE_BLOCK_SIZE`` value may be adjusted and designs can be made according to this setting however 32 is recommended as a good trade-off between system latency, memory usage and CPU efficiency which is higher for larger block sizes.
+
+``AWE_HEAP_SIZE_LONG_WORDS`` is dependent on your particular design requirements. Even in maximal configurations, AWE on XCORE allows for at least 40 k long words of heap size.
 
 Some values are, at present, pre-set:
 
@@ -72,7 +76,7 @@ Some values are, at present, pre-set:
   =============================== ===========
 
 
-A single function is provided to wrap the entire lib_awe implementation and automatically spawns all of the worker and helper threads. In addition, where USB/HID is used as the control interface, an API is provided which takes care of translating messages to and from the HID endpoint and to and from the lib_awe tuning thread. Other interfaces may be used such as UART or I2C although these are not currently implemented.
+A single function is provided to wrap the entire lib_awe implementation and automatically spawns all of the worker and helper threads. If the FFS is used then this thread must be started by the user. In addition, where USB/HID is used as the control interface, an API is provided which takes care of translating messages to and from the HID endpoint and to and from the lib_awe tuning thread. Lib_awe also provides a number of remote tuning function APIs which allow loading of AWB designs, profiling and the setting and getting and getting of tuning parameters from firmware. The external USB/HID interface may co-exist with internal tuning functions. Other interfaces may be used such as UART or I2C although these are not currently implemented.
 
 .. doxygengroup:: lib_awe
     :content-only:
@@ -80,213 +84,6 @@ A single function is provided to wrap the entire lib_awe implementation and auto
 Application Examples
 --------------------
 
-A number of sample applications are provided to help you get up and running quickly. The sample application provided is called ``app_usb_audio_awe``. It is based on the XMOS USB Audio reference design which uses ``lib_xua`` and associated XK-AUDIO-316-MC hardware. It is very closely related to the standard USB Audio reference design provided by XMOS in ``sw_usb_audio``. Documentation for this can be found here `sw_usb_audio design guide <https://www.xmos.com/download/sw_usb_audio:-sw_usb_audio-(user-guide)(v8_1_0).pdf>`_
+A number of sample applications are provided to help you get up and running quickly based on the XK-AUDIO-316-MC hardware and standard USB Audio reference design provided by XMOS in ``sw_usb_audio``. 
 
-The thread diagram for the application example is shown below. Note how most of it is either brought in from ``lib_xua`` or ``lib_awe`` with only the platform specific ``lib_i2c`` remote thread being part of the application which is required for configuration of the audio hardware on the board.
-
-
-DSP Concepts provide a helpful setup guide which can be found in the file ``User_Guide_for_XMOS_EVK_with_AWE.pdf`` provided in this repo which is designed to help you get up and running as quickly as possible and help you connect to the AudioWeaver designer software. A sample design called ``playBasic_3thread.awj`` for use in the Audioweaver Designer software may be found in the ``examples/audioweaver`` directory of the ``lib_awe`` repo.
-
-There are three firmware build profiles provided each one providing a different audio source/sink or tuning data path:
-
-.. list-table:: Example Application Builds
-   :widths: 25 50 50
-   :header-rows: 1
-   :align: center
-
-   * - Build
-     - Data path
-     - Tuning path
-   * - UA
-     - USB Audio to target, Line out from target
-     - USB / HID and via firmware
-   * - UA_FFS
-     - USB Audio to target, Line out from target
-     - USB / HID and via firmware with FFS enabled
-   * - I2S
-     - Line in to target, Line out from target
-     - USB / HID and via firmware
-
-UA Build
-........
-
-
-The feature set of this build profile is as follows:
-
-    - USB Audio Class 2.0 (High Speed)
-    - Stereo input from the host
-    - Stereo output on the OUT 1/2 3.5 mm analog jack
-    - Audio from the host is processed by the AWE framework before being played on the output jack
-    - Asynchronous clocking (local audio clock to hardware)
-    - 24 bit Sample resolution
-    - 48 kHz sample rate
-    - Tuning to AWE provided over USB HID with VID 0x20b1 and PID 0x0018 supporting live tuning from the Audioweaver software. Additionally, AWB files may be loaded (and in one case controlled) using the buttons on the board.
-
-The thread diagram for the UA application example is shown below. In addition to the I2C remote master a new application thread has been added ``awe_standalone_tuning`` which handles loading of the AWB image and volume control via the buttons.
-
-.. figure:: ./images/awe_example_ua.drawio.png
-   :width: 75%
-
-   Application thread diagram for awe_example
-
-The button control works as follows:
-
-.. list-table:: UA_STANDALONE control functions
-   :widths: 5 50
-   :header-rows: 1
-   :align: center
-
-   * - Button
-     - Function
-   * - 2
-     - Load the ``PlayBasic_3thread`` AWB file which contains the multi-band compressor example
-   * - 1
-     - Load the ``simple_volume`` AWB file which contains a pass-through with volume control
-   * - 0
-     - When the ``simple_volume`` AWB is selected, it controls the volume in 10 dB decrements. No function for other builds.
-
-.. note::
-    When the firmware boots, there is no design loaded so you will not hear any sound played from the host. Please either load a design via Audioweaver designer or press button 2 or 1 to load an AWB and enable audio processing.
-
-
-UA_FFS Build
-............
-
-The UA_FFS build profile is a superset of the UA build. In addition it has the internal Flash File System (FFS) enabled. This means, via the Audioweaver GUI, you may add files to a file system that is stored in external flash memory. The files may include ``.awb`` compiled design images which can be loaded or even booted from so that the AWE system comes up pre-configured with a particular design.
-
-The FFS is stored in the data partition of the flash memory and the boot partition (used for the boot image(s)) is protected from accidental overwriting.
-
-An additional thread is used on Tile[0] which acts as the FFS server and handles accesses to the external QSPI via requests from AWE core.
-
-For more details on using the FFS from Audioweaver please consult the DSP Concepts documentation.
-
-.. note::
-    When using the FFS ensure that the timeout setting in the AWE Server "Change Connection" dialogue is increased to 5000 ms. This is because some of the low-level flash operations may exceed the 1500 ms default timeout setting which will cause communications errors.
-
-The above thread diagram shows the addition of the optional FFS flash server thread which manages the low-level flash accesses.
-
-
-I2S Build
-.........
-
-The feature set of this build profile is as follows:
-
-
-    - Stereo input from the IN 1/2 3.5 mm analog jack
-    - Stereo output on the OUT 1/2 3.5 mm analog jack
-    - Audio from the host is pumped through the AWE framework before being played on the output jack
-    - USB Audio Class 1.0 (Full Speed)
-    - Tuning to AWE provided over USB HID with VID 0x20b1 and PID 0x0018 supporting live tuning from the Audioweaver software
-
-    .. note::
-        When the firmware boots, there is no design loaded so you will not hear any sound played from the host. Please load an AWB from the host using the Audioweaver software.
-
-
-
-Building the Examples
-.....................
-
-The following section assumes you have downloaded and installed the XMOS `tools <https://www.xmos.com/software-tools/>`_ minimum version 15.2.1. Now open a tools command prompt.
-
-You will first need to download both ``lib_awe`` and ``xcommon_cmake`` to your chose sandbox directory::
-
-    cd my_sandbox
-    git clone git@github.com:xmos/lib_awe.git
-    git clone -b v1.2.0 git@github.com:xmos/xcommon_cmake
-
-Your sandbox root directory listing will look something like this::
-
-    lib_awe     xcommon_cmake
-
-Next you need to set the environment for xcommon-cmake:
-
-.. tab:: MacOS and Linux
-
-    .. code-block:: console
-
-       # MacOS and Linux
-       export XMOS_CMAKE_PATH=/home/user/xcommon_cmake
-
-.. tab:: Windows
-
-    .. code-block:: console
-
-       # Windows
-       set XMOS_CMAKE_PATH=C:\Users\user\xcommon_cmake
-
-
-Finally, ensure you have the lib_awe.a file placed in the lib_awe/lib/xs3a directory. This is the core archive file containing the AWE library::
-
-    cp lib_awe.a lib_awe/lib_awe/lib/xs3a
-
-.. note::
-    The ``lib_awe.a`` file is not provided as part of the lib_awe repository for security reasons. Please obtain this from your XMOS contact directly.
-
-
-
-To build using xcommon-cmake:
-
-.. tab:: MacOS and Linux
-
-    .. code-block:: console
-
-       # MacOS and Linux
-       cd lib_awe
-       cd examples
-       cd app_usb_audio_awe
-       cmake -G "Unix Makefiles" -B build
-       xmake -j -C build
-
-.. tab:: Windows
-
-    .. code-block:: console
-
-       # Windows
-       cd lib_awe
-       cd examples
-       cd app_usb_audio_awe
-       cmake -G "Unix Makefiles" -B build
-       xmake -C build
-
-
-This will build both the UA (USB Audio) and I2S (I2S only for data transport but with USB/HID enabled for control) binaries. All of the required dependencies will be downloaded at this step. This will only happen the first time you build.
-
-The application uses approximately 30-48 kB on Tile[0] depending on build and 510 kB on Tile[1], of 512 kB on each tile when allocating a generous 44 k long-words for ``AWE_HEAP_SIZE_LONG_WORDS``.
-
-Running the Examples
-....................
-
-To run the application use the following command from the lib_awe/app_usb_audio_awe directory where <build> should be one of UA, I2S or UA_STANDALONE::
-
-    xrun bin/<build>/app_usb_audio_awe_<build>.xe
-
-Alternatively to make the design non-volatile by programming in to flash memory use the following command:
-
-
-.. tab:: UA, I2S_ONLY
-
-    .. code-block:: console
-
-       # UA, I2S_ONLY
-       xflash bin/<build>/app_usb_audio_awe_<build>.xe
-
-.. tab:: UA_FFS
-
-   .. code-block:: console
-
-      # UA_FFS
-      xflash --factory bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe --boot-partition-size 0x80000 --data ../audioweaver/awb_files/data_partition_ffs.bin
-
-The figure ``0x80000`` equates to 512 kB which is the amount of space reserved for the boot partition. For this example, the required storage in flash for the application is in the order of 380 kB leaving around 132 kB of space for the application to grow if needed. A simple way to determine the required boot partition size if to run the following command and then inspect the file size of ``flash.bin``::
-
-    xflash -o flash.bin app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe
-
-In this case the rest of the flash beyond the boot partition (for this target 3.5 MB) is available for the FFS.
-
-
-Once flashed or run, the USB audio device should appear in your host OS's audio settings window (except for I2S_ONLY).
-
-.. note::
-    No audio will be passed through from the host to the 3.5 mm jack until an AWE design is loaded.
-
-For designs which are tuned via USB/HID you may connect Audioweaver designer via USB/HID according to the documentation in the ``User_Guide_for_XMOS_EVK_with_AWE.pdf`` file which can be found in the ``lib_awe`` repo doc directory.
+The application example source code and documentation may be found at `an02016 <https://github.com/xmosnotes/an02016>`_.
