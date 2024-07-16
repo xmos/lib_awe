@@ -192,7 +192,7 @@ pipeline {
 
             dir("${REPO}") {
               checkout scm
-              sh "tree" // Debug
+              sh "tree .." // Debug
               sh "docker pull ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION"
 
               // Build lib docs
