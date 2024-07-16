@@ -189,8 +189,8 @@ pipeline {
             println "Stage running on ${env.NODE_NAME}"
             dir("${REPO}") {
               checkout scm
-
               sh "docker pull ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION"
+
               // Build lib docs
               sh """docker run -u "\$(id -u):\$(id -g)" \
                       --rm \
@@ -200,17 +200,16 @@ pipeline {
               zip dir: "doc/_build/html/", zipFile: "lib_awe_docs_html.zip"
               archiveArtifacts artifacts: "lib_awe_docs_html.zip"
               archiveArtifacts artifacts: "doc/_build/**/*.pdf", allowEmptyArchive: true
-            }
-            dir("${EXAMPLE}") {
+
               // Build example docs
               sh """docker run -u "\$(id -u):\$(id -g)" \
                       --rm \
                       -v ${WORKSPACE}/${EXAMPLE}:/build \
                       ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION -v"""
               // Zip and archive doc files
-              zip dir: "doc/_build/html/", zipFile: "lib_awe_docs_html.zip"
-              archiveArtifacts artifacts: "awe_example_html.zip"
-              archiveArtifacts artifacts: "doc/_build/**/*.pdf", allowEmptyArchive: true
+              zip dir: "../${EXAMPLE}/doc/_build/html/", zipFile: "../${EXAMPLE}lib_awe_docs_html.zip"
+              archiveArtifacts artifacts: "../${EXAMPLE}awe_example_html.zip"
+              archiveArtifacts artifacts: "../${EXAMPLE}doc/_build/**/*.pdf", allowEmptyArchive: true
             }
           } // steps
           post {
