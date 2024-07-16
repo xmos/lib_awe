@@ -202,7 +202,7 @@ pipeline {
               // Zip and archive doc files
               zip dir: "doc/_build/html/", zipFile: "lib_awe_docs_html.zip"
               archiveArtifacts artifacts: "lib_awe_docs_html.zip"
-              archiveArtifacts artifacts: "doc/_build/**/*.pdf", allowEmptyArchive: true
+              sh "cp doc/_build/pdf/*.pdf ." // Will archive at end of stage along with example
 
               // Build example docs
               sh """docker run -u "\$(id -u):\$(id -g)" \
@@ -210,10 +210,10 @@ pipeline {
                       -v ${WORKSPACE}/${EXAMPLE}:/build \
                       ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION -v"""
               // Zip and archive doc files
-              sh "tree .." // Debug
               zip dir: "../${EXAMPLE}/doc/_build/html/", zipFile: "awe_example_html.zip"
               archiveArtifacts artifacts: "awe_example_html.zip"
-              archiveArtifacts artifacts: "../${EXAMPLE}/doc/_build/**/*.pdf", allowEmptyArchive: true
+              sh "cp ../${EXAMPLE}/doc/_build/pdf/*.pdf ." // archiveArtifacts doesn't like going up a dir
+              archiveArtifacts artifacts: "*.pdf", allowEmptyArchive: true
             }
           } // steps
           post {
