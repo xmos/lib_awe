@@ -136,7 +136,7 @@ The tuning interface exposed in lib_awe is channel based and uses two channels; 
 
 The packet protocol is described in the `DSP Concepts documentation <https://w.dspconcepts.com/hubfs/Docs-AWECoreOS/AWECoreOS_UserGuide/a00075.html#message-structure>`_ and is directly reflected in the data tokens sent over the channels ``c_tuning_from_host`` and  ``c_tuning_to_host``. In addition, some control tokens are sent over the channels to initiate a transaction, synchronise and close the switch path following the communication. The source code for these can be found in ``awe_tuning.c`` in ``lib_awe``.
 
-However the finer details of these protocols is normally not required to be understood for most applications. The reason for this that ``lib_awe`` provides an application API layer above the low level channel protocol which takes the form of a function API. This `client side` API provides all typically required tuning functions including:
+However the finer details of these protocols is normally not required to be understood for most applications. The reason for this is that ``lib_awe`` provides an application API layer above the low level channel protocol which takes the form of a function API. This `client side` API provides all typically required tuning functions including:
 
     - Loading AWB files (from memory or flash file system)
     - Getting and setting of control parameters
@@ -159,7 +159,7 @@ How many threads to define for lib_awe?
 AWE supports multi-threaded operation meaning that a large pipeline may be split across multiple threads. Lib_awe implements this capability by offering multiple hardware threads which can be used as stages for the user design. Simple designs may only require one thread however complex user designs may need to be split across multiple threads. An AWE block, available in AWE Designer, called ``Buffer Up V2`` is available to explicitly move the downstream blocks onto the next thread in lib_awe. 
 
 .. figure:: ./images/bufferup.png
-   :width: 40%
+   :width: 20%
 
    The AWE BufferUpV2 Function
 
@@ -171,7 +171,9 @@ By default, two threads are allocated to lib_awe for DSP work. The amount of MIP
 How much HEAP to allocate?
 ..........................
 
-Again this is design dependent. Large delay lines or filters with large numbers of coefficients will significantly increase the required heap size. Simple biquad filtering designs may only require a few hundred words of heap whereas a large FIR or reverb block may take tens of thousands of long words of HEAP. A default implementation in lib_awe will provide at least 40 k words of HEAP which is sufficient for may cases. The ``AWE_HEAP_SIZE_LONG_WORDS`` define (described in lib_awe API document) controls this and is statically allocated at compile time.
+Again this is design dependent. Large delay lines or filters with large numbers of coefficients will significantly increase the required heap size. Simple biquad filtering designs may only require a few hundred words of heap whereas a large FIR or reverb block may take tens of thousands of long words of HEAP. 
+
+A default implementation in lib_awe will provide at least 40 k words of HEAP which is sufficient for many cases. The ``AWE_HEAP_SIZE_LONG_WORDS`` define (described in API section) controls this and is statically allocated at compile time.
 
 How to reduce lib_awe memory usage and allow for more memory of the AWE tile?
 .............................................................................
@@ -183,7 +185,7 @@ There are a number of ways to reduce the memory usage on the XCORE tile where li
 - Remove application code from the AWE tile. (Application dependent)
 - Trim the number of compiled-in modules in lib_awe. 10s - 100s of kB may be saved depending on the design.
 
-The last point can potentially save a lot of memory however it limits the pool of available modules. The file ``awe_module_list.S`` is an assembler file which lists the symbols of each of the modules that should be compiled in with lib_awe. It ensures they are linked in to the application binary. Any modules that are compiled in will automatically be picked up by AWE Designer as being available on the target during the design process. Once a design has been completed, and the know list of modules required has been established, unused modules may be commented out.
+The last point can potentially save a lot of memory however it limits the pool of available modules. The file ``awe_module_list.S`` is an assembler file which lists the symbols of each of the modules that should be compiled in with lib_awe. It ensures they are linked in to the application binary. Any modules that are compiled in will automatically be picked up by AWE Designer as being available on the target during the design process. Once a design has been completed, and the known list of modules required has been established, unused modules may be commented out.
 
 .. note::
     Removing supported modules from ``awe_module_list.S`` precludes their use in future designs when updated compiled AWB files are downloaded. If a new module is needed then a full DFU, including the required DSP modules, must be performed. 
