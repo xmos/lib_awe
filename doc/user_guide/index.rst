@@ -104,7 +104,7 @@ This convenience function is typically called from an isochronous streaming audi
 
     void UserBufferManagement(unsigned sampsFromUsbToAudio[], unsigned sampsFromAudioToUsb[])
 
-However if USB audio is not required in your application then the ``awe_offload_data_to_dsp_engine()`` function may be called from any isochronous task running at 48 kHz. For example the following task is a minimal example which pumps zeros through the AWE stack::
+However if USB audio is not required in your application then the ``awe_offload_data_to_dsp_engine()`` function may be called from any isochronous task running at 48 kHz. For example the following task is a minimal example which sends zeros through the AWE stack::
 
     DECLARE_JOB(data_path, (chanend_t));
     void data_path(chanend_t c_data){
@@ -125,7 +125,7 @@ However if USB audio is not required in your application then the ``awe_offload_
         hwtimer_free(t);
     }
 
-This example task allocates a hardware timer (which are clocked at 100 MHz) and the calls ``awe_offload_data_to_dsp_engine()`` once every 20.830 microseconds which equates to a sample rate of 48008 Hz.
+This example task allocates a hardware timer (which are clocked at 100 MHz) and then calls ``awe_offload_data_to_dsp_engine()`` once every 20.830 microseconds which equates to a sample rate of 48008 Hz.
 
 Control (Tuning interface)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -178,7 +178,7 @@ A default implementation in lib_awe will provide at least 40 k words of HEAP whi
 How to reduce lib_awe memory usage and allow for more memory of the AWE tile?
 .............................................................................
 
-There are a number of ways to reduce the memory usage on the XCORE tile where lib_awe is placed:
+There are a number of ways to reduce the memory usage on the XCORE tile where lib_awe is placed and consequently allow more HEAP for AWE:
 
 - Disable the Flash File System. This saves around 10 kB on the AWE tile.
 - Reduce number of threads. Each DSP worker thread requires around 4 kB of supporting memory.
