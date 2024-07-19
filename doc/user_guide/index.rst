@@ -5,11 +5,11 @@ AWE Library User Guide
 Introduction
 ------------
 
-AudioWeaver is a tool and libraries for implementing Digital Signal Processing algorithms. It comprises a GUI and a set of libraries. Standard building blocks such as filters, equalisers, echo cancellers, can be assembled in the GUI and then executed on a device. A control library is available that enables on-line tuning of the processing blocks.
+Audio Weaver is a tool and libraries for implementing Digital Signal Processing algorithms. It comprises a GUI and a set of libraries. Standard building blocks such as filters, equalisers, echo cancellers, can be assembled in the GUI and then executed on a device. A control library is available that enables on-line tuning of the processing blocks.
 
 XCORE is a programmable multi-core device with flexible DSP and IO interfaces. The IO interfaces can be programmed to, for example, I2S, TDM, USB, ADAT or S/PDIF interfaces (or indeed any other interface), and the DSP capability can be used to operate on data that is received from or sent to these interfaces. In addition to interfaces and DSP, XCORE devices can also execute control code or even ML inference engines.
 
-Lib_awe is a port of AudioWeaver for XMOS's powerful xcore.ai device. It contains code for software threads which wrap the core library and provide easy interfacing to both audio streaming components such as I2S and USB Audio as well as tuning interfacing to allow control and loading of pre-built designs from a host or internally from the device.
+Lib_awe is a port of Audio Weaver for XMOS's powerful xcore.ai device. It contains code for software threads which wrap the core library and provide easy interfacing to both audio streaming components such as I2S and USB Audio as well as tuning interfacing to allow control and loading of pre-built designs from a host or internally from the device.
 
 It utilises xcore.ai's multi-threaded architecture and vector processing unit to provide very high performance and predictable timing required by embedded systems.
 
@@ -20,7 +20,7 @@ For reference, we refer to the following repositories that you may want to
 use:
 
 * <https://github.com/xmos/lib_awe.git> for the library that integrates
-  AudioWeaver and XCORE.
+  Audio Weaver and XCORE.
 
 * <https://github.com/xmos/lib_xua.git> for the USB Audio library
   design
@@ -39,9 +39,9 @@ Lib_awe provides an interface to the audio streaming and tuning functions using 
    lib_awe thread diagram
 
 
-Lib_awe consists of a group of threads. There are a statically defined number (maximum 5) of DSP worker threads which perform the AWE core functionality within the Audioweaver runtime core.
+Lib_awe consists of a group of threads. There are a statically defined number (maximum 5) of DSP worker threads which perform the AWE core functionality within the Audio Weaver runtime core.
 
-To support audio streaming an audio transport thread provides a channel interface to the Audioweaver ``awe_audioImportSamples()`` and ``awe_audioExportSamples()`` functions. The purpose of this thread is to simplify connection to XMOS audio streaming components and user application logic and allows placement of the user application logic on a different tile.
+To support audio streaming an audio transport thread provides a channel interface to the Audio Weaver ``awe_audioImportSamples()`` and ``awe_audioExportSamples()`` functions. The purpose of this thread is to simplify connection to XMOS audio streaming components and user application logic and allows placement of the user application logic on a different tile.
 
 Finally, a tuning thread is provided which abstracts away the awe_packetProcess() function calls and provides a channel API and also presents a channel interface allowing placement of control to be on a different tile. In AWE nomenclature, this provides a ``tuning interface`` which is different from a ``control interface`` in that the control interface uses function calls whereas tuning is a remote operation. The same functionality is available for both AWE control approaches however, for the XCORE port, the ``tuning interface`` method is default since it allows control logic to be placed on a remote tile that does not share memory space with the AWE tile.
 
