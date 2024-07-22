@@ -1,5 +1,7 @@
-#ifndef AWE_XCORE_INTERNAL_H
-#define AWE_XCORE_INTERNAL_H
+// Copyright 2023-2024 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public Licence: Version 1.
+#ifndef _AWE_XCORE_INTERNAL_H
+#define _AWE_XCORE_INTERNAL_H
 
 #include <xcore/chanend.h>
 #include "AWECore.h"
@@ -10,6 +12,18 @@
 
 extern AWEInstance2 g_AWEInstance;
 extern UINT32 AWE_Packet_Buffer[AWE_HID_PACKET_BUFFER_SIZE];
+
+/**
+@brief The XMOS AWE instance.
+@details For XMOS this is an array of channel ends which represent
+the public API to the XMOS AWE instance and presents a tuning interface suitable for USB, internal use or other IO interfaces specified by the user.
+*/
+typedef struct xAWETuningInstance_t{
+    chanend_t c_tuning_from_host;
+    chanend_t c_tuning_to_host;
+    lock_t l_api_lock;
+} xAWETuningInstance_t;
+
 
 /** Function that initialises all global data structures
  */
@@ -29,8 +43,8 @@ void awe_tuning_thread(chanend_t c_control_from_host,
  *
  * \param c_data      The channelend over which audio is communicated. Either
  *                    use ``awe_offload_data_to_dsp_engine`` or output
- *                    AUDIO_INPUT_CHANNELS ints over the channel followed by
- *                    CT_END, then input AUDIO_OUTPUT_CHANNELS ints over the 
+ *                    AWE_INPUT_CHANNELS ints over the channel followed by
+ *                    CT_END, then input AWE_OUTPUT_CHANNELS ints over the
  *                    channelend and then input a CT_END.
  */
 void awe_data_transport_thread(chanend_t c_data, chanend_t c_children[]);
