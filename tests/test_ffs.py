@@ -4,11 +4,18 @@
 Tests the FFS callbacks using the app in test_ffs
 """
 
+import json
 import pytest
 from pathlib import Path
 import struct
-from awe_test_utils import flash_xe, run_xe_hw, awe_hid_comms
 import time
+
+from awe_test_utils import flash_xe, run_xe_hw, awe_hid_comms
+from conftest import AweDut, get_xtag_ids
+
+from hardware_test_tools.AudioAnalyzerHarness import AudioAnalyzerHarness
+from hardware_test_tools.Xsig import XsigOutput
+from hardware_test_tools.check_analyzer_output import check_analyzer_output
 
 xe_ffs_rpc = "test_ffs_rpc/bin/test_ffs_rpc.xe"
 xe_demo_ffs_host = "../examples/app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe"
@@ -52,7 +59,31 @@ def test_load_awb_from_ffs_host(flash_ua_with_ffs):
         assert awe.load_awb_from_ffs("simple_volume.awb")
 
 
-    # NOW stream some audio
+    # NOW stream some audio. simple_volume should be loaded and will pass audio straight through
+    fs = 48000
+    duration = 30
+
+    analyzer_dir = Path(__file__).parents[2] / "sw_audio_analyzer"
+    with AudioAnalyzerHarness(adapter_harness, analyzer_dir, attach="xscope") as harness:
+        xsig_config = Path(__file__).parent / "output_sine_2ch.json"
+        assert xsig_config.exists()
+
+        with XsigOutput(fs, None, xsig_config, dut.dev_name) as xsig_proc:
+            time.sleep(duration)
+            harness.terminate()
+            xscope_lines = harness.proc_stdout + harness.proc_stderr
+
+        with open(xsig_config) as file:
+            xsig_json = json.load(file)
+
+        failures = check_analyzer_output(xscope_lines, xsig_json["out"])
+        fail_str = (
+            "\n".join(failures)
+            + f"\n\nxscope output:\n{xscope_lines}\n"
+            + f"xsig output:\n{xsig_proc.proc_output}"
+        )
+        
+        assert len(failures) == 0, f"Failures: {fail_str}"
 
 def test_load_awb_from_ffs_device(flash_ua_with_ffs):
     """
