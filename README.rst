@@ -20,7 +20,7 @@ of pre-built Audio Weaver designs from a host or internally from the device.
 Features
 ========
 
-  * xcore.ai port of AWE core
+  * xcore.ai port of AWE core version 8.D.1.1
   * Remote (via channel) access to AWE Tuning interface
   * Implementation of AWE Control Inteface using the above
   * Example implementation of run-time selection of AWE layouts that are compiled into an application

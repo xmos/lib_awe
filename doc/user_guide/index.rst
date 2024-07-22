@@ -26,7 +26,7 @@ use:
   design
 
 .. note::
-    The ``lib_awe.a`` file is not provided as part of the lib_awe repository for security reasons. Please obtain this file from your XMOS contact directly.
+    The ``lib_awe.a`` file is not provided as part of the lib_awe repository for security reasons. This version has been tested with AWE Core version 8.D.1.1. Please obtain this file from your XMOS contact directly.
 
 Architecture
 ------------
