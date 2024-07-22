@@ -29,6 +29,8 @@ extern "C" {
 extern const int awe_modAGCCoreClass;
 extern const int awe_modAGCLimiterCoreClass;
 extern const int awe_modAGCLimiterCoreFract32Class;
+extern const int awe_modAGCLimiterCoreV2Class;
+extern const int awe_modAGCLimiterCoreV2Fract32Class;
 extern const int awe_modAGCMultiplierFract32Class;
 extern const int awe_modAGCNoiseGateCoreClass;
 extern const int awe_modAbsClass;
@@ -60,6 +62,7 @@ extern const int awe_modButterworthFilterFract32Class;
 extern const int awe_modCeilClass;
 extern const int awe_modClipAsymClass;
 extern const int awe_modClipAsymFract32Class;
+extern const int awe_modClipAsymInt32Class;
 extern const int awe_modClipIndicatorClass;
 extern const int awe_modClipIndicatorFract32Class;
 extern const int awe_modCopierClass;
@@ -109,12 +112,15 @@ extern const int awe_modLog2Class;
 extern const int awe_modLog2Fract32Class;
 extern const int awe_modLogicAllClass;
 extern const int awe_modLogicAndConstFract32Class;
+extern const int awe_modLogicAndConstInt32Class;
 extern const int awe_modLogicAnyClass;
 extern const int awe_modLogicBinaryOpClass;
 extern const int awe_modLogicCompareClass;
 extern const int awe_modLogicCompareConstClass;
 extern const int awe_modLogicCompareConstFract32Class;
 extern const int awe_modLogicCompareConstInt32Class;
+extern const int awe_modLogicCompareConstReplaceClass;
+extern const int awe_modLogicCompareConstReplaceInt32Class;
 extern const int awe_modLogicCompareFract32Class;
 extern const int awe_modLogicCompareInt32Class;
 extern const int awe_modMaxAbsClass;
@@ -188,6 +194,7 @@ extern const int awe_modScalerNSymmetricFadingClass;
 extern const int awe_modScalerNV2Class;
 extern const int awe_modScalerSmoothedFract32Class;
 extern const int awe_modScalerSymmetricFadingClass;
+extern const int awe_modScalerSymmetricFadingV2Class;
 extern const int awe_modScalerV2Class;
 extern const int awe_modSecondOrderFilterSmoothedClass;
 extern const int awe_modSecondOrderFilterSmoothedCascadeClass;
@@ -255,16 +262,9 @@ extern const int awe_modWithinRangeClass;
 extern const int awe_modWithinRangeFract32Class;
 extern const int awe_modZeroCrossingDetectorClass;
 extern const int awe_modZeroCrossingDetectorFract32Class;
-extern const int awe_modRandiClass;
-extern const int awe_modAllpassDelayClass;
-extern const int awe_modAllpassDelay16Class;
-extern const int awe_modAllpassDelay16Fract32Class;
-extern const int awe_modAllpassDelayFract32Class;
-extern const int awe_modAllpassDelayciClass;
-extern const int awe_modAllpassDelayiClass;
 extern const int awe_modZeroSourceClass;
 
-#ifdef ADVANCED
+
 // Advanced Modules
 extern const int awe_modAGCAttackReleaseClass;
 extern const int awe_modAGCAttackReleaseFract32Class;
@@ -272,6 +272,12 @@ extern const int awe_modAGCCompressorCoreClass;
 extern const int awe_modAGCCompressorCoreFract32Class;
 extern const int awe_modAGCCoreFract32Class;
 extern const int awe_modAGCVariableAttackReleaseClass;
+extern const int awe_modAllpassDelayClass;
+extern const int awe_modAllpassDelay16Class;
+extern const int awe_modAllpassDelay16Fract32Class;
+extern const int awe_modAllpassDelayFract32Class;
+extern const int awe_modAllpassDelayciClass;
+extern const int awe_modAllpassDelayiClass;
 extern const int awe_modArraysetClass;
 extern const int awe_modAttackDecaySustainReleaseClass;
 extern const int awe_modAudioWeightingClass;
@@ -361,6 +367,7 @@ extern const int awe_modFIRInterpolatorFract32Class;
 extern const int awe_modFIRLoadingClass;
 extern const int awe_modFIRLoadingFract32Class;
 extern const int awe_modFIRNChanClass;
+extern const int awe_modFIRReaderClass;
 extern const int awe_modFIRSparseClass;
 extern const int awe_modFIRSparseReaderClass;
 extern const int awe_modFIRSparseReaderFract16Class;
@@ -369,8 +376,6 @@ extern const int awe_modFOFControlClass;
 extern const int awe_modFOFControlFract32Class;
 extern const int awe_modFftClass;
 extern const int awe_modFftFract32Class;
-extern const int awe_modFifoInClass;
-extern const int awe_modFifoOutClass;
 extern const int awe_modFilterbankFIRNChanClass;
 extern const int awe_modFilterbankFIRNChanV2Class;
 extern const int awe_modFractionalDelayV2Class;
@@ -395,9 +400,9 @@ extern const int awe_modMatrixMultiplicationClass;
 extern const int awe_modMeasurementClass;
 extern const int awe_modMeasurementV2Class;
 extern const int awe_modMemoryLoadingClass;
-extern const int awe_modMovingAverageFract32Class;
 extern const int awe_modMultichannelMixerSmoothedClass;
 extern const int awe_modMuteLinearFadeClass;
+extern const int awe_modMuteSymmetricClass;
 extern const int awe_modMuteSyncClass;
 extern const int awe_modMuteSyncFract32Class;
 extern const int awe_modOscillatorClass;
@@ -412,6 +417,7 @@ extern const int awe_modPolarToComplexClass;
 extern const int awe_modPresetArrayHandlerClass;
 extern const int awe_modPresetArrayHandlerV2Class;
 extern const int awe_modProbeFract32Class;
+extern const int awe_modRandiClass;
 extern const int awe_modRandiFract32Class;
 extern const int awe_modRealImagToComplexClass;
 extern const int awe_modRealImagToComplexFract32Class;
@@ -489,9 +495,8 @@ extern const int awe_modWindowOverlapFract32Class;
 extern const int awe_modWindowV2Class;
 extern const int awe_modZeroPaddingClass;
 extern const int awe_modZeroPaddingFract32Class;
-#endif // definted ADVANCED
 
-#ifdef DEPRECATED
+
 // Deprecated Modules
 extern const int awe_modAGCMultiplierClass;
 extern const int awe_modApplyPresetClass;
@@ -535,10 +540,16 @@ extern const int awe_modScalerSmoothedClass;
 extern const int awe_modSineGenClass;
 extern const int awe_modTableInterpRuntimeClass;
 extern const int awe_modTwoPieceInterpClass;
-#endif // defined DEPRECATED
+
 
 // Internal Modules
 extern const int awe_modCompiledSubsystemClass;
+extern const int awe_modFifoInClass;
+extern const int awe_modFifoInV2Class;
+extern const int awe_modFifoOutClass;
+extern const int awe_modFifoOutV2Class;
+extern const int awe_modIPCFifoInClass;
+extern const int awe_modIPCFifoOutClass;
 extern const int awe_modProxyGetSetClass;
 
 
@@ -551,6 +562,8 @@ extern const int awe_modProxyGetSetClass;
 &awe_modAGCCoreClass, \
 &awe_modAGCLimiterCoreClass, \
 &awe_modAGCLimiterCoreFract32Class, \
+&awe_modAGCLimiterCoreV2Class, \
+&awe_modAGCLimiterCoreV2Fract32Class, \
 &awe_modAGCMultiplierFract32Class, \
 &awe_modAGCNoiseGateCoreClass, \
 &awe_modAbsClass, \
@@ -582,6 +595,7 @@ extern const int awe_modProxyGetSetClass;
 &awe_modCeilClass, \
 &awe_modClipAsymClass, \
 &awe_modClipAsymFract32Class, \
+&awe_modClipAsymInt32Class, \
 &awe_modClipIndicatorClass, \
 &awe_modClipIndicatorFract32Class, \
 &awe_modCopierClass, \
@@ -631,12 +645,15 @@ extern const int awe_modProxyGetSetClass;
 &awe_modLog2Fract32Class, \
 &awe_modLogicAllClass, \
 &awe_modLogicAndConstFract32Class, \
+&awe_modLogicAndConstInt32Class, \
 &awe_modLogicAnyClass, \
 &awe_modLogicBinaryOpClass, \
 &awe_modLogicCompareClass, \
 &awe_modLogicCompareConstClass, \
 &awe_modLogicCompareConstFract32Class, \
 &awe_modLogicCompareConstInt32Class, \
+&awe_modLogicCompareConstReplaceClass, \
+&awe_modLogicCompareConstReplaceInt32Class, \
 &awe_modLogicCompareFract32Class, \
 &awe_modLogicCompareInt32Class, \
 &awe_modMaxAbsClass, \
@@ -710,6 +727,7 @@ extern const int awe_modProxyGetSetClass;
 &awe_modScalerNV2Class, \
 &awe_modScalerSmoothedFract32Class, \
 &awe_modScalerSymmetricFadingClass, \
+&awe_modScalerSymmetricFadingV2Class, \
 &awe_modScalerV2Class, \
 &awe_modSecondOrderFilterSmoothedClass, \
 &awe_modSecondOrderFilterSmoothedCascadeClass, \
@@ -777,30 +795,6 @@ extern const int awe_modProxyGetSetClass;
 &awe_modWithinRangeFract32Class, \
 &awe_modZeroCrossingDetectorClass, \
 &awe_modZeroCrossingDetectorFract32Class, \
-&awe_modFifoInClass, \
-&awe_modFifoOutClass, \
-&awe_modZeroPaddingClass, \
-&awe_modComplexModulateClass, \
-&awe_modCfftClass, \
-&awe_modSbAttackReleaseClass, \
-&awe_modSbComplexFIRClass, \
-&awe_modSbComplexFIRvlClass, \
-&awe_modComplexToPolarClass, \
-&awe_modComplexToRealImagClass, \
-&awe_modBlockExtractClass, \
-&awe_modBlockFlipClass, \
-&awe_modBlockConcatenateClass, \
-&awe_modBlockDelayClass, \
-&awe_modBlockDelayV2Class, \
-&awe_modOverlapAddClass, \
-&awe_modRepWinOverlapClass, \
-&awe_modRandiClass, \
-&awe_modAllpassDelayClass, \
-&awe_modAllpassDelay16Class, \
-&awe_modAllpassDelay16Fract32Class, \
-&awe_modAllpassDelayFract32Class, \
-&awe_modAllpassDelayciClass, \
-&awe_modAllpassDelayiClass, \
 &awe_modZeroSourceClass
 
 #define ADVANCED_LIST \
@@ -810,6 +804,12 @@ extern const int awe_modProxyGetSetClass;
 &awe_modAGCCompressorCoreFract32Class, \
 &awe_modAGCCoreFract32Class, \
 &awe_modAGCVariableAttackReleaseClass, \
+&awe_modAllpassDelayClass, \
+&awe_modAllpassDelay16Class, \
+&awe_modAllpassDelay16Fract32Class, \
+&awe_modAllpassDelayFract32Class, \
+&awe_modAllpassDelayciClass, \
+&awe_modAllpassDelayiClass, \
 &awe_modArraysetClass, \
 &awe_modAttackDecaySustainReleaseClass, \
 &awe_modAudioWeightingClass, \
@@ -831,11 +831,17 @@ extern const int awe_modProxyGetSetClass;
 &awe_modBiquadSparseV4Class, \
 &awe_modBiquadSparseV5Class, \
 &awe_modBiquadSparseV6Class, \
+&awe_modBlockConcatenateClass, \
+&awe_modBlockDelayClass, \
+&awe_modBlockDelayV2Class, \
+&awe_modBlockExtractClass, \
+&awe_modBlockFlipClass, \
 &awe_modBlockMedianClass, \
 &awe_modBlockStatisticsClass, \
 &awe_modBlockStatisticsFract32Class, \
 &awe_modBlockStatisticsNClass, \
 &awe_modButterworthFilterHPClass, \
+&awe_modCfftClass, \
 &awe_modCfftFract32Class, \
 &awe_modCoeffTableClass, \
 &awe_modComplexAngleClass, \
@@ -845,6 +851,7 @@ extern const int awe_modProxyGetSetClass;
 &awe_modComplexMagnitudeClass, \
 &awe_modComplexMagnitudeFract32Class, \
 &awe_modComplexMagnitudeSquaredClass, \
+&awe_modComplexModulateClass, \
 &awe_modComplexMultiplierClass, \
 &awe_modComplexMultiplierFract32Class, \
 &awe_modComplexMultiplierV2Class, \
@@ -892,6 +899,7 @@ extern const int awe_modProxyGetSetClass;
 &awe_modFIRLoadingClass, \
 &awe_modFIRLoadingFract32Class, \
 &awe_modFIRNChanClass, \
+&awe_modFIRReaderClass, \
 &awe_modFIRSparseClass, \
 &awe_modFIRSparseReaderClass, \
 &awe_modFIRSparseReaderFract16Class, \
@@ -924,12 +932,13 @@ extern const int awe_modProxyGetSetClass;
 &awe_modMeasurementClass, \
 &awe_modMeasurementV2Class, \
 &awe_modMemoryLoadingClass, \
-&awe_modMovingAverageFract32Class, \
 &awe_modMultichannelMixerSmoothedClass, \
 &awe_modMuteLinearFadeClass, \
+&awe_modMuteSymmetricClass, \
 &awe_modMuteSyncClass, \
 &awe_modMuteSyncFract32Class, \
 &awe_modOscillatorClass, \
+&awe_modOverlapAddClass, \
 &awe_modOverlapAddFract32Class, \
 &awe_modOverwriteControlClass, \
 &awe_modPDFClass, \
@@ -940,10 +949,12 @@ extern const int awe_modProxyGetSetClass;
 &awe_modPresetArrayHandlerClass, \
 &awe_modPresetArrayHandlerV2Class, \
 &awe_modProbeFract32Class, \
+&awe_modRandiClass, \
 &awe_modRandiFract32Class, \
 &awe_modRealImagToComplexClass, \
 &awe_modRealImagToComplexFract32Class, \
 &awe_modRebufferClass, \
+&awe_modRepWinOverlapClass, \
 &awe_modRepWinOverlapFract32Class, \
 &awe_modRunningMinMaxClass, \
 &awe_modRunningMinMaxFract32Class, \
@@ -963,6 +974,9 @@ extern const int awe_modProxyGetSetClass;
 &awe_modSampleRateClass, \
 &awe_modSampleStatisticsClass, \
 &awe_modSampleStatisticsFract32Class, \
+&awe_modSbAttackReleaseClass, \
+&awe_modSbComplexFIRClass, \
+&awe_modSbComplexFIRvlClass, \
 &awe_modSbDerivativeClass, \
 &awe_modSbNLMSClass, \
 &awe_modSbNLMSV2Class, \
@@ -1011,6 +1025,7 @@ extern const int awe_modProxyGetSetClass;
 &awe_modWindowOverlapClass, \
 &awe_modWindowOverlapFract32Class, \
 &awe_modWindowV2Class, \
+&awe_modZeroPaddingClass, \
 &awe_modZeroPaddingFract32Class
 
 #define DEPRECATED_LIST \
@@ -1059,6 +1074,12 @@ extern const int awe_modProxyGetSetClass;
 
 #define INTERNAL_LIST \
 &awe_modCompiledSubsystemClass, \
+&awe_modFifoInClass, \
+&awe_modFifoInV2Class, \
+&awe_modFifoOutClass, \
+&awe_modFifoOutV2Class, \
+&awe_modIPCFifoInClass, \
+&awe_modIPCFifoOutClass, \
 &awe_modProxyGetSetClass
 
 #define CUSTOM_LIST 

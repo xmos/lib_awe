@@ -1,9 +1,27 @@
-/* ----------------------------------------------------------------------------
- *	 Preprocessor Definitions
- * ------------------------------------------------------------------------- */
+/*******************************************************************************
+*
+*				Audio Framework
+*				---------------
+*
+********************************************************************************
+*	  TargetProcessor.h
+********************************************************************************
+*
+*	  Description:	AudioWeaver Framework target preprocessor definitions
+*
+*	  Copyright:	(c) 2007-2023 DSP Concepts, Inc. All rights reserved.
+*					3235 Kifer Road
+*					Santa Clara, CA 95054
+*
+*******************************************************************************/
+
 
 #ifndef TARGET_PROCESSOR_H_
 #define TARGET_PROCESSOR_H_
+
+#ifdef AWE_USE_DEFAULT_CODE_PLACEMENT
+#include "TargetDefaultCodePlacement.h"
+#endif
 
 #if defined(WIN32)
 #include "Win_TargetProcessor.h"
@@ -197,9 +215,18 @@
 
 // Catch missed setting of BUILD64
 #if !defined(BUILD64)
-#if defined(_WIN64) || defined (__x86_64__) || defined(_M_X64) || defined(_M_AMD64) || defined(__arch64__) || defined(_M_ARM64)
+#if defined(_WIN64) || defined (__x86_64__) || defined(_M_X64) || defined(_M_AMD64) || defined(__aarch64__) || defined(_M_ARM64)
 #define BUILD64
 #endif
 #endif // !defined(BUILD64)
+
+#ifdef LINUX
+#include <pthread.h>
+#define AweEnterCriticalSection(x) if (pAWE->pCriticalSec != NULL) pthread_mutex_lock(x)
+#define AweExitCriticalSection(x)  if (pAWE->pCriticalSec != NULL) pthread_mutex_unlock(x)
+#else
+#define AweEnterCriticalSection(x) DISABLE_INTERRUPTS()
+#define AweExitCriticalSection(x)  ENABLE_INTERRUPTS()
+#endif
 
 #endif	  /* !defined  TARGET_PROCESSOR_H_ */

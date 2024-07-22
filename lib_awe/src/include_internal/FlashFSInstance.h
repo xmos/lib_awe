@@ -14,6 +14,12 @@
 *                   Santa Clara, CA 95054
 *
 *******************************************************************************/
+
+/**
+* @file 
+* @brief The AWEFlashFSInstance API Header File
+*/
+
 #ifndef _FLASHFSINSTANCE_H
 #define _FLASHFSINSTANCE_H
 
@@ -30,9 +36,7 @@ struct _AWEInstance;
 @brief The DSPC Flash File System Instance
 @details Optional -- SINGLE INSTANCE ONLY
 */
-typedef struct _AWEFlashFSInstance AWEFlashFSInstance;
-typedef struct _AWEFlashFSInstance2
-
+typedef struct _AWEFlashFSInstance
 {
     /** Size of flash memory - if non-zero, next two values must also be non-zero. */
     UINT32 flashSizeInBytes;
@@ -70,7 +74,7 @@ typedef struct _AWEFlashFSInstance2
     UINT32 _Reserved[59];
 #endif
 
-} AWEFlashFSInstance2;
+} AWEFlashFSInstance;
 
 // Macro to indicate API's changed
 #define FLASH_FS_API_CHANGED

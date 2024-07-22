@@ -313,6 +313,11 @@
 #define E_MODULE_NOT_INITIALIZED						(-95)
 
 /** The file content is invalid. */
+
+/** If you encounter this error when loading a .awb, it may be
+ *  because the encryption key does not match the library key.
+ *   You will have to regenerate the .awb with matching keys" */
+
 #define E_INVALID_FILE									(-96)
 
 /** There are no more routes. */
@@ -363,8 +368,23 @@
 /** System call unavailable on target */
 #define E_SYSCALL								    	(-112)
 
-/** Tried to malloc with an align value of 0 */
+/** Tried to malloc with an invalid alignment value (possibly 0) */
 #define E_INVALID_ALIGN_VALUE					    	(-113)
+
+/** numProcessingInstances registered lies outside valid range */
+#define E_INVALID_NUM_INSTANCES							(-114)
+
+/** Instance ID registered lies outside numProcessingInstances value set by user */
+#define E_OUT_OF_RANGE_INSTANCE_ID						(-115)
+
+/** Shared heap size either invalid or unregistered by user */
+#define E_INVALID_SHARED_HEAP_LENGTH					(-116)
+
+/** Multi-instance packet has been forwarded but has not yet been serviced */
+#define E_MULTI_PACKET_WAITING							(-117)
+
+/** Invalid layout index **/
+#define E_INVALID_LAYOUT_INDEX                          (-118)
 
 #ifdef DEFINE_ERROR_STRINGS
 /** Table of error descriptions */
@@ -484,6 +504,11 @@ static const char *s_error_strings[] =
 	"module instance pointer not passed",				//#define E_INSTANCE_POINTER_INVALID (-111)
 	"System Call is not available on target",		    //#define E_SYSCALL (-112)
 	"Tried to malloc with invalid alignment value",     //#define E_INVALID_ALIGN_VALUE (-113)
+	"numProcessingInstances lies outside valid range",	//#define E_INVALID_NUM_INSTANCES (-114)
+	"instance ID outside range set by numProcessingInstances", //#define E_OUT_OF_RANGE_INSTANCE_ID (-115)
+	"shared heap size registered is invalid",			//#define E_INVALID_SHARED_HEAP_LENGTH (-116)
+	"multi-instance packet has been forwarded, waiting on response"	//#define E_MULTI_PACKET_WAITING (-117)
+    "the specified layout index does not exist"	        //#define E_INVALID_LAYOUT_INDEX (-118)
 };
 #endif // DEFINE_ERROR_STRINGS
 

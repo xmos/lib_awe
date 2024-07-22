@@ -41,8 +41,7 @@ The AWEInstance is the most important structure, and it must be initialized prop
 After assigning all of the required members, the BSP author will call the awe_init() function. 
 All members are required to be assigned unless they are marked optional in the detailed description below..
 */
-typedef struct _AWEInstance AWEInstance;
-typedef struct _AWEInstance2
+typedef struct _AWEInstance
 {
 	/** The ID of this instance. Single instance systems should always be 0.
 	The instanceID of the AWEInstance must match the instanceID of your desired AWE commands.
@@ -60,7 +59,7 @@ typedef struct _AWEInstance2
 	/** The slow heap. */
 	UINT32 *pSlowHeap;
 
-	/** The fast heap A size. Heap sizes will vary from platform to platform, and also depend on the size of a layout.
+	/** The fast heap A size in 32-bit words. Heap sizes will vary from platform to platform, and also depend on the size of a layout.
 		A good place to start for each heap is 1048576, however this will be too large for some platforms. 
 	*/
 	UINT32 fastHeapASize;
@@ -84,6 +83,15 @@ typedef struct _AWEInstance2
 	This callback can also be used for whatever the BSP author pleases, including halting audio streams, freeing buffers, etc...
 	*/
 	INT32 (*cbAudioStop)(struct _AWEInstance *pAWE);
+	
+	/*------------------CACHE COHERENCE CALLBACK------------------*/
+	
+	/** OPTIONAL This callback is invoked wherever cache flush or invalidation is required, either in the framework or in modules.
+	This callback is useful in the FFSWrapper where the FFS bin file stored in L2/L3 RAM. The callback is also useful for Multi Instance 
+	environments where the shared heap is allocated in a cached region. 
+	The callback function expects two arguments; the start address of the memory to be invalidated, and length in 32-bit words.
+	*/
+    INT32 (*cbCacheInvalidate)(struct _AWEInstance *pAWE, void *nStartingAddress, UINT32 lengthInWords);
 
 
 	/*------------------IO PINS------------------*/
@@ -138,7 +146,7 @@ typedef struct _AWEInstance2
 	UINT32 *pReplyBuffer;
 
     /** Packet buffer size. Must be initialized to the size of the BSP's packet buffers. 
-		The recommended packet buffer size is 264 words. If you need to use a smaller packetBufferSize
+		The recommended packet buffer size is 264 32-bit words. If you need to use a smaller packetBufferSize
 		due to memory constraints on your target, please contact DSPC Engineering. 
 		(The absolute minimum packetBufferSize is 16 and absolute max is 4105) 
 	*/
@@ -155,7 +163,7 @@ typedef struct _AWEInstance2
 	/** Profiling clock speed in Hz. */
     float profileSpeed;
 
-/*The name of the AWE Instance that will be displayed in Server. Can be any string of XYZ length?*/
+    /** The name of the AWE Instance that will be displayed in Server. Can be any 8 character string*/
 #ifdef __ADSP21000__ 
     /** Name of this instance as an int*/
     const UINT32 *pName;
@@ -173,24 +181,48 @@ typedef struct _AWEInstance2
 	/** Base frame size of this instance. In order for a layout to run on an instance, it must be a multiple of the fundamental blocksize
 	*/
     UINT32 fundamentalBlockSize;
-
+    
     /** DSPC Flash file system instance. OPTIONAL if no FFS. 
 	If implementing the optional flash file system, then assign this pointer to your properly initialized flash file system instance
 	*/
     AWEFlashFSInstance *pFlashFileSystem;
+
+  /*------------------MULTI-INSTANCE SUPPORT------------------*/
+  /** AWE Core shared memory definitions. Not required if using only single-instance AWE Core 
+   */
+	/** The shared heap. */
+    volatile UINT32 *pSharedHeap;
+
+	/** The shared heap size, in 32-bit words */
+    UINT32 sharedHeapSize;
+
+	/** The number of audio processing instances of AWE Core configured on a single target */
+    UINT32 numProcessingInstances;
 
 #ifdef AWEINSTANCE_FRAMEWORK
     AWEINSTANCE_FRAMEWORK
 #else
 	/** Internal members. Reserved memory. */
     #ifdef BUILD64
-	UINT32 _Reserved[564];
+	UINT32 _Reserved[572];
     #else
-	UINT32 _Reserved[295];
+	UINT32 _Reserved[301];
     #endif
 #endif
 
-} AWEInstance2;
+} AWEInstance;
+
+/** Build versioning structure returned by @ref awe_getBuildVersionInfo */
+typedef struct AWEBuildVersionInfo
+{
+	UINT32 tuningVer;					/**< Tuning version */
+	char majorVer;						/**< Major API version (single letter) */
+	UINT32 minorVer;					/**< Minor API version */
+	UINT32 procVer;						/**< Processor specific version */
+	char hotFixVer;						/**< Hot fix version, if the build is a hot fix release. If not, 0 is returned */
+	UINT32 buildNumber;					/**< Library build number */
+
+} AWEBuildVersionInfo_t;
 
 
 /*------------------------------------------Initialization----------------------------------------------------*/
@@ -236,9 +268,19 @@ typedef INT32 packetProcessFunction(AWEInstance * pAWE);
  */
 INT32 awe_packetProcess(AWEInstance * pAWE);
 
+/**
+ * @brief Multi-instance Wrapper for tuning packet processing. 
+ * If called by the tuning instance, call whenever a complete packet is received. Wait until the return value 
+   is not E_MULTI_PACKET_WAITING to forward reply back to the tuning interface.
+ * If called by a non-tuning instance, poll continuously in a low-priority task.
+ * @param [in] pAWE              The AWE instance pointer to process
+ * @param [in] isTuningInstance  Boolean marking if the instance calling this API implements the tuning interface
+ * @return error      @ref E_SUCCESS,  @ref E_MULTI_PACKET_WAITING,  @ref E_COMMAND_NOT_IMPLEMENTED,  
+ * @ref E_MESSAGE_LENGTH_TOO_LONG,  @ref E_CRC_ERROR,  @ref E_BADPACKET 
+ */
+INT32 awe_packetProcessMulti(AWEInstance * pAWE, BOOL isTuningInstance);
 
 /*------------------------------------------Audio----------------------------------------------------*/
-
 /**
  * @brief Audio pump function. Call this in your audio thread once you have imported the data you wish to process.
  *  Before pumping, you must also check that the AudioWeaver buffers have been filled (awe_getPumpMask) 
@@ -312,7 +354,7 @@ INT32 awe_audioIsStarted(const AWEInstance *pAWE);
    If a previous pump is not complete and the layout is ready to pump again, an overflow is detected by this function. 
    In this condition, the layoutMask bit for the overflowed layout will be zero, which prevents the layout from being pumped again.
    Example:
-		int layoutMask = awe_audioGetPumpMask&g_AWEInstance);
+		int layoutMask = awe_audioGetPumpMask(&g_AWEInstance);
 		if (layoutMask > 0) 
 		{
 			if (layoutMask & 0x1) 
@@ -324,6 +366,55 @@ INT32 awe_audioIsStarted(const AWEInstance *pAWE);
  * @return							bit vector of threads to run, 0 if no threads,  @ref E_AUDIO_NOT_STARTED
  */
 INT32 awe_audioGetPumpMask(AWEInstance *pAWE);
+
+/**
+ * @brief Test if AWE is ready to run on secondary instances (ID > 0). This must be used in multi-instance applications to determine when to trigger secondary instances. 
+   Failure to do so can result in pumping at the wrong rates. This avoids unneccessary interrupts on secondary instances where layout block size is higher than the fundamental block size.
+   This function returns TRUE or FALSE. When it returns TRUE, corresponding secondary instance is ready to signal. When this function is called with instance ID 0 or invalid ID, then always 
+   False is returned.
+   Example:
+		int pumpSlaveInstance = awe_audioIsReadyToPumpMulti(&g_AWEInstance, 1);
+		if (pumpSlaveInstance)
+		{
+			// Signal slave core to get pump mask
+			raise();
+		}
+ * @param pAWE						AWE instance
+ * @param instanceID				AWE instance ID
+ * @return							true or false
+ */
+INT32 awe_audioIsReadyToPumpMulti(AWEInstance* pAWE, UINT32 instanceID);
+
+/**
+ * @brief Function to correct overhead outside of the Audio Weaver, like Audio DMA ISR.
+ * Call this function at the very beginning of the DMA ISR and store the returned value, which is an argument to following end function call.
+ * For the use case where multiple instances exists on the same core, this function can be called with any instance's AWEInstance pointer, provided that
+ * the user called @ref awe_setInstancesInfo during the startup.
+ * Example:
+ *		UINT32 start_time = awe_audioStartPreemption(&g_AWEInstance, coreAffinity);
+ *
+ * @param pAWE						AWE instance
+ * @param coreAffinity				Core affinity from which this function is called
+ * @return							start time stamp in cycles at profiling clock
+ */
+UINT32 awe_audioStartPreemption(AWEInstance* pAWE, INT32 coreAffinity);
+
+/**
+ * @brief Function to correct overhead outside of the Audio Weaver, like Audio DMA ISR.
+ * Call this function at the end in the DMA ISR with start_time returned by awe_audioStartPreemption().
+ * If the DMA ISR has low latency audio pump calls, then this function must be called before the audio pump and call awe_audioStartPreemption() again after pump.
+ * Note that the funtion awe_audioStartPreemption() must be called first, before calling awe_audioEndPreemption().
+ * For the use case where multiple instances exists on the same core, this function can be called with any instance's AWEInstance pointer, provided that
+ * the user called @ref awe_setInstancesInfo during the startup.
+ * Example:
+ *		awe_audioEndPreemption(&g_AWEInstance, start_time, coreAffinity);
+ *
+ * @param pAWE						AWE instance
+ * @param start_time				Start time returned by the corresponding start function "awe_audioStartPreemption"
+ * @param coreAffinity				Core affinity from which this function is called
+ * @return							Elapsed time between start preempt and this function
+ */
+UINT32 awe_audioEndPreemption(AWEInstance* pAWE, UINT32 start_time, INT32 coreAffinity);
 
 /*------------------------------------------Deferred Functions----------------------------------------------------*/
 /**
@@ -504,7 +595,7 @@ INT32 awe_ctrlGetValueMask(const AWEInstance *pAWE, UINT32 handle, void *value, 
 INT32 awe_ctrlGetModuleClass(const AWEInstance *pAWE, UINT32 handle, UINT32 *pClassID);
 
 /**
- * @brief Enable or disable the profiling ability of the AWECore. Both top and module level profiling enabled by default at awe_init. 
+ * @brief Enable or disable the profiling ability of the AWE Core. Both top and module level profiling enabled by default at awe_init. 
  * Use this if you wish to selectively enable or disable per pump profiling during runtime. 
  * Disabling profiling saves a small amount of cycles per pump. User can also enable or disable independently module level profiling and top level profiling.
  * @param pAWE						instance pointer
@@ -525,6 +616,42 @@ INT32 awe_setProfilingStatus(AWEInstance *pAWE, UINT32 status);
 */
 INT32 awe_getAverageLayoutCycles(AWEInstance *pAWE, UINT32 layoutIdx, UINT32 * averageCycles);
 
+/**
+ * @brief Setup function only intended for systems with multiple AWE Instances in a single core.
+ *        Call this function at startup after awe_init is done in the sequence.
+ *        Enables both accurate profiling and loading of multi-instance designs.
+ * @param [in] pInstances				Array of AWE Instance pointers that process on one core. Array must  
+										exist as long as the system is active.
+ * @param [in] numAweInstancesOnCore	Number of AWE Instances in pInstances array.
+ */
+void awe_setInstancesInfo(AWEInstance **pInstances, INT32 numAweInstancesOnCore);
+
+/**
+ * @brief Set the core affinity of the layout in layoutNumber. Used to get more accurate profiling in multithreaded
+          systems.
+ * @param [in] pAWE					AWE instance pointer (this)
+ * @param [in] layoutNumber			the layout index to set the core affinity.
+ * @param [in] coreAffinity			core affinity to set in the layout.
+ * @return                          E_SUCCESS or E_INVALID_LAYOUT_INDEX if no layout
+ * 
+ */
+INT32 awe_fwSetLayoutCoreAffinity(AWEInstance* pAWE, INT32 layoutNumber, INT32 coreAffinity);
+
+/**
+ * @brief Get the core affinity of the layout in layoutNumber, initializes to 0 and can be set with 
+ *        awe_fwSetLayoutCoreAffinity
+ * @param [in] pAWE					AWE instance pointer (this)
+ * @param [in] layoutNumber			the layout index to get the core affinity.
+ * @return                          the core affinity of the requested layout, or E_INVALID_LAYOUT_INDEX if no layout
+ */
+INT32 awe_fwGetLayoutCoreAffinity(AWEInstance* pAWE, INT32 layoutNumber);
+
+/**
+ * @brief Get the AWECore build number and version information.
+ * @param [in, out] pBuildVersionInfo	Pointer of type AWEBuildVersionInfo_t to return build version information
+ * @return								Return E_SUCCESS up on success. If pBuildVersionInfo is NULL, E_NOT_OBJECT returned.
+ */
+INT32 awe_getBuildVersionInfo(AWEBuildVersionInfo_t *pBuildVersionInfo);
 
 #ifdef	__cplusplus
 }
