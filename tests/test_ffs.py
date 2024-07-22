@@ -14,16 +14,34 @@ xe_ffs_rpc = "test_ffs_rpc/bin/test_ffs_rpc.xe"
 xe_demo_ffs_host = "../examples/app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe"
 xe_ffs_rpc_device = "test_ffs_awb_device/bin/test_ffs_awb_device.xe"
 
+
 def test_xawe_ffs_rpc():
-    # stdout = flash_xe(xe_ffs, boot_partition_size=0x80000)
-    stdout = run_xe_hw(xe_ffs_rpc, ["--io"])
+    """
+    This is a executable that needs to run on HW with flash and tests the individual RPC calls.
+    The result is returned in the errorcode from the xrun instance.
+    Note this will leave the data partition with junk in it.
+    """
+    
+    stdout = run_xe_hw(xe_ffs_rpc, ["--io"]) # This will assert if it fails
     print(stdout)
 
 
-def test_load_awb_from_ffs_host():
-    pytest.skip() # Until we have HW test in place
+@pytest.fixture
+def flash_ua_with_ffs(scope="session"):
+    """
+    This test programs the UA/FFS binary and the pre-made FFS containing a couple of AWBS.
+    """
 
     stdout = flash_xe(xe_demo_ffs_host, boot_partition_size=0x80000, data_partition_bin="../examples/audioweaver/awb_files/data_partition_ffs.bin")
+
+
+
+def test_load_awb_from_ffs_host(flash_ua_with_ffs):
+    """
+    This test programs the UA/FFS binary and the pre-made FFS containing a couple of AWBS.
+    It then uses a host command to load these many times to see if it works
+    """
+    
     time.sleep(5) # Wait for HID to come up
 
     awe = awe_hid_comms()
@@ -33,9 +51,13 @@ def test_load_awb_from_ffs_host():
         assert awe.load_awb_from_ffs("playBasic_3thread.awb")
         assert awe.load_awb_from_ffs("simple_volume.awb")
 
-def test_load_awb_from_ffs_device():
-    pytest.skip() # Until we have HW test in place
 
+    # NOW stream some audio
+
+def test_load_awb_from_ffs_device(flash_ua_with_ffs):
+    """
+    Runs 
+    """
     output = run_xe_hw(xe_ffs_rpc_device, opts=["--io"])
 
     assert "xawe_loadAWBfromFFS SUCCESS" in output, f"Failed loading AWB from FFS: {output}"
