@@ -66,4 +66,5 @@ Known Issues
   * AWE_DSP_THREAD_NUM counts of less than 3 are not currently supported. This will be fixed in a future release. https://github.com/xmos/lib_awe/issues/44
   * Lib_awe requires the xcore.ai device to be run with a CPU clock of at least 700 MHz. Please use the appropriate silicon grade to support this.
   * Audio Weaver code-generation produces mis-matched declaraition (const) between .h and c files (https://github.com/xmos/lib_awe/issues/39)
+  * This release is know to only work with verison of AWE core 8.D.1.1
 
