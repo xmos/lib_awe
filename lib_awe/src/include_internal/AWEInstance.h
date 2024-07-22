@@ -41,7 +41,8 @@ The AWEInstance is the most important structure, and it must be initialized prop
 After assigning all of the required members, the BSP author will call the awe_init() function. 
 All members are required to be assigned unless they are marked optional in the detailed description below..
 */
-typedef struct _AWEInstance
+typedef struct _AWEInstance AWEInstance;
+typedef struct _AWEInstance2
 {
 	/** The ID of this instance. Single instance systems should always be 0.
 	The instanceID of the AWEInstance must match the instanceID of your desired AWE commands.
@@ -210,7 +211,7 @@ typedef struct _AWEInstance
     #endif
 #endif
 
-} AWEInstance;
+} AWEInstance2;
 
 /** Build versioning structure returned by @ref awe_getBuildVersionInfo */
 typedef struct AWEBuildVersionInfo

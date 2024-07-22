@@ -24,7 +24,8 @@ extern "C" {
 /** @brief AWE IO Pin type.  */
 /**@details The AWE typedef for input/output pins. A BSP author will allocate their input/output pins of this type.
 */
-typedef struct _IOPinDescriptor
+typedef struct _IOPinDescriptor IOPinDescriptor;
+typedef struct _IOPinDescriptor2
 {
 #ifdef IOPINDESCRIPTOR_FRAMEWORK
     IOPINDESCRIPTOR_FRAMEWORK
@@ -36,7 +37,7 @@ typedef struct _IOPinDescriptor
     UINT32 _Reserved[17];
     #endif
 #endif
-} IOPinDescriptor;
+} IOPinDescriptor2;
 
 #ifdef	__cplusplus
 }

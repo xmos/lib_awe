@@ -36,7 +36,8 @@ struct _AWEInstance;
 @brief The DSPC Flash File System Instance
 @details Optional -- SINGLE INSTANCE ONLY
 */
-typedef struct _AWEFlashFSInstance
+typedef struct _AWEFlashFSInstance AWEFlashFSInstance;
+typedef struct _AWEFlashFSInstance2
 {
     /** Size of flash memory - if non-zero, next two values must also be non-zero. */
     UINT32 flashSizeInBytes;
@@ -74,7 +75,7 @@ typedef struct _AWEFlashFSInstance
     UINT32 _Reserved[59];
 #endif
 
-} AWEFlashFSInstance;
+} AWEFlashFSInstance2;
 
 // Macro to indicate API's changed
 #define FLASH_FS_API_CHANGED
