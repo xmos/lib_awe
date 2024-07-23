@@ -68,27 +68,31 @@ def test_load_awb_from_ffs_host(flash_ua_with_ffs):
     fs = 48000
     duration = 30
 
-    analyzer_dir = Path(__file__).parents[2] / "sw_audio_analyzer"
-    with AudioAnalyzerHarness(adapter_harness, analyzer_dir, attach="xscope") as harness:
-        xsig_config = Path(__file__).parent / "output_sine_2ch.json"
-        assert xsig_config.exists()
+    with AweDut(adapter_dut, "UA") as dut:
+        # Load the AWB from FFS
+        assert awe.load_awb_from_ffs("simple_volume.awb")
 
-        with XsigOutput(fs, None, xsig_config, dut.dev_name) as xsig_proc:
-            time.sleep(duration)
-            harness.terminate()
-            xscope_lines = harness.proc_stdout + harness.proc_stderr
+        analyzer_dir = Path(__file__).parents[2] / "sw_audio_analyzer"
+        with AudioAnalyzerHarness(adapter_harness, analyzer_dir, attach="xscope") as harness:
+            xsig_config = Path(__file__).parent / "output_sine_2ch.json"
+            assert xsig_config.exists()
 
-        with open(xsig_config) as file:
-            xsig_json = json.load(file)
+            with XsigOutput(fs, None, xsig_config, dut.dev_name) as xsig_proc:
+                time.sleep(duration)
+                harness.terminate()
+                xscope_lines = harness.proc_stdout + harness.proc_stderr
 
-        failures = check_analyzer_output(xscope_lines, xsig_json["out"])
-        fail_str = (
-            "\n".join(failures)
-            + f"\n\nxscope output:\n{xscope_lines}\n"
-            + f"xsig output:\n{xsig_proc.proc_output}"
-        )
-        
-        assert len(failures) == 0, f"Failures: {fail_str}"
+            with open(xsig_config) as file:
+                xsig_json = json.load(file)
+
+            failures = check_analyzer_output(xscope_lines, xsig_json["out"])
+            fail_str = (
+                "\n".join(failures)
+                + f"\n\nxscope output:\n{xscope_lines}\n"
+                + f"xsig output:\n{xsig_proc.proc_output}"
+            )
+            
+            assert len(failures) == 0, f"Failures: {fail_str}"
 
 
 @pytest.mark.hw
