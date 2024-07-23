@@ -14,12 +14,16 @@ xe_ffs_rpc = "test_ffs_rpc/bin/test_ffs_rpc.xe"
 xe_demo_ffs_host = "../examples/app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe"
 xe_ffs_rpc_device = "test_ffs_awb_device/bin/test_ffs_awb_device.xe"
 
+
+@pytest.mark.hw
 def test_xawe_ffs_rpc():
+    pytest.skip() # Until we have HW test in place
     # stdout = flash_xe(xe_ffs, boot_partition_size=0x80000)
     stdout = run_xe_hw(xe_ffs_rpc, ["--io"])
     print(stdout)
 
 
+@pytest.mark.hw
 def test_load_awb_from_ffs_host():
     pytest.skip() # Until we have HW test in place
 
@@ -33,6 +37,8 @@ def test_load_awb_from_ffs_host():
         assert awe.load_awb_from_ffs("playBasic_3thread.awb")
         assert awe.load_awb_from_ffs("simple_volume.awb")
 
+
+@pytest.mark.hw
 def test_load_awb_from_ffs_device():
     pytest.skip() # Until we have HW test in place
 

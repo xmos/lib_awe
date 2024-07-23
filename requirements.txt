@@ -1,6 +1,9 @@
 # python_version 3.11
 
 # dependencies
+
+-e tests/hardware_test_tools
+
 flake8==7.0.0
 pylint==3.2.3
 pytest==7.4.2
