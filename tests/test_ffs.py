@@ -68,7 +68,7 @@ def test_load_awb_from_ffs_host(pytestconfig, flash_ua_with_ffs):
     fs = 48000
     duration = 30
 
-    with AweDut(adapter_dut, "UA") as dut:
+    with AweDut(adapter_dut, "UA_FFS") as dut:
         # Load the AWB from FFS
         assert awe.load_awb_from_ffs("simple_volume.awb")
 
