@@ -11,6 +11,8 @@ set(APP_COMPILER_FLAGS ${EXTRA_BUILD_FLAGS}     -Os
                                                 -lquadflash
                                                 # (8 + 1) * 16 + a bit
                                                 -fcmdline-buffer-bytes=192
+                                                -mcmodel=large
+                                                -DAWE_USE_FLASH_FILE_SYSTEM=1
 )
 
 set(APP_INCLUDES src)
