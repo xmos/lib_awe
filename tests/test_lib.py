@@ -10,6 +10,8 @@ import os
 
 exclude_dirs = [".venv"]
 
+
+@pytest.mark.lib
 def test_lib_not_present():
     file_list = []
     for dirpath, dirnames, filenames in os.walk("."):

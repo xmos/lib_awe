@@ -35,6 +35,7 @@ def check_expected(dut, expected):
         assert int(dut_word, 16) == int(expected_word, 16)
 
 
+@pytest.mark.sim
 def test_target_info():
     dut = send_command(xe_cmd, "PFID_GetTargetInfo")
     expected = "000e0000 00000000 473b8000 4b3ebc20 00403020 24020264 08440100 00000107 534f4d58 4253555f 4cbebc20 00000000 7a6b5c4d 07c4f609"
@@ -48,7 +49,7 @@ def test_target_info():
     check_expected(dut, expected)
 
 
-
+@pytest.mark.sim
 def test_get_moduleclass_count():
     dut = send_command(xe_cmd, "PFID_GetCIModuleCount")
     count = 325
@@ -56,6 +57,8 @@ def test_get_moduleclass_count():
 
     check_expected(dut, expected)
 
+
+@pytest.mark.sim
 def test_get_core_list():
     dut = send_command(xe_cmd, "PFID_GetCores2")
     cores = 1
@@ -63,6 +66,8 @@ def test_get_core_list():
 
     check_expected(dut, expected)
 
+
+@pytest.mark.sim
 def test_long_packet():
     # 264 max packet length so cmd + id + len + offset + payload + CRC
     payload = [0] + [259] + [0] + [i for i in range(259)]
@@ -77,6 +82,7 @@ def test_long_packet():
     assert error_lut.lookup(error_code) == "E_ARGUMENT_ERROR"
 
 
+@pytest.mark.sim
 def test_xawe_ctrl_interface():
     stdout = run_xe_sim(xe_xawe, "", max_cycles=10000000)
     print(stdout)
