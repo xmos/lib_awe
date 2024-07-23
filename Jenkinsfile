@@ -176,7 +176,6 @@ pipeline {
               junit "${REPO}/tests/pytest_result_hw.xml"
             }
             cleanup {
-              uninstallTools()
               xcoreCleanSandbox()
             }
           }
@@ -221,7 +220,6 @@ pipeline {
           } // steps
           post {
             cleanup {
-              uninstallTools()
               xcoreCleanSandbox()
             }
           }
