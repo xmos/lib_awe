@@ -136,6 +136,8 @@ pipeline {
               unstash "xe_files"
             }
 
+            get_xcommon_cmake()
+
             dir("${REPO}/tests") {
               dir("hardware_test_tools/xsig") {
                 copyArtifacts filter: 'bin-macos-arm/xsig', fingerprintArtifacts: true, projectName: 'xmos-int/xsig/master', flatten: true, selector: lastSuccessful()
