@@ -37,7 +37,27 @@ def check_expected(dut, expected):
 
 def test_target_info():
     dut = send_command(xe_cmd, "PFID_GetTargetInfo")
-    expected = "000e0000 00000000 473b8000 4b3ebc20 00403020 24020264 08440100 00000107 534f4d58 4253555f 4cbebc20 00000000 7a6b5c4d 07c4f609"
+    major = 8
+    minor = ord("D")
+    patch = 8
+    version_info = f"{(patch << 24) | (minor << 16) | (major << 8):x}"
+    expected = f"000e0000 00000000 473b8000 4b3ebc20 00403020 24020264 {version_info} 00000107 534f4d58 4253555f 4cbebc20 00000000 7a6b5c4d 7c4ff09"
+    """
+    Message Length = 14 0
+    error status (int)
+    sample rate (float)
+    profile clock speed in Hz (float)
+    packedBlockSize (uint)
+    packedData (uint)
+    version information (uint)
+    packetBufferSize (uint)
+    packedName 1 (uint)
+    packedName 2 (uint)
+    cpuClockSpeed in Hz (float)
+    coreID (uint)
+    featureBits (uint)
+    CRC (uint)
+    """
 
     to_fp = lambda a : struct.unpack('f', struct.pack('I', a))[0]
 
