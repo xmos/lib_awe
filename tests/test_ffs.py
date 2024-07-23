@@ -18,22 +18,24 @@ from hardware_test_tools.Xsig import XsigOutput
 from hardware_test_tools.check_analyzer_output import check_analyzer_output
 
 xe_ffs_rpc = "test_ffs_rpc/bin/test_ffs_rpc.xe"
-xe_demo_ffs_host = "../examples/app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe"
 xe_ffs_rpc_device = "test_ffs_awb_device/bin/test_ffs_awb_device.xe"
-
+xe_demo_ffs_host = "../../an02016/app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe"
 
 
 
 @pytest.fixture
 def flash_ua_with_ffs(scope="session"):
     """
-    This test programs the UA/FFS binary and the pre-made FFS containing a couple of AWBS.
+    This fixture programs the UA/FFS binary and the pre-made FFS containing a couple of AWBS.
     """
+    stdout = flash_xe(xe_demo_ffs_host, boot_partition_size=0x80000, data_partition_bin="../examples/audioweaver/awb_files/data_partition_ffs.bin")
+
 
 @pytest.mark.hw
 def test_xawe_ffs_rpc():
-    pytest.skip() # Until we have HW test in place
-    # stdout = flash_xe(xe_ffs, boot_partition_size=0x80000)
+    # program flash and create empty DP      
+    stdout = flash_xe(xe_demo_ffs_host, boot_partition_size=0x80000)
+    print(stdout)
     stdout = run_xe_hw(xe_ffs_rpc, ["--io"])
     print(stdout)
 
