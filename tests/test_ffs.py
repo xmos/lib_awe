@@ -22,15 +22,6 @@ xe_demo_ffs_host = "../examples/app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_U
 xe_ffs_rpc_device = "test_ffs_awb_device/bin/test_ffs_awb_device.xe"
 
 
-def test_xawe_ffs_rpc():
-    """
-    This is a executable that needs to run on HW with flash and tests the individual RPC calls.
-    The result is returned in the errorcode from the xrun instance.
-    Note this will leave the data partition with junk in it.
-    """
-    
-    stdout = run_xe_hw(xe_ffs_rpc, ["--io"]) # This will assert if it fails
-    print(stdout)
 
 
 @pytest.fixture
@@ -39,15 +30,22 @@ def flash_ua_with_ffs(scope="session"):
     This test programs the UA/FFS binary and the pre-made FFS containing a couple of AWBS.
     """
 
-    stdout = flash_xe(xe_demo_ffs_host, boot_partition_size=0x80000, data_partition_bin="../examples/audioweaver/awb_files/data_partition_ffs.bin")
+@pytest.mark.hw
+def test_xawe_ffs_rpc():
+    pytest.skip() # Until we have HW test in place
+    # stdout = flash_xe(xe_ffs, boot_partition_size=0x80000)
+    stdout = run_xe_hw(xe_ffs_rpc, ["--io"])
+    print(stdout)
 
 
-
+@pytest.mark.hw
 def test_load_awb_from_ffs_host(flash_ua_with_ffs):
     """
     This test programs the UA/FFS binary and the pre-made FFS containing a couple of AWBS.
     It then uses a host command to load these many times to see if it works
     """
+
+    stdout = flash_xe(xe_demo_ffs_host, boot_partition_size=0x80000, data_partition_bin="../examples/audioweaver/awb_files/data_partition_ffs.bin")
     
     time.sleep(5) # Wait for HID to come up
 
@@ -57,7 +55,6 @@ def test_load_awb_from_ffs_host(flash_ua_with_ffs):
     for i in range(200):
         assert awe.load_awb_from_ffs("playBasic_3thread.awb")
         assert awe.load_awb_from_ffs("simple_volume.awb")
-
 
     # NOW stream some audio. simple_volume should be loaded and will pass audio straight through
     fs = 48000
@@ -85,13 +82,18 @@ def test_load_awb_from_ffs_host(flash_ua_with_ffs):
         
         assert len(failures) == 0, f"Failures: {fail_str}"
 
+
+@pytest.mark.hw
 def test_load_awb_from_ffs_device(flash_ua_with_ffs):
     """
-    Runs 
+    Runs the firmware API version of xawe_loadAWBfromFFS many times on HW
+    Print from xrun session will determine if it encountered an error or not
     """
     output = run_xe_hw(xe_ffs_rpc_device, opts=["--io"])
 
     assert "xawe_loadAWBfromFFS SUCCESS" in output, f"Failed loading AWB from FFS: {output}"
+
+
 
 # For local testing only
 if __name__ == "__main__":
