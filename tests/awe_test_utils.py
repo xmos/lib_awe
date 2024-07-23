@@ -356,7 +356,7 @@ def run_xe_sim(bin_path, cmds, max_cycles=1000000):
     cmd = f"xsim --max-cycles {max_cycles} --args {bin_path} {cmds}"
   
     ret = subprocess.run(cmd.split(), capture_output=True, text=True)
-    assert ret.returncode == 0, f"Failed runing {cmd}: {ret.stderr}"
+    assert ret.returncode == 0, f"Failed runing {cmd}, returncode:{ret.returncode} stderr:{ret.stderr}"
 
     return ret.stdout
 

@@ -29,7 +29,7 @@ pipeline {
     PYTHON_VERSION = "3.11"
     XMOSDOC_VERSION = "v5.4"
     XTAGCTL_VERSION = "v2.0.0"
-    AWE_CORE_VERSION = "DSPCAWE_8.D.1.1"
+    AWE_CORE_VERSION = "DSPCAWE_8.D.8"
   }
   stages {
     stage('Linux stages') {
