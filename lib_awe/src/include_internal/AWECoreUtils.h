@@ -33,6 +33,9 @@ extern "C" {
 
 /*------------------ PACKET ROUTING MACROS - MULTI-INSTANCE ONLY  ------------------*/
 
+/* Maximum number of AWECore instances able to be configured on a single target */
+#define MAX_PROCESSING_INSTANCES (256)
+
 /**This will determine the length of a packet in words.*/
 #define PACKET_LENGTH_WORDS(x) (x[0]>>16)
 

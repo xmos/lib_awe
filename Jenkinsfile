@@ -29,6 +29,7 @@ pipeline {
     PYTHON_VERSION = "3.11"
     XMOSDOC_VERSION = "v5.4"
     XTAGCTL_VERSION = "v2.0.0"
+    AWE_CORE_VERSION = "DSPCAWE_8.D.8"
   }
   stages {
     stage('Linux stages') {
@@ -84,7 +85,7 @@ pipeline {
             withTools(params.TOOLS_VERSION) {
               withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
                 dir("${REPO}") {
-                  withCredentials([file(credentialsId: 'DSPCAWE_8.D.1.1', variable: 'DSPC_AWE_LIB')]) {
+                  withCredentials([file(credentialsId: "${AWE_CORE_VERSION}", variable: 'DSPC_AWE_LIB')]) {
                     sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
                   }
                 }
@@ -180,7 +181,7 @@ pipeline {
               withVenv {
                 sh 'pip install -r requirements.txt'
               }
-              withCredentials([file(credentialsId: 'DSPCAWE_8.D.1.1', variable: 'DSPC_AWE_LIB')]) {
+              withCredentials([file(credentialsId: "${AWE_CORE_VERSION}", variable: 'DSPC_AWE_LIB')]) {
                 sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
               }
             }
