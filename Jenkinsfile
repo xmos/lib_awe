@@ -85,7 +85,7 @@ pipeline {
             withTools(params.TOOLS_VERSION) {
               withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
                 dir("${REPO}") {
-                  withCredentials([file(credentialsId: '${AWE_CORE_VERSION}', variable: 'DSPC_AWE_LIB')]) {
+                  withCredentials([file(credentialsId: "${AWE_CORE_VERSION}", variable: 'DSPC_AWE_LIB')]) {
                     sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
                   }
                 }
@@ -181,7 +181,7 @@ pipeline {
               withVenv {
                 sh 'pip install -r requirements.txt'
               }
-              withCredentials([file(credentialsId: '${AWE_CORE_VERSION}', variable: 'DSPC_AWE_LIB')]) {
+              withCredentials([file(credentialsId: "${AWE_CORE_VERSION}", variable: 'DSPC_AWE_LIB')]) {
                 sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
               }
             }
