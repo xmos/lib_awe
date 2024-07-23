@@ -28,6 +28,7 @@ pipeline {
     PIP_VERSION = "24.0"
     PYTHON_VERSION = "3.11"
     XMOSDOC_VERSION = "v5.4"
+    XTAGCTL_VERSION = "v2.0.0"
   }
   stages {
     stage('Linux stages') {
@@ -46,6 +47,7 @@ pipeline {
 
             dir("${REPO}") {
               checkout scm
+              sh "git submodule update --init"
               createVenv()
               withVenv {
                 sh "pip install -e ${WORKSPACE}/infr_scripts_py"
@@ -69,7 +71,7 @@ pipeline {
                   withEnv(["REPO=${REPO}"]) {
                     xcoreLibraryChecks("${REPO}", false)
                     // Need to run this test on the repo source only before we do a build and grab the .a
-                    sh "python -m pytest -k \"lib\" --junitxml=junit_lib.xml"
+                    sh "python -m pytest -m lib --junitxml=junit_lib.xml"
                     junit "junit_lib.xml"
                   } // withEnv
                 } // with Venv
@@ -112,19 +114,43 @@ pipeline {
             label 'usb_audio && macos && arm64 && xcore.ai-mcab'
           }
           steps {
+            println "Stage running on ${env.NODE_NAME}"
+            sh "git clone git@github0.xmos.com:xmos-int/xtagctl"
+            sh "git -C xtagctl checkout ${env.XTAGCTL_VERSION}"
+
+            dir("sw_audio_analyzer") {
+              copyArtifacts filter: '**/*.xe', fingerprintArtifacts: true, projectName: 'xmos-int/sw_audio_analyzer/master', selector: lastSuccessful()
+              copyArtifacts filter: 'host_xscope_controller/bin_macos/xscope_controller', fingerprintArtifacts: true, projectName: 'xmos-int/sw_audio_analyzer/master', selector: lastSuccessful()
+            }
+
             dir("${REPO}") {
               checkout scm
+              sh "git submodule update --init"
               createVenv()
               withVenv {
                 sh 'pip install -r requirements.txt'
               }
             }
-            println "Stage running on ${env.NODE_NAME}"
+
+            dir("${EXAMPLE}") {
+              unstash "xe_files"
+            }
+
             dir("${REPO}/tests") {
+              dir("hardware_test_tools/xsig") {
+                copyArtifacts filter: 'bin-macos-arm/xsig', fingerprintArtifacts: true, projectName: 'xmos-int/xsig/master', flatten: true, selector: lastSuccessful()
+              }
+
               withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
                 withVenv {
                   withTools(params.TOOLS_VERSION) {
+                    sh "pip install -e ${WORKSPACE}/xtagctl"
+
                     unstash "xe_files"
+
+                    withXTAG(["usb_audio_mc_xcai_dut", "usb_audio_mc_xcai_harness"]) { xtagIds ->
+                      sh "pytest -v -m hw --junitxml=pytest_result_hw.xml -o xtag_dut=${xtagIds[0]} -o xtag_harness=${xtagIds[1]}"
+                    }
                     sh "tree"
                     sh "xrun -l"
                   } // Tools
@@ -133,6 +159,9 @@ pipeline {
             } // dir
           } // steps
           post {
+            always {
+              junit "${REPO}/tests/pytest_result_hw.xml"
+            }
             cleanup {
               xcoreCleanSandbox()
             }
@@ -146,6 +175,7 @@ pipeline {
             println "Stage running on ${env.NODE_NAME}"
             dir("${REPO}") {
               checkout scm
+              sh "git submodule update --init"
               createVenv()
               withVenv {
                 sh 'pip install -r requirements.txt'
@@ -168,7 +198,7 @@ pipeline {
                       sh "cmake -G \"Unix Makefiles\" -B build"
                       sh "xmake -C build -j"
                     }
-                    sh "python -m pytest -v -k \"not lib and not ffs\" --junitxml=junit_main.xml"
+                    sh "python -m pytest -v -m sim --junitxml=junit_main.xml"
                     junit "junit_main.xml"
                   } // withTools
                 } // withVenv
@@ -192,6 +222,8 @@ pipeline {
 
             dir("${REPO}") {
               checkout scm
+              sh "git submodule update --init"
+
               sh "docker pull ghcr.io/xmos/xmosdoc:$XMOSDOC_VERSION"
 
               // Build lib docs
