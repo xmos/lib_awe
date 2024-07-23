@@ -360,20 +360,20 @@ def run_xe_sim(bin_path, cmds, max_cycles=1000000):
 
     return ret.stdout
 
-def run_xe_hw(bin_path, opts=None):
+def run_xe_hw(bin_path, adapter_id, opts=None):
     options = "" if opts is None else " ".join(opts)
-    cmd = f"xrun {options} {bin_path}"
+    cmd = f"xrun --adapter-id {adapter_id} {options} {bin_path}"
   
     ret = subprocess.run(cmd.split(), capture_output=True, text=True)
     assert ret.returncode == 0, f"Failed runing {cmd}: {ret.stderr}"
 
     return ret.stdout + ret.stderr
 
-def flash_xe(bin_path, boot_partition_size=None, data_partition_bin=None):
+def flash_xe(bin_path, adapter_id, boot_partition_size=None, data_partition_bin=None):
     if boot_partition_size is None:
-        cmd = f"xflash {bin_path}"
+        cmd = f"xflash --adapter-id {adapter_id} {bin_path}"
     else:
-        cmd = f"xflash --factory {bin_path} --boot-partition-size {boot_partition_size}"
+        cmd = f"xflash --adapter-id {adapter_id} --factory {bin_path} --boot-partition-size {boot_partition_size}"
         if data_partition_bin is not None:
             cmd += f" --data {data_partition_bin}"
   

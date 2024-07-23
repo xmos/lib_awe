@@ -28,15 +28,20 @@ def flash_ua_with_ffs(scope="session"):
     """
     This fixture programs the UA/FFS binary and the pre-made FFS containing a couple of AWBS.
     """
-    stdout = flash_xe(xe_demo_ffs_host, boot_partition_size=0x80000, data_partition_bin="../examples/audioweaver/awb_files/data_partition_ffs.bin")
+
+    adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
+
+    stdout = flash_xe(xe_demo_ffs_host, adapter_dut, boot_partition_size=0x80000, data_partition_bin="../examples/audioweaver/awb_files/data_partition_ffs.bin")
 
 
 @pytest.mark.hw
 def test_xawe_ffs_rpc():
-    # program flash and create empty DP      
-    stdout = flash_xe(xe_demo_ffs_host, boot_partition_size=0x80000)
+    adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
+
+    # program flash and create empty DP 
+    stdout = flash_xe(xe_demo_ffs_host, adapter_dut, boot_partition_size=0x80000)
     print(stdout)
-    stdout = run_xe_hw(xe_ffs_rpc, ["--io"])
+    stdout = run_xe_hw(xe_ffs_rpc, adapter_dut, ["--io"])
     print(stdout)
 
 
@@ -46,8 +51,9 @@ def test_load_awb_from_ffs_host(flash_ua_with_ffs):
     This test programs the UA/FFS binary and the pre-made FFS containing a couple of AWBS.
     It then uses a host command to load these many times to see if it works
     """
+    adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
 
-    stdout = flash_xe(xe_demo_ffs_host, boot_partition_size=0x80000, data_partition_bin="../examples/audioweaver/awb_files/data_partition_ffs.bin")
+    stdout = flash_xe(xe_demo_ffs_host, adapter_dut, boot_partition_size=0x80000, data_partition_bin="../examples/audioweaver/awb_files/data_partition_ffs.bin")
     
     time.sleep(5) # Wait for HID to come up
 
