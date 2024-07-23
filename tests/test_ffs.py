@@ -24,7 +24,7 @@ xe_demo_ffs_host = "../../an02016/app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe
 
 
 @pytest.fixture
-def flash_ua_with_ffs(scope="session"):
+def flash_ua_with_ffs(pytestconfig, scope="session"):
     """
     This fixture programs the UA/FFS binary and the pre-made FFS containing a couple of AWBS.
     """
@@ -35,7 +35,7 @@ def flash_ua_with_ffs(scope="session"):
 
 
 @pytest.mark.hw
-def test_xawe_ffs_rpc():
+def test_xawe_ffs_rpc(pytestconfig):
     adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
 
     # program flash and create empty DP 
@@ -46,7 +46,7 @@ def test_xawe_ffs_rpc():
 
 
 @pytest.mark.hw
-def test_load_awb_from_ffs_host(flash_ua_with_ffs):
+def test_load_awb_from_ffs_host(pytestconfig, flash_ua_with_ffs):
     """
     This test programs the UA/FFS binary and the pre-made FFS containing a couple of AWBS.
     It then uses a host command to load these many times to see if it works
@@ -96,19 +96,14 @@ def test_load_awb_from_ffs_host(flash_ua_with_ffs):
 
 
 @pytest.mark.hw
-def test_load_awb_from_ffs_device(flash_ua_with_ffs):
+def test_load_awb_from_ffs_device(pytestconfig, flash_ua_with_ffs):
     """
     Runs the firmware API version of xawe_loadAWBfromFFS many times on HW
     Print from xrun session will determine if it encountered an error or not
     """
-    output = run_xe_hw(xe_ffs_rpc_device, opts=["--io"])
+
+    adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
+
+    output = run_xe_hw(xe_ffs_rpc_device, adapter_harness, opts=["--io"])
 
     assert "xawe_loadAWBfromFFS SUCCESS" in output, f"Failed loading AWB from FFS: {output}"
-
-
-
-# For local testing only
-if __name__ == "__main__":
-    test_xawe_ctrl_interface()
-
-
