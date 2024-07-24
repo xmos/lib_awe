@@ -99,6 +99,7 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
             devices = hid.enumerate()
             for device in devices:
                 print(device)
+        self.debug = debug
 
         self.dev = hid.device()
         self.dev.open(VID, PID)
@@ -117,8 +118,12 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
 
     def cmd_raw(self, msg):
         """ Send and receive in one hit - need to send whole packet includeing command with len. CRC gets added"""
+        if self.debug:
+            print(f"Sending: {[hex(m) for m in msg]}")
         self.send(msg)
         response = self.get_response()
+        if self.debug:
+            print(f"Response: {[hex(r) for r in response]}")
         err = self.check_response(response)
 
         return err
