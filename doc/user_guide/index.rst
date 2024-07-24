@@ -5,7 +5,7 @@ AWE Library User Guide
 Introduction
 ------------
 
-Audio Weaver is a tool and libraries for implementing Digital Signal Processing algorithms. It comprises a GUI and a set of libraries. Standard building blocks such as filters, equalisers, echo cancellers, can be assembled in the GUI and then executed on a device. A control library is available that enables on-line tuning of the processing blocks.
+Audio Weaver is a tool and libraries for implementing Digital Signal Processing algorithms. It comprises a GUI and a set of libraries. Standard building blocks such as filters, equalisers and many more can be assembled in the GUI and then executed on a device. A control library is available that enables on-line tuning of the processing blocks.
 
 XCORE is a programmable multi-core device with flexible DSP and IO interfaces. The IO interfaces can be programmed to, for example, I2S, TDM, USB, ADAT or S/PDIF interfaces (or indeed any other interface), and the DSP capability can be used to operate on data that is received from or sent to these interfaces. In addition to interfaces and DSP, XCORE devices can also execute control code or even ML inference engines.
 
@@ -16,8 +16,7 @@ It utilises xcore.ai's multi-threaded architecture and vector processing unit to
 .. note::
     This document refers to the XMOS specific implementation details. DSP Concepts provide several documents on the usage and integration of Audio Weaver into user system. Please refer to https://documentation.dspconcepts.com for documentation specific to Audio Weaver.
 
-For reference, we refer to the following repositories that you may want to
-use:
+For reference, we refer to the following repositories that you may want to use:
 
 * <https://github.com/xmos/lib_awe.git> for the library that integrates
   Audio Weaver and XCORE.
@@ -26,7 +25,7 @@ use:
   design
 
 .. note::
-    The ``lib_awe.a`` file is not provided as part of the lib_awe repository for security reasons. This version has been tested with AWE Core version 8.D.1.1. Please obtain this file from your XMOS contact directly.
+    The ``lib_awe.a`` file is not provided as part of the lib_awe repository for commercial reasons. This version has been tested with AWE Core version 8.D.8. Please obtain this file from your DSP Concepts contact directly.
 
 Architecture
 ------------
