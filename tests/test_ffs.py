@@ -61,6 +61,7 @@ def test_load_awb_from_ffs_host(pytestconfig, flash_ua_with_ffs):
 
     # hammer the loading mechanism 400 times
     for i in range(200):
+        print(f"Iteration: {i}")
         assert awe.load_awb_from_ffs("playBasic_3thread.awb")
         assert awe.load_awb_from_ffs("simple_volume.awb")
 
