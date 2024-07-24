@@ -20,7 +20,7 @@ from hardware_test_tools.check_analyzer_output import check_analyzer_output
 xe_ffs_rpc = "test_ffs_rpc/bin/test_ffs_rpc.xe"
 xe_ffs_rpc_device = "test_ffs_awb_device/bin/test_ffs_awb_device.xe"
 xe_demo_ffs_host = "../../an02016/app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe"
-dp_with_ffs = "../../an02016/app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe"
+dp_with_ffs = "../examples/audioweaver/awb_files/data_partition_ffs.bin" # This is a pre-formatted and populated FFS with 2 x AWBs on it
 
 
 def post_boot_hid_delay():
