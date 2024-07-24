@@ -16,7 +16,7 @@ from hardware_test_tools.check_analyzer_output import check_analyzer_output
 
 @pytest.mark.hw
 @pytest.mark.parametrize("awb_load_method", ["hid", "ffs"])
-def test_stream_out(pytestconfig):
+def test_stream_out(pytestconfig, awb_load_method):
     adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
 
     with AweDut(adapter_dut, "UA" if awb_load_method == "hid" else "UA_FFS") as dut:
