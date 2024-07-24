@@ -16,11 +16,8 @@ from hardware_test_tools.check_analyzer_output import check_analyzer_output
 
 @pytest.mark.hw
 @pytest.mark.parametrize("awb_load_method", ["hid", "ffs"])
-def test_stream_out(pytestconfig, awb_load_method):
+def test_stream_out(pytestconfig, awb_load_method, flash_ua_with_ffs):
     adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
-
-    if awb_load_method == "ffs":
-        stdout = flash_xe(xe_demo_ffs_host, adapter_dut, boot_partition_size=boot_partition_size, data_partition_bin=dp_with_ffs)
 
     with AweDut(adapter_dut, "UA" if awb_load_method == "hid" else "UA_FFS") as dut:
         awe = awe_hid_comms()

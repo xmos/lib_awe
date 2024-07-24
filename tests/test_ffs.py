@@ -18,18 +18,6 @@ from hardware_test_tools.Xsig import XsigOutput
 from hardware_test_tools.check_analyzer_output import check_analyzer_output
 
 
-def post_boot_hid_delay():
-    time.sleep(5) # Wait for HID to come up
-
-@pytest.fixture
-def flash_ua_with_ffs(pytestconfig, scope="session"):
-    """
-    This fixture programs the UA/FFS binary and the pre-made FFS containing a couple of AWBs.
-    """
-
-    adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
-    stdout = flash_xe(xe_demo_ffs_host, adapter_dut, boot_partition_size=boot_partition_size, data_partition_bin=dp_with_ffs)
-    print(stdout)
 
 
 @pytest.mark.hw
@@ -50,11 +38,7 @@ def test_load_awb_from_ffs_host_stress(pytestconfig, flash_ua_with_ffs):
     This test programs the UA/FFS binary and the pre-made FFS containing a couple of AWBs.
     It then uses a host command to load these many times to see if it works
     """
-    adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
-    stdout = flash_xe(xe_demo_ffs_host, adapter_dut, boot_partition_size=boot_partition_size, data_partition_bin=dp_with_ffs)
     
-    post_boot_hid_delay()
-
     awe = awe_hid_comms()
 
     # hammer the loading mechanism 400 times
