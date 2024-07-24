@@ -58,6 +58,8 @@ void awe_xcore_init() {
     UINT32 flash_memory_size_in_bytes = 0;
     UINT32 eraseable_sector_size = 0;
     ffs_rpc_get_flash_info(&flash_memory_size_in_bytes, &eraseable_sector_size);
+    
+    assert(flash_memory_size_in_bytes > 0); // If you hit this then you need to format the flash with a data partition. See lib_Awe user guide
 
     memset(&g_AWEFlashFSInstance, 0, sizeof(g_AWEFlashFSInstance));
 
@@ -79,11 +81,11 @@ void awe_xcore_init() {
 
     int ret;
     ret = awe_initPin((IOPinDescriptor *)&g_InputPin,  AWE_INPUT_CHANNELS, NULL);
-    assert(ret == 0);
+    assert(ret == 0); // awe_initPin init error INPUT
     ret = awe_initPin((IOPinDescriptor *)&g_OutputPin, AWE_OUTPUT_CHANNELS, NULL);
-    assert(ret == 0);
+    assert(ret == 0); // awe_initPin init error OUTPUT
     ret = awe_init((AWEInstance*)&g_AWEInstance);
-    assert(ret == 0);
+    assert(ret == 0); // awe_init init error
 
     g_AWE_IsInitialised = 1;
 }
