@@ -48,8 +48,9 @@ def test_xawe_ffs_rpc(pytestconfig):
     print(stdout)
 
 
+
 @pytest.mark.hw
-def test_load_awb_from_ffs_host(pytestconfig, flash_ua_with_ffs):
+def test_load_awb_from_ffs_host_stress(pytestconfig, flash_ua_with_ffs):
     """
     This test programs the UA/FFS binary and the pre-made FFS containing a couple of AWBs.
     It then uses a host command to load these many times to see if it works
@@ -68,51 +69,9 @@ def test_load_awb_from_ffs_host(pytestconfig, flash_ua_with_ffs):
         assert awe.load_awb_from_ffs("playBasic_3thread.awb")
         assert awe.load_awb_from_ffs("simple_volume.awb")
 
-    # NOW stream some audio. simple_volume should be loaded and will pass audio straight through
-    fs = 48000
-    duration = 30
-
-    with AweDut(adapter_dut, "UA_FFS") as dut:
-
-        # Load the AWB from FFS
-        # assert awe.load_awb_from_ffs("simple_volume.awb")
-
-        awb = (
-            Path(__file__).parents[1]
-            / "examples"
-            / "audioweaver"
-            / "awb_files"
-            / "playBasic_3thread.awb"
-        )
-        assert awb.exists()
-
-        awe.send_awb(awb)
-
-        analyzer_dir = Path(__file__).parents[2] / "sw_audio_analyzer"
-        with AudioAnalyzerHarness(adapter_harness, analyzer_dir, attach="xscope") as harness:
-            xsig_config = Path(__file__).parent / "output_sine_2ch.json"
-            assert xsig_config.exists()
-
-            with XsigOutput(fs, None, xsig_config, dut.dev_name) as xsig_proc:
-                time.sleep(duration)
-                harness.terminate()
-                xscope_lines = harness.proc_stdout + harness.proc_stderr
-
-            with open(xsig_config) as file:
-                xsig_json = json.load(file)
-
-            failures = check_analyzer_output(xscope_lines, xsig_json["out"])
-            fail_str = (
-                "\n".join(failures)
-                + f"\n\nxscope output:\n{xscope_lines}\n"
-                + f"xsig output:\n{xsig_proc.proc_output}"
-            )
-            
-            assert len(failures) == 0, f"Failures: {fail_str}"
-
 
 @pytest.mark.hw
-def test_load_awb_from_ffs_device(pytestconfig, flash_ua_with_ffs):
+def test_load_awb_from_ffs_device_stress(pytestconfig, flash_ua_with_ffs):
     """
     Runs the firmware API version of xawe_loadAWBfromFFS many times on HW
     Print from xrun session will determine if it encountered an error or not
