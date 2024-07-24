@@ -104,6 +104,6 @@ def test_load_awb_from_ffs_device(pytestconfig, flash_ua_with_ffs):
 
     adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
 
-    output = run_xe_hw(xe_ffs_rpc_device, adapter_harness, opts=["--io"])
+    output = run_xe_hw(xe_ffs_rpc_device, adapter_dut, opts=["--io"])
 
     assert "xawe_loadAWBfromFFS SUCCESS" in output, f"Failed loading AWB from FFS: {output}"
