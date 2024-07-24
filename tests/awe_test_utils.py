@@ -13,6 +13,14 @@ import time
 from pathlib import Path
 import sys
 
+# Binaries and config used by various tests
+xe_cmd = "test_basic/bin/test_awe_basic.xe"
+xe_xawe = "test_xawe_if/bin/test_xawe_if.xe"
+xe_ffs_rpc = "test_ffs_rpc/bin/test_ffs_rpc.xe"
+xe_ffs_rpc_device = "test_ffs_awb_device/bin/test_ffs_awb_device.xe"
+xe_demo_ffs_host = "../../an02016/app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe"
+dp_with_ffs = "../examples/audioweaver/awb_files/data_partition_ffs.bin" # This is a pre-formatted and populated FFS with 2 x AWBs on it
+boot_partition_size = 0x80000
 
 class awe_cmd_list:
     """
@@ -437,17 +445,21 @@ if __name__ == '__main__':
 
     # filter_awe_packet_log()
 
-    # awe = awe_hid_comms()
-    # awe.load_awb_from_ffs("playBasic_3thread.awb")
+    awe = awe_hid_comms(debug=True)
+    # print(awe.cmd('PFID_GetFileSystemInfo'))
+
+    print(awe.cmd('PFID_GetTargetInfo'))
+
+    awe.load_awb_from_ffs("playBasic_3thread.awb")
     # awe.load_awb_from_ffs("simple_volume.awb")
     # sys.exit(0)
 
-    import argparse
+    # import argparse
 
-    parser = argparse.ArgumentParser(description='awe_test_utils')
-    parser.add_argument('--pid', type=int, help='PID of target device', default=0x18)
+    # parser = argparse.ArgumentParser(description='awe_test_utils')
+    # parser.add_argument('--pid', type=int, help='PID of target device', default=0x18)
 
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
-    awe = awe_hid_comms(PID=args.pid)
-    awe.send_awb("../examples/audioweaver/awb_files/simple_volume.awb")
+    # awe = awe_hid_comms(PID=args.pid)
+    # awe.send_awb("../examples/audioweaver/awb_files/simple_volume.awb")

@@ -10,17 +10,12 @@ from pathlib import Path
 import struct
 import time
 
-from awe_test_utils import flash_xe, run_xe_hw, awe_hid_comms
+from awe_test_utils import flash_xe, run_xe_hw, awe_hid_comms, xe_ffs_rpc, xe_ffs_rpc_device, xe_demo_ffs_host, dp_with_ffs, boot_partition_size 
 from conftest import AweDut, get_xtag_ids
 
 from hardware_test_tools.AudioAnalyzerHarness import AudioAnalyzerHarness
 from hardware_test_tools.Xsig import XsigOutput
 from hardware_test_tools.check_analyzer_output import check_analyzer_output
-
-xe_ffs_rpc = "test_ffs_rpc/bin/test_ffs_rpc.xe"
-xe_ffs_rpc_device = "test_ffs_awb_device/bin/test_ffs_awb_device.xe"
-xe_demo_ffs_host = "../../an02016/app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe"
-dp_with_ffs = "../examples/audioweaver/awb_files/data_partition_ffs.bin" # This is a pre-formatted and populated FFS with 2 x AWBs on it
 
 
 def post_boot_hid_delay():
@@ -33,8 +28,8 @@ def flash_ua_with_ffs(pytestconfig, scope="session"):
     """
 
     adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
-
-    stdout = flash_xe(xe_demo_ffs_host, adapter_dut, boot_partition_size=0x80000, data_partition_bin=dp_with_ffs)
+    stdout = flash_xe(xe_demo_ffs_host, adapter_dut, boot_partition_size=boot_partition_size, data_partition_bin=dp_with_ffs)
+    print(stdout)
 
 
 @pytest.mark.hw
@@ -42,7 +37,7 @@ def test_xawe_ffs_rpc(pytestconfig):
     adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
 
     # program flash and create empty DP 
-    stdout = flash_xe(xe_demo_ffs_host, adapter_dut, boot_partition_size=0x80000)
+    stdout = flash_xe(xe_demo_ffs_host, adapter_dut, boot_partition_size=boot_partition_size)
     print(stdout)
     stdout = run_xe_hw(xe_ffs_rpc, adapter_dut, ["--io"])
     print(stdout)
@@ -56,8 +51,7 @@ def test_load_awb_from_ffs_host_stress(pytestconfig, flash_ua_with_ffs):
     It then uses a host command to load these many times to see if it works
     """
     adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
-
-    stdout = flash_xe(xe_demo_ffs_host, adapter_dut, boot_partition_size=0x80000, data_partition_bin=dp_with_ffs)
+    stdout = flash_xe(xe_demo_ffs_host, adapter_dut, boot_partition_size=boot_partition_size, data_partition_bin=dp_with_ffs)
     
     post_boot_hid_delay()
 
@@ -78,7 +72,6 @@ def test_load_awb_from_ffs_device_stress(pytestconfig, flash_ua_with_ffs):
     """
 
     adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
-
     output = run_xe_hw(xe_ffs_rpc_device, adapter_dut, opts=["--io"])
 
     assert "xawe_loadAWBfromFFS SUCCESS" in output, f"Failed loading AWB from FFS: {output}"
