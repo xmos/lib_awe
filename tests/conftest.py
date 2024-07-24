@@ -3,6 +3,7 @@
 
 from pathlib import Path
 import pytest
+import time
 
 from hardware_test_tools.UaDut import UaDut
 from awe_test_utils import flash_xe, xe_demo_ffs_host, boot_partition_size, dp_with_ffs
