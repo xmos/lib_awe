@@ -23,7 +23,7 @@ def test_stream_out(pytestconfig, awb_load_method, flash_ua_with_ffs):
         awe = awe_hid_comms()
 
         if awb_load_method == "ffs":
-            awb.load_awb_from_ffs("playBasic_3thread.awb")
+            awe.load_awb_from_ffs("playBasic_3thread.awb")
         else:
             awb = (
                 Path(__file__).parents[1]
