@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 import time
 
-from awe_test_utils import awe_hid_comms
+from awe_test_utils import awe_hid_comms, xe_demo_ffs_host, boot_partition_size, dp_with_ffs
 from conftest import AweDut, get_xtag_ids
 
 from hardware_test_tools.AudioAnalyzerHarness import AudioAnalyzerHarness
@@ -19,18 +19,24 @@ from hardware_test_tools.check_analyzer_output import check_analyzer_output
 def test_stream_out(pytestconfig, awb_load_method):
     adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
 
+    if awb_load_method == "ffs":
+        stdout = flash_xe(xe_demo_ffs_host, adapter_dut, boot_partition_size=boot_partition_size, data_partition_bin=dp_with_ffs)
+
     with AweDut(adapter_dut, "UA" if awb_load_method == "hid" else "UA_FFS") as dut:
         awe = awe_hid_comms()
-        awb = (
-            Path(__file__).parents[1]
-            / "examples"
-            / "audioweaver"
-            / "awb_files"
-            / "playBasic_3thread.awb"
-        )
-        assert awb.exists()
 
-        awe.send_awb(awb)
+        if awb_load_method == "ffs":
+            awb.load_awb_from_ffs("playBasic_3thread.awb")
+        else:
+            awb = (
+                Path(__file__).parents[1]
+                / "examples"
+                / "audioweaver"
+                / "awb_files"
+                / "playBasic_3thread.awb"
+            )
+            assert awb.exists()
+            awe.send_awb(awb)
 
         fs = 48000
         duration = 30
