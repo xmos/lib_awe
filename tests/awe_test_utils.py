@@ -444,21 +444,19 @@ if __name__ == '__main__':
 
     # filter_awe_packet_log()
 
-    awe = awe_hid_comms(debug=True)
+    # awe = awe_hid_comms(debug=True)
     # print(awe.cmd('PFID_GetFileSystemInfo'))
-
-    print(awe.cmd('PFID_GetTargetInfo'))
-
-    awe.load_awb_from_ffs("playBasic_3thread.awb")
+    # print(awe.cmd('PFID_GetTargetInfo'))
+    # awe.load_awb_from_ffs("playBasic_3thread.awb")
     # awe.load_awb_from_ffs("simple_volume.awb")
     # sys.exit(0)
 
-    # import argparse
+    import argparse
 
-    # parser = argparse.ArgumentParser(description='awe_test_utils')
-    # parser.add_argument('--pid', type=int, help='PID of target device', default=0x18)
+    parser = argparse.ArgumentParser(description='awe_test_utils')
+    parser.add_argument('--pid', type=int, help='PID of target device', default=0x18)
 
-    # args = parser.parse_args()
+    args = parser.parse_args()
 
-    # awe = awe_hid_comms(PID=args.pid)
-    # awe.send_awb("../examples/audioweaver/awb_files/simple_volume.awb")
+    awe = awe_hid_comms(PID=args.pid)
+    awe.send_awb("../examples/audioweaver/awb_files/simple_volume.awb")
