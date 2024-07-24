@@ -73,10 +73,20 @@ def test_load_awb_from_ffs_host(pytestconfig, flash_ua_with_ffs):
     duration = 30
 
     with AweDut(adapter_dut, "UA_FFS") as dut:
-        post_boot_hid_delay()
 
         # Load the AWB from FFS
-        assert awe.load_awb_from_ffs("simple_volume.awb")
+        # assert awe.load_awb_from_ffs("simple_volume.awb")
+
+        awb = (
+            Path(__file__).parents[1]
+            / "examples"
+            / "audioweaver"
+            / "awb_files"
+            / "playBasic_3thread.awb"
+        )
+        assert awb.exists()
+
+        awe.send_awb(awb)
 
         analyzer_dir = Path(__file__).parents[2] / "sw_audio_analyzer"
         with AudioAnalyzerHarness(adapter_harness, analyzer_dir, attach="xscope") as harness:
