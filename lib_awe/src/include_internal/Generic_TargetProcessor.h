@@ -1,6 +1,20 @@
-/* ----------------------------------------------------------------------------
- *	 Preprocessor Definitions
- * ------------------------------------------------------------------------- */
+/*******************************************************************************
+*
+*				Audio Framework
+*				---------------
+*
+********************************************************************************
+*	  Generic_TargetProcessor.h
+********************************************************************************
+*
+*	  Description:	AudioWeaver Framework generic target preprocessor definitions
+*
+*	  Copyright:	(c) 2007-2023 DSP Concepts, Inc. All rights reserved.
+*					3235 Kifer Road
+*					Santa Clara, CA 95054
+*
+*******************************************************************************/
+
 
 #ifndef GENERIC_TARGET_PROCESSOR_H_
 #define GENERIC_TARGET_PROCESSOR_H_
@@ -96,15 +110,21 @@ extern UINT32 hal_gpt_get_free_run_count(UINT32 clock_source, UINT32 *count);
 #define DISABLE_INTERRUPTS()
 #define ENABLE_INTERRUPTS()
 #define USE_SIMD4
-#include <time.h>
 #endif // DSPC_CORTEX_A
 
 #if defined(LINUX) && LINUX != 0
 #define DISABLE_INTERRUPTS()
 #define ENABLE_INTERRUPTS()
 #define INT64 long long
-#include <time.h>
 #endif // LINUX
+
+#if defined(LINUX) || defined(__QNX__) || defined(DSPC_CORTEX_A)
+#include <time.h>
+#endif
+
+#if defined(__QNX__)
+#include <stdint.h>
+#endif
 
 #ifdef CEVA_X2
 #define DISABLE_INTERRUPTS()
@@ -341,6 +361,8 @@ asm("#include <def21489.h>");
 /* ----------------------------------------------------------------------
 ** Memory segments for various processors
 ** ------------------------------------------------------------------- */
+// define this to use the defines set elsewhere and ignore the macros here
+#if !defined(AWE_CODE_PLACEMENT_MACROS_DEFINED)
 
 #if defined(TEAKLITE3)
 #define AWE_FW_FAST_CODE	  __attribute__ ((section (".CSECT AWE_fast_code_sect")))
@@ -616,6 +638,7 @@ asm("#include <def21489.h>");
 
 #endif
 
+#endif //
 /* ----------------------------------------------------------------------
 ** Standard Audio Weaver data types
 ** ------------------------------------------------------------------- */
@@ -831,9 +854,9 @@ typedef unsigned int UINT;
 ** Cycle counting macros
 ** ------------------------------------------------------------------- */
 
-#if __STDC__ || defined(WIN32)
 extern UINT32 aweuser_getCycleCount(void);
 extern UINT32 aweuser_getElapsedCycles(UINT32 start_time, UINT32 end_time);
+#if __STDC__ || defined(WIN32)
 
 static VEC_INLINE void awe_fwCycleInit(void)
 {
@@ -908,7 +931,7 @@ static VEC_INLINE UINT32 awe_getCycleCount(void)
 	#endif
 	return (cycles);
 
-#elif defined(LINUX)
+#elif defined(LINUX) || defined(__QNX__)
 	#if defined(TESLA)
 		UINT32 cycles_high, cycles_low;
 		asm volatile ("CPUID\n\t" "RDTSC\n\t"
@@ -968,7 +991,7 @@ static VEC_INLINE UINT32 awe_getCycleCount(void)
 
 	#ifdef SIMULATOR
 		#define GET_CCOUNT() (clock())
-	#elif !( defined(AIROHA_AB155X) || defined(AB1568)  || defined(AMD_HIFI5))
+	#elif !( defined(AIROHA_AB155X) || defined(AB1568)  || defined(AMD_HIFI5) || defined(AB1552))
 		#define GET_CCOUNT()	({ int __ccount; \
 						__asm__ volatile("rsr.ccount %0" : "=a"(__ccount)); \
 						__ccount; })
@@ -1007,6 +1030,12 @@ static VEC_INLINE UINT32 awe_getCycleCount(void)
 			#else
 				return (cycles);
 			#endif
+        #elif (defined (HIFIMINI) && defined(SIMULATOR))
+            #ifdef PROFILE_DIVIDER
+                return GET_CCOUNT() / PROFILE_DIVIDER;
+            #else	// PROFILE_DIVIDER
+                return GET_CCOUNT();
+            #endif	// PROFILE_DIVIDER
 		#else
 			return aweuser_getCycleCount();
 		#endif	// AIROHA_AB155X
@@ -1038,7 +1067,7 @@ static VEC_INLINE UINT32 awe_getElapsedCycles(UINT32 start_time, UINT32 end_time
 // Cases to match from awe_getCycleCount above
 #elif ( defined(AARCH64_NXP) || defined(__ADSP21000__) || defined(__ADSPBLACKFIN__) || \
         defined(WIN32) || defined(LINUX) || (defined(DSPC_CORTEX_A) && !defined(BARE_METAL)) || \
-		defined(XTENSA) || defined(XTENSA2) || defined(X86))
+		defined(__QNX__) || defined(XTENSA) || defined(XTENSA2) || defined(X86))
 	#ifdef PROFILE_DIVIDER
 		#if (PROFILE_DIVIDER == 2)
 			return (end_time - start_time) & 0x7FFFFFFF;
@@ -1069,3 +1098,4 @@ static VEC_INLINE UINT32 awe_getElapsedCycles(UINT32 start_time, UINT32 end_time
 #endif // __STDC__
 
 #endif	  /* !defined  GENERIC_TARGET_PROCESSOR_H_ */
+

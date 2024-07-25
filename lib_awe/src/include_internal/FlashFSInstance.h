@@ -14,6 +14,12 @@
 *                   Santa Clara, CA 95054
 *
 *******************************************************************************/
+
+/**
+* @file 
+* @brief The AWEFlashFSInstance API Header File
+*/
+
 #ifndef _FLASHFSINSTANCE_H
 #define _FLASHFSINSTANCE_H
 
@@ -32,7 +38,6 @@ struct _AWEInstance;
 */
 typedef struct _AWEFlashFSInstance AWEFlashFSInstance;
 typedef struct _AWEFlashFSInstance2
-
 {
     /** Size of flash memory - if non-zero, next two values must also be non-zero. */
     UINT32 flashSizeInBytes;

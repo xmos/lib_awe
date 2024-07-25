@@ -92,6 +92,7 @@ typedef float FLOAT32;
 #endif
 #endif
 
+#ifndef USE_SINGLE_PREC
 #ifndef FLOAT64_DEFINED
 #define FLOAT64_DEFINED
 #ifndef FLOAT64
@@ -99,6 +100,7 @@ typedef float FLOAT32;
 typedef long double FLOAT64;
 #else
 typedef double FLOAT64;
+#endif
 #endif
 #endif
 #endif

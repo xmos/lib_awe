@@ -4,50 +4,65 @@
 Tests the FFS callbacks using the app in test_ffs
 """
 
+import json
 import pytest
 from pathlib import Path
 import struct
-from awe_test_utils import flash_xe, run_xe_hw, awe_hid_comms
 import time
 
-xe_ffs_rpc = "test_ffs_rpc/bin/test_ffs_rpc.xe"
-xe_demo_ffs_host = "../examples/app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe"
-xe_ffs_rpc_device = "test_ffs_awb_device/bin/test_ffs_awb_device.xe"
+from awe_test_utils import flash_xe, run_xe_hw, awe_hid_comms, xe_ffs_rpc, xe_ffs_rpc_device, xe_demo_ffs_host, dp_with_ffs, boot_partition_size 
+from conftest import AweDut, get_xtag_ids
+
+from hardware_test_tools.AudioAnalyzerHarness import AudioAnalyzerHarness
+from hardware_test_tools.Xsig import XsigOutput
+from hardware_test_tools.check_analyzer_output import check_analyzer_output
+
+
 
 
 @pytest.mark.hw
-def test_xawe_ffs_rpc():
-    pytest.skip() # Until we have HW test in place
-    # stdout = flash_xe(xe_ffs, boot_partition_size=0x80000)
-    stdout = run_xe_hw(xe_ffs_rpc, ["--io"])
+def test_xawe_ffs_rpc(pytestconfig):
+    adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
+
+    # program flash and create empty DP 
+    stdout = flash_xe(xe_demo_ffs_host, adapter_dut, boot_partition_size=boot_partition_size)
+    print(stdout)
+    stdout = run_xe_hw(xe_ffs_rpc, adapter_dut, ["--io"])
     print(stdout)
 
 
+
 @pytest.mark.hw
-def test_load_awb_from_ffs_host():
-    pytest.skip() # Until we have HW test in place
-
-    stdout = flash_xe(xe_demo_ffs_host, boot_partition_size=0x80000, data_partition_bin="../examples/audioweaver/awb_files/data_partition_ffs.bin")
-    time.sleep(5) # Wait for HID to come up
-
+def test_load_awb_from_ffs_host_stress(pytestconfig, flash_ua_with_ffs):
+    """
+    This test programs the UA/FFS binary and the pre-made FFS containing a couple of AWBs.
+    It then uses a host command to load these many times to see if it works
+    """
+    
     awe = awe_hid_comms()
 
     # hammer the loading mechanism 400 times
     for i in range(200):
+        print(f"Iteration: {i}")
         assert awe.load_awb_from_ffs("playBasic_3thread.awb")
         assert awe.load_awb_from_ffs("simple_volume.awb")
 
 
 @pytest.mark.hw
-def test_load_awb_from_ffs_device():
-    pytest.skip() # Until we have HW test in place
+def test_load_awb_from_ffs_device_stress(pytestconfig, flash_ua_with_ffs):
+    """
+    Runs the firmware API version of xawe_loadAWBfromFFS many times on HW
+    Print from xrun session will determine if it encountered an error or not
+    """
 
-    output = run_xe_hw(xe_ffs_rpc_device, opts=["--io"])
+    adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
+    output = run_xe_hw(xe_ffs_rpc_device, adapter_dut, opts=["--io"])
 
     assert "xawe_loadAWBfromFFS SUCCESS" in output, f"Failed loading AWB from FFS: {output}"
 
-# For local testing only
+
+# Local test only
 if __name__ == "__main__":
-    test_xawe_ctrl_interface()
-
-
+    awe = awe_hid_comms()
+    awe.send_awb("../examples/audioweaver/awb_files/simple_volume.awb")
+    # awe.load_awb_from_ffs("playBasic_3thread.awb")

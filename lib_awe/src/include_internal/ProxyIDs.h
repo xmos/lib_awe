@@ -320,8 +320,16 @@ typedef enum
 	PFID_CreateWireBufferPool = 128,					
 
 	/** Function ID for awe_fwCreateWireInBufferPool(). */
-	PFID_CreateWireInBufferPool = 129,					
+	PFID_CreateWireInBufferPool = 129,
 	
+	/** Get the shared heap size. */
+	PFID_GetSharedHeapSize = 130,
+
+    /** Function ID for awe_fwGetLayoutCoreAffinity **/
+    PFID_GetLayoutCoreAffinity = 131,	
+
+	/** Function ID for awe_fwGetProfileValuesPreCalc(). */
+	PFID_GetProfileValuesPreCalc = 132,
 } tProxyFuncID;
 
 #endif /* !PROXYIDS_H_INCLUDED */

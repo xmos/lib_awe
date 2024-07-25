@@ -31,14 +31,14 @@ void data_path(chanend_t c_data){
 
 DECLARE_JOB(awe_test, (chanend_t, chanend_t));
 void awe_test(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host){
-    xAWEInstance_t xAWEInstance = {c_tuning_from_host, c_tuning_to_host};
+    init_awe_tuning_instance(c_tuning_from_host, c_tuning_to_host);
 
     char *awb_filenames[] = {"playBasic_3thread.awb", "simple_volume.awb"};
     int errors = 0;
 
     for(int i = 0; i < 1000; i++){
         char *awb_filename = awb_filenames[i % 2]; // swap each one
-        int err = xawe_loadAWBfromFFS(&xAWEInstance, awb_filename);
+        int err = xawe_loadAWBfromFFS(awb_filename);
         if(err != E_SUCCESS){
             puts("ERROR - xawe_loadAWBfromFFS failed");
             printintln(err);

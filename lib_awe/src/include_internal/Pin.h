@@ -32,9 +32,9 @@ typedef struct _IOPinDescriptor2
 #else
     /** Reserved member. */
     #ifdef BUILD64
-    UINT32 _Reserved[22];
+    UINT32 _Reserved[24];
     #else
-    UINT32 _Reserved[15];
+    UINT32 _Reserved[17];
     #endif
 #endif
 } IOPinDescriptor2;

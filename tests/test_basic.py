@@ -10,10 +10,8 @@ output.
 import pytest
 from pathlib import Path
 import struct
-from awe_test_utils import awe_cmd_list, awe_error_codes, run_xe_sim
+from awe_test_utils import awe_cmd_list, awe_error_codes, run_xe_sim, xe_cmd, xe_xawe
 
-xe_cmd = "test_basic/bin/test_awe_basic.xe"
-xe_xawe = "test_xawe_if/bin/test_xawe_if.xe"
 
 def send_command(xe, cmd, payload=[]):
     cmd = ((2 + len(payload)) << 16) + awe_cmd_list().lookup(cmd)
@@ -38,7 +36,27 @@ def check_expected(dut, expected):
 @pytest.mark.sim
 def test_target_info():
     dut = send_command(xe_cmd, "PFID_GetTargetInfo")
-    expected = "000e0000 00000000 473b8000 4b3ebc20 00403020 24020264 08440100 00000107 534f4d58 4253555f 4cbebc20 00000000 7a6b5c4d 07c4f609"
+    major = 8
+    minor = ord("D")
+    patch = 8
+    version_info = f"{(patch << 24) | (minor << 16) | (major << 8):x}"
+    expected = f"000e0000 00000000 473b8000 4b3ebc20 00403020 24020264 {version_info} 00000107 534f4d58 4253555f 4cbebc20 00000000 7a6b5c4d 7c4ff09"
+    """
+    Message Length = 14 0
+    error status (int)
+    sample rate (float)
+    profile clock speed in Hz (float)
+    packedBlockSize (uint)
+    packedData (uint)
+    version information (uint)
+    packetBufferSize (uint)
+    packedName 1 (uint)
+    packedName 2 (uint)
+    cpuClockSpeed in Hz (float)
+    coreID (uint)
+    featureBits (uint)
+    CRC (uint)
+    """
 
     to_fp = lambda a : struct.unpack('f', struct.pack('I', a))[0]
 
