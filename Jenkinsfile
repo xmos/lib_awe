@@ -4,8 +4,8 @@ getApproval()
 
 // Get XCommon CMake and log a record of the git commit
 def get_xcommon_cmake() {
-  sh "git clone -b v1.2.0 git@github.com:xmos/xcommon_cmake"
-  sh "git -C xcommon_cmake rev-parse HEAD"
+  sh 'git clone -b v1.2.0 git@github.com:xmos/xcommon_cmake'
+  sh 'git -C xcommon_cmake rev-parse HEAD'
 }
 
 pipeline {
@@ -131,11 +131,16 @@ pipeline {
               withVenv {
                 sh 'pip install -r requirements.txt'
               }
+              withCredentials([file(credentialsId: "${AWE_CORE_VERSION}", variable: 'DSPC_AWE_LIB')]) {
+                sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a" // Bring AWE library in
+              }
             }
 
             dir("${EXAMPLE}") {
               unstash "xe_files"
             }
+
+            get_xcommon_cmake()
 
             dir("${REPO}/tests") {
               dir("hardware_test_tools/xsig") {
@@ -147,13 +152,24 @@ pipeline {
                   withTools(params.TOOLS_VERSION) {
                     sh "pip install -e ${WORKSPACE}/xtagctl"
 
+                    // Get pre-built application example XEs
                     unstash "xe_files"
+
+                    // Build test XEs
+                    withTools(params.TOOLS_VERSION) {
+                      dir("test_ffs_rpc"){
+                        sh "cmake -G \"Unix Makefiles\" -B build"
+                        sh "xmake -C build -j"
+                      }
+                      dir("test_ffs_awb_device"){
+                        sh "cmake -G \"Unix Makefiles\" -B build"
+                        sh "xmake -C build -j"
+                      }
+                    }
 
                     withXTAG(["usb_audio_mc_xcai_dut", "usb_audio_mc_xcai_harness"]) { xtagIds ->
                       sh "pytest -v -m hw --junitxml=pytest_result_hw.xml -o xtag_dut=${xtagIds[0]} -o xtag_harness=${xtagIds[1]}"
                     }
-                    sh "tree"
-                    sh "xrun -l"
                   } // Tools
                 } // Venv
               } // XCCM

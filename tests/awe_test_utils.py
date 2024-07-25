@@ -9,10 +9,17 @@ import numpy as np
 import time
 import re
 import subprocess
-import time
 from pathlib import Path
 import sys
 
+# Binaries and config used by various tests
+xe_cmd = "test_basic/bin/test_awe_basic.xe"
+xe_xawe = "test_xawe_if/bin/test_xawe_if.xe"
+xe_ffs_rpc = "test_ffs_rpc/bin/test_ffs_rpc.xe"
+xe_ffs_rpc_device = "test_ffs_awb_device/bin/test_ffs_awb_device.xe"
+xe_demo_ffs_host = "../../an02016/app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe"
+dp_with_ffs = "../examples/audioweaver/awb_files/data_partition_ffs.bin" # This is a pre-formatted and populated FFS with 2 x AWBs on it
+boot_partition_size = 0x80000
 
 class awe_cmd_list:
     """
@@ -99,6 +106,7 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
             devices = hid.enumerate()
             for device in devices:
                 print(device)
+        self.debug = debug
 
         self.dev = hid.device()
         self.dev.open(VID, PID)
@@ -117,8 +125,12 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
 
     def cmd_raw(self, msg):
         """ Send and receive in one hit - need to send whole packet includeing command with len. CRC gets added"""
+        if self.debug:
+            print(f"Sending: {[hex(m) for m in msg]}")
         self.send(msg)
         response = self.get_response()
+        if self.debug:
+            print(f"Response: {[hex(r) for r in response]}")
         err = self.check_response(response)
 
         return err
@@ -360,20 +372,20 @@ def run_xe_sim(bin_path, cmds, max_cycles=1000000):
 
     return ret.stdout
 
-def run_xe_hw(bin_path, opts=None):
+def run_xe_hw(bin_path, adapter_id, opts=None):
     options = "" if opts is None else " ".join(opts)
-    cmd = f"xrun {options} {bin_path}"
+    cmd = f"xrun --adapter-id {adapter_id} {options} {bin_path}"
   
     ret = subprocess.run(cmd.split(), capture_output=True, text=True)
     assert ret.returncode == 0, f"Failed runing {cmd}: {ret.stderr}"
 
     return ret.stdout + ret.stderr
 
-def flash_xe(bin_path, boot_partition_size=None, data_partition_bin=None):
+def flash_xe(bin_path, adapter_id, boot_partition_size=None, data_partition_bin=None):
     if boot_partition_size is None:
-        cmd = f"xflash {bin_path}"
+        cmd = f"xflash --adapter-id {adapter_id} {bin_path}"
     else:
-        cmd = f"xflash --factory {bin_path} --boot-partition-size {boot_partition_size}"
+        cmd = f"xflash --adapter-id {adapter_id} --factory {bin_path} --boot-partition-size {boot_partition_size}"
         if data_partition_bin is not None:
             cmd += f" --data {data_partition_bin}"
   
@@ -432,7 +444,9 @@ if __name__ == '__main__':
 
     # filter_awe_packet_log()
 
-    # awe = awe_hid_comms()
+    # awe = awe_hid_comms(debug=True)
+    # print(awe.cmd('PFID_GetFileSystemInfo'))
+    # print(awe.cmd('PFID_GetTargetInfo'))
     # awe.load_awb_from_ffs("playBasic_3thread.awb")
     # awe.load_awb_from_ffs("simple_volume.awb")
     # sys.exit(0)

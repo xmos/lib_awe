@@ -3,9 +3,10 @@
 
 from pathlib import Path
 import pytest
+import time
 
 from hardware_test_tools.UaDut import UaDut
-
+from awe_test_utils import flash_xe, xe_demo_ffs_host, boot_partition_size, dp_with_ffs
 
 def pytest_addoption(parser):
     parser.addini("xtag_dut", help="XTAG ID for the DUT")
@@ -60,3 +61,15 @@ def get_xtag_ids(pytestconfig):
     xtag_dut = pytestconfig.getini("xtag_dut")
     xtag_harness = pytestconfig.getini("xtag_harness")
     return xtag_dut, xtag_harness
+
+
+@pytest.fixture
+def flash_ua_with_ffs(pytestconfig, scope="session"):
+    """
+    This fixture programs the UA/FFS binary and the pre-made FFS containing a couple of AWBs.
+    """
+
+    adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
+    stdout = flash_xe(xe_demo_ffs_host, adapter_dut, boot_partition_size=boot_partition_size, data_partition_bin=dp_with_ffs)
+    print(stdout)
+    time.sleep(5) # Wait for HID to come up after boot
