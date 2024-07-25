@@ -10,10 +10,8 @@ output.
 import pytest
 from pathlib import Path
 import struct
-from awe_test_utils import awe_cmd_list, awe_error_codes, run_xe_sim
+from awe_test_utils import awe_cmd_list, awe_error_codes, run_xe_sim, xe_cmd, xe_xawe
 
-xe_cmd = "test_basic/bin/test_awe_basic.xe"
-xe_xawe = "test_xawe_if/bin/test_xawe_if.xe"
 
 def send_command(xe, cmd, payload=[]):
     cmd = ((2 + len(payload)) << 16) + awe_cmd_list().lookup(cmd)
