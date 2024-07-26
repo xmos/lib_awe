@@ -1,3 +1,5 @@
+:orphan:
+
 XCORE Audio Weaver Interface
 ############################
 
@@ -6,7 +8,7 @@ XCORE Audio Weaver Interface
 :Scope: Demonstration
 
 Summary
-*******
+=======
 
 Lib_awe is a port of Audio Weaver for XMOS's powerful xcore.ai device. It contains code for
 software threads which wrap the core library and provide easy interfacing to both audio streaming
@@ -27,39 +29,6 @@ Features
   * Example integration into the XMOS USB Audio Reference Design
   * Supports 48000 Hz sample rate (will be extended in future releases)
 
-Host System Requirements
-========================
-
-For development a installation (and licence) of AudioWeaver is required
-
-Documentation
-=============
-
-You can find the documentation for this software in the /doc directory of the package.
-
-Related Application Notes
-=========================
-
-The following application notes use this library:
-
-  * AN020016: XMOS xcore.ai USB Audio AWE Examples
-
-Required Software (dependencies)
-================================
-
-  * lib_xud (www.github.com/xmos/lib_xud)
-  * xcommon_cmake (www.github.com/xmos/xcommon_xmake) v1.2
-
-Documentation
-=============
-
-You can find the documentation for this software in the /doc directory of the package.
-
-Support
-=======
-
-This package is supported by XMOS Ltd. Issues can be raised against the software at: http://www.xmos.com/support
-
 Known Issues
 ============
 
@@ -68,4 +37,31 @@ Known Issues
   * Lib_awe requires the xcore.ai device to be run with a CPU clock of at least 700 MHz. Please use the appropriate silicon grade to support this.
   * Audio Weaver code-generation produces mis-matched declaration (const) between .h and c files (https://github.com/xmos/lib_awe/issues/39)
   * This release is known to be incompatible with versions of AWE core previous to 8.D.8
+
+Host System Requirements
+========================
+
+For development a installation (and licence) of AudioWeaver is required
+
+Required Tools
+==============
+
+  * XMOS XTC Tools: 15.3.0
+
+Required Libraries (dependencies)
+=================================
+
+  * lib_xud (www.github.com/xmos/lib_xud)
+
+Related Application Notes
+=========================
+
+The following application notes use this library:
+
+  * AN020016: Integrating Audio Weaver (AWE) Core into USB Audio
+
+Support
+=======
+
+This package is supported by XMOS Ltd. Issues can be raised against the software at: http://www.xmos.com/support
 

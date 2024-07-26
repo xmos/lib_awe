@@ -1,15 +1,24 @@
 ---
-project: lib_awe
-title: AWE Library for XMOS
+lib_name: lib_awe
+project: '{{lib_name}}'
+title: '{{lib_name}}: AWE Core for xcore'
 version: 1.0.0
 
 documentation:
   exclude_patterns_path: doc/exclude_patterns.inc
+  root_doc: doc/rst/lib_awe.rst
   linkcheck_ignore_regex: ['.*lib_awe.*', '.*an02016.*']
+  cognidox_part_number: XM-015096-UG
   doxygen_projects:
     lib_xcore_math:
       doxyfile_path: doc/Doxyfile.inc
   pdfs:
-    doc/user_guide/index:
-      pdf_title: "{{title}} - User Guide"
-      pdf_filename: "{{project}}_user_guide_v{{version}}"
+    doc/rst/lib_awe.rst:
+      pdf_title: '{{title}}'
+      pdf_filename: '{{lib_name}}_v{{version}}'
+    README.rst:
+      pdf_title: '{{title}} (README)'
+      pdf_filename: 'readme'
+
+software:
+  cognidox_part_number: XM-015095-SM
