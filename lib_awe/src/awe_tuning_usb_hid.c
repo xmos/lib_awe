@@ -24,9 +24,9 @@ void awe_usb_hid(chanend_t c_hid_to_host, chanend_t c_hid_from_host) {
     XUD_SetReady_Out(ep_hid_from_host, (unsigned char*)g_hid_from_host_buffer);
 
     int host_requests_hid_data = 0;         // This guards the select which receives responses from AWE. It holds off packets on long responses to match HID poll rate
-    int transaction_underway = 0;           // Flasg to stat that a transaction (cmd, response) is underway
-    XUD_Result_t result;                    // Because we share the channel end from two different threads
-    unsigned length;                        // potentially we only want to select on it if not already busy
+    int transaction_underway = 0;           // Flag to show that a transaction (cmd + response) is underway and chanends are safely locked. Also guards the select to avoid unsafe chanend sharing
+    XUD_Result_t result = XUD_RES_OKAY;                    
+    unsigned length = 0;                        
 
     /* Wait for response from XUD and service relevant EP */
     SELECT_RES(
