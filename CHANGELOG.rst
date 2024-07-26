@@ -1,8 +1,8 @@
-lib_awe library change log
-==========================
+lib_awe Change Log
+==================
 
 1.0.0
 -----
 
-  * Initial version
+  * Initial release
 
