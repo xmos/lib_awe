@@ -1,7 +1,7 @@
 ---
 lib_name: lib_awe
 project: '{{lib_name}}'
-title: '{{lib_name}}: AWE Core for XMOS'
+title: '{{lib_name}}: AWE Core for xcore'
 version: 1.0.0
 
 documentation:

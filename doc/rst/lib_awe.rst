@@ -1,13 +1,17 @@
-AWE Library User Guide
-======================
-
+lib_awe: AWE Core for xcore
+===========================
 
 Introduction
 ------------
 
-Audio Weaver is a tool and libraries for implementing Digital Signal Processing algorithms. It comprises a GUI and a set of libraries. Standard building blocks such as filters, equalisers, echo cancellers, can be assembled in the GUI and then executed on a device. A control library is available that enables on-line tuning of the processing blocks.
+Audio Weaver comprises GUI tools (Designer) and libraries (Core) for implementing audio Digital
+Signal Processing (DSP) algorithms. Developed by DSP Concepts (DSPC), it delivers signal processing
+building blocks, referred to as "modules". Module capabilties range from simple filtering to data
+type conversions all the way to much more specialised processing. These can be assembled, deleted
+and rearranged in the Designer GUI and then executed on a device. A control library is available
+that enables on-line control of the blocks.
 
-XCORE is a programmable multi-core device with flexible DSP and IO interfaces. The IO interfaces can be programmed to, for example, I2S, TDM, USB, ADAT or S/PDIF interfaces (or indeed any other interface), and the DSP capability can be used to operate on data that is received from or sent to these interfaces. In addition to interfaces and DSP, XCORE devices can also execute control code or even ML inference engines.
+xcore is a programmable multi-core device with flexible DSP and IO interfaces. The IO interfaces can be programmed to, for example, I2S, TDM, USB, ADAT or S/PDIF interfaces (or indeed any other interface), and the DSP capability can be used to operate on data that is received from or sent to these interfaces. In addition to interfaces and DSP, XCORE devices can also execute control code or even ML inference engines.
 
 Lib_awe is a port of Audio Weaver for XMOS's powerful xcore.ai device. It contains code for software threads which wrap the core library and provide easy interfacing to both audio streaming components such as I2S and USB Audio as well as tuning interfacing to allow control and loading of pre-built designs from a host or internally from the device.
 
