@@ -110,7 +110,7 @@ There are two main APIs for ``lib_awe``; audio data path and control.
 Data (Audio interface)
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The data xcore-channel handles the passing of audio samples to and from lib_awe. It consists of a single channel which allows a bi-direction exchange of samples. A convenience function is which is called from the user thread handling audio samples is provided by the API::
+The data xcore-channel handles the passing of audio samples to and from lib_awe. It consists of a single channel which allows a bi-directional exchange of samples. A convenience function which is called from the user thread handling audio samples is provided by the API::
 
     void awe_offload_data_to_dsp_engine(chanend_t c_to_awe, unsigned toAWE[], unsigned fromAWE[])
 
