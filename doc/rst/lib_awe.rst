@@ -33,7 +33,7 @@ Architecture
 
 Lib_awe provides an interface to the audio streaming and tuning functions using XCORE channels which allow placement of the application blocks on different tiles from lib_awe.
 
-.. figure:: ./images/lib_awe.drawio.png
+.. figure:: ../images/lib_awe.drawio.png
    :width: 100%
 
    lib_awe thread diagram
@@ -121,7 +121,7 @@ However if USB audio is not required in your application then the ``awe_offload_
             time_trigger += XS1_TIMER_HZ / 48000;
             hwtimer_wait_until(t, time_trigger);
         }
-        
+
         hwtimer_free(t);
     }
 
@@ -156,22 +156,22 @@ Below is a list of common questions that you may ask before integrating lib_awe 
 How many threads to define for lib_awe?
 .......................................
 
-AWE supports multi-threaded operation meaning that a large pipeline may be split across multiple threads. Lib_awe implements this capability by offering multiple hardware threads which can be used as stages for the user design. Simple designs may only require one thread however complex user designs may need to be split across multiple threads. An AWE block, available in AWE Designer, called ``Buffer Up V2`` is available to explicitly move the downstream blocks onto the next thread in lib_awe. 
+AWE supports multi-threaded operation meaning that a large pipeline may be split across multiple threads. Lib_awe implements this capability by offering multiple hardware threads which can be used as stages for the user design. Simple designs may only require one thread however complex user designs may need to be split across multiple threads. An AWE block, available in AWE Designer, called ``Buffer Up V2`` is available to explicitly move the downstream blocks onto the next thread in lib_awe.
 
-.. figure:: ./images/bufferup.png
+.. figure:: ../images/bufferup.png
    :width: 20%
 
    The AWE BufferUpV2 Function
 
 The CPU usage metric in ``AWE Server`` (part of the AWE Designer software) allows tracking of processor loading as does the firmware API ``xawe_getAverageLayoutCycles(UINT32 *average_cycles)`` call.
 
-By default, two threads are allocated to lib_awe for DSP work. The amount of MIPS available per thread in the XCORE is dependent on the core clock frequency and the maximum number of active threads. For designs using 5 or fewer threads the maximum number of MIPS is f / 5 (which is 140 MIPS per thread for a 700 MHz core clock) or f / n for 6 to 8 active threads. Hence for AWE designs not exploiting the multi-threaded capability, setting ``AWE_DSP_THREAD_NUM`` to two or one will maximise the available performance. 
+By default, two threads are allocated to lib_awe for DSP work. The amount of MIPS available per thread in the XCORE is dependent on the core clock frequency and the maximum number of active threads. For designs using 5 or fewer threads the maximum number of MIPS is f / 5 (which is 140 MIPS per thread for a 700 MHz core clock) or f / n for 6 to 8 active threads. Hence for AWE designs not exploiting the multi-threaded capability, setting ``AWE_DSP_THREAD_NUM`` to two or one will maximise the available performance.
 
 
 How much HEAP to allocate?
 ..........................
 
-Again this is design dependent. Large delay lines or filters with large numbers of coefficients will significantly increase the required heap size. Simple biquad filtering designs may only require a few hundred words of heap whereas a large FIR or reverb block may take tens of thousands of long words of HEAP. 
+Again this is design dependent. Large delay lines or filters with large numbers of coefficients will significantly increase the required heap size. Simple biquad filtering designs may only require a few hundred words of heap whereas a large FIR or reverb block may take tens of thousands of long words of HEAP.
 
 A default implementation in lib_awe will provide at least 40 k words of HEAP which is sufficient for many cases. The ``AWE_HEAP_SIZE_LONG_WORDS`` define (described in API section) controls this and is statically allocated at compile time.
 
@@ -188,13 +188,13 @@ There are a number of ways to reduce the memory usage on the XCORE tile where li
 The last point can potentially save a lot of memory however it limits the pool of available modules. The file ``awe_module_list.S`` is an assembler file which lists the symbols of each of the modules that should be compiled in with lib_awe. It ensures they are linked in to the application binary. Any modules that are compiled in will automatically be picked up by AWE Designer as being available on the target during the design process. Once a design has been completed, and the known list of modules required has been established, unused modules may be commented out.
 
 .. note::
-    Removing supported modules from ``awe_module_list.S`` precludes their use in future designs when updated compiled AWB files are downloaded. If a new module is needed then a full DFU, including the required DSP modules, must be performed. 
+    Removing supported modules from ``awe_module_list.S`` precludes their use in future designs when updated compiled AWB files are downloaded. If a new module is needed then a full DFU, including the required DSP modules, must be performed.
 
 
 Application Examples
 --------------------
 
-A number of sample applications are provided to help you get up and running quickly. These based on the XK-AUDIO-316-MC hardware and standard USB Audio reference design provided by XMOS in ``sw_usb_audio``. 
+A number of sample applications are provided to help you get up and running quickly. These based on the XK-AUDIO-316-MC hardware and standard USB Audio reference design provided by XMOS in ``sw_usb_audio``.
 
 The application example source code and documentation may be found at `an02016 <https://github.com/xmosnotes/an02016>`_.
 
