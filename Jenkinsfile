@@ -43,7 +43,7 @@ pipeline {
 
             sh "git clone -b v1.2.1 git@github.com:xmos/infr_scripts_py"
             sh "git clone -b v1.5.0 git@github.com:xmos/infr_apps"
-            sh "git clone git@github.com:xmosnotes/${EXAMPLE}.git"
+            sh "git clone -b sysfreq600 git@github.com:xmosnotes/${EXAMPLE}.git"
             get_xcommon_cmake()
 
             dir("${REPO}") {
