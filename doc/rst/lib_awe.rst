@@ -79,7 +79,7 @@ In order to use the functions, one needs to configure the library to use the cor
 
 The ``AWE_BLOCK_SIZE`` value may be adjusted and designs can be created according to this setting however a block size of 32 is recommended as a good trade-off between system latency, memory usage and CPU efficiency which is higher for larger block sizes.
 
-``AWE_HEAP_SIZE_LONG_WORDS`` is dependent on your particular design requirements. Even in maximal configurations, AWE on xcore allows for at least 40 k long words of heap size.
+``AWE_HEAP_SIZE_LONG_WORDS`` is dependent on your particular design requirements. Even in maximal configurations, AWE on xcore allows for at least 50 k long words of heap size.
 
 Some values are, at present, pre-set:
 
@@ -190,7 +190,7 @@ How much HEAP to allocate?
 
 Again this is design dependent. Large delay lines or filters with large numbers of coefficients will significantly increase the required heap size. Simple biquad filtering designs may only require a few hundred words of heap whereas a large FIR or reverb block may take tens of thousands of long words of HEAP.
 
-A default implementation in lib_awe will provide at least 40 k words of HEAP which is sufficient for many cases. The ``AWE_HEAP_SIZE_LONG_WORDS`` define (described in API section) controls this and is statically allocated at compile time.
+A default implementation in lib_awe will provide at least 50 k words of HEAP which is sufficient for many cases. The ``AWE_HEAP_SIZE_LONG_WORDS`` define (described in API section) controls this and is statically allocated at compile time.
 
 How to reduce lib_awe memory usage and allow for more memory of the AWE tile?
 .............................................................................

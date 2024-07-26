@@ -131,10 +131,7 @@ void init_awe_tuning_instance(chanend_t c_tuning_from_host,
 #define DEBUG_PACKETS     0
 
 // Sends a single packet. Adds CRC on end
-void _send_packet_to_awe(chanend_t c_tuning_from_host, lock_t l_api_lock, const unsigned int payload[], unsigned int num_words){
-    if(l_api_lock != 0){
-        lock_acquire(l_api_lock);
-    }
+void _send_packet_to_awe(chanend_t c_tuning_from_host, const unsigned int payload[], unsigned int num_words){
     chanend_out_word(c_tuning_from_host, num_words + 1); // + crc
 
     unsigned int crc = 0;
@@ -154,10 +151,7 @@ void _send_packet_to_awe(chanend_t c_tuning_from_host, lock_t l_api_lock, const 
 
 
 // Sends a concatonated packet consisting of two single packets. Adds CRC on end
-void _send_packet_to_awe_dual_array(chanend_t c_tuning_from_host, lock_t l_api_lock, const unsigned int payload1[], unsigned int num_words1, const unsigned int payload2[], unsigned int num_words2){
-    if(l_api_lock != 0){
-        lock_acquire(l_api_lock);
-    }
+void _send_packet_to_awe_dual_array(chanend_t c_tuning_from_host, const unsigned int payload1[], unsigned int num_words1, const unsigned int payload2[], unsigned int num_words2){
     chanend_out_word(c_tuning_from_host, num_words1 + num_words2 + 1); // + crc
 
     unsigned int crc = 0;
@@ -180,7 +174,7 @@ void _send_packet_to_awe_dual_array(chanend_t c_tuning_from_host, lock_t l_api_l
 }
 
 // Gets a whole packet (including CRC) from awe
-unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, lock_t l_api_lock, unsigned int packet_buffer[], unsigned max_packet_words){
+unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, unsigned int packet_buffer[], unsigned max_packet_words){
 
     // Messages may be split across multiple packets
     int response_finished = 0;
@@ -201,10 +195,6 @@ unsigned int _get_packet_from_awe(chanend_t c_tuning_to_host, lock_t l_api_lock,
         chanend_check_end_token(c_tuning_to_host);
     }
 
-    if(l_api_lock != 0){
-        lock_release(l_api_lock);
-    }
-
     return total_words;
 }
 
@@ -220,11 +210,13 @@ const unsigned coreID = 0;
 
 
 INT32 xawe_ctrlSetValue(UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length){
+    lock_acquire(g_xAWETuningInstance.l_api_lock);
     UINT32 payload1[] = {PACKET_HEADER(4 + length, coreID, PFID_SetValueHandle), handle, length, arrayOffset};
-    _send_packet_to_awe_dual_array(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, payload1, NUM_WORDS(payload1), (const unsigned int *)value, length);
+    _send_packet_to_awe_dual_array(g_xAWETuningInstance.c_tuning_from_host, payload1, NUM_WORDS(payload1), (const unsigned int *)value, length);
     const unsigned response_packet_len = 3;
     unsigned int response_packet[response_packet_len] = {0};
-    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, response_packet, response_packet_len);
+    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, response_packet, response_packet_len);
+    lock_release(g_xAWETuningInstance.l_api_lock);
     DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
 
     return response_packet[1];
@@ -232,11 +224,13 @@ INT32 xawe_ctrlSetValue(UINT32 handle, const void *value, INT32 arrayOffset, UIN
 
 
 INT32 xawe_ctrlGetValue(UINT32 handle, void *value, INT32 arrayOffset, UINT32 length){
+    lock_acquire(g_xAWETuningInstance.l_api_lock);
     UINT32 payload[] = {PACKET_HEADER(4, coreID, PFID_GetValueHandle), handle, length, arrayOffset};
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, payload, NUM_WORDS(payload));
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, payload, NUM_WORDS(payload));
     const unsigned response_packet_len = 16;
     unsigned int response_packet[response_packet_len] = {0};
-    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, response_packet, response_packet_len);
+    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, response_packet, response_packet_len);
+    lock_release(g_xAWETuningInstance.l_api_lock);
     DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
 
     for(int i = 0; i < length; i++){
@@ -248,11 +242,13 @@ INT32 xawe_ctrlGetValue(UINT32 handle, void *value, INT32 arrayOffset, UINT32 le
 
 
 INT32 xawe_ctrlSetStatus(UINT32 handle, UINT32 status){
+    lock_acquire(g_xAWETuningInstance.l_api_lock);
     UINT32 payload[] = {PACKET_HEADER(3, coreID, PFID_SetStatusHandle), handle, status};
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, payload, NUM_WORDS(payload));
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, payload, NUM_WORDS(payload));
     const unsigned response_packet_len = 3;
     unsigned int response_packet[response_packet_len] = {0};
-    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, response_packet, response_packet_len);
+    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, response_packet, response_packet_len);
+    lock_release(g_xAWETuningInstance.l_api_lock);
     DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
 
     return response_packet[1];
@@ -260,11 +256,13 @@ INT32 xawe_ctrlSetStatus(UINT32 handle, UINT32 status){
 
 
 INT32 xawe_ctrlGetStatus(UINT32 handle, UINT32 *status){
+    lock_acquire(g_xAWETuningInstance.l_api_lock);
     UINT32 payload[] = {PACKET_HEADER(2, coreID, PFID_GetStatusHandle), handle};
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, payload, NUM_WORDS(payload));
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, payload, NUM_WORDS(payload));
     const unsigned response_packet_len = 3;
     unsigned int response_packet[response_packet_len] = {0};
-    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, response_packet, response_packet_len);
+    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, response_packet, response_packet_len);
+    lock_release(g_xAWETuningInstance.l_api_lock);
     DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
     *status = response_packet[1];
 
@@ -273,11 +271,13 @@ INT32 xawe_ctrlGetStatus(UINT32 handle, UINT32 *status){
 
 
 INT32 xawe_ctrlSetValueMask(UINT32 handle, const void *value, INT32 arrayOffset, UINT32 length, UINT32 mask){
+    lock_acquire(g_xAWETuningInstance.l_api_lock);
     UINT32 payload1[] = {PACKET_HEADER(5 + length, coreID, PFID_SetValueHandleMask), handle, length, arrayOffset, mask};
-    _send_packet_to_awe_dual_array(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, payload1, NUM_WORDS(payload1), (const unsigned int *)value, length);
+    _send_packet_to_awe_dual_array(g_xAWETuningInstance.c_tuning_from_host, payload1, NUM_WORDS(payload1), (const unsigned int *)value, length);
     const unsigned response_packet_len = 3;
     unsigned int response_packet[response_packet_len] = {0};
-    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, response_packet, response_packet_len);
+    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, response_packet, response_packet_len);
+    lock_release(g_xAWETuningInstance.l_api_lock);
     DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
 
     return response_packet[1];
@@ -285,11 +285,13 @@ INT32 xawe_ctrlSetValueMask(UINT32 handle, const void *value, INT32 arrayOffset,
 
 
 INT32 xawe_ctrlGetValueMask(UINT32 handle, void *value, INT32 arrayOffset, UINT32 length, UINT32 mask){
+    lock_acquire(g_xAWETuningInstance.l_api_lock);
     UINT32 payload[] = {PACKET_HEADER(5, coreID, PFID_GetValueHandleMask), handle, length, arrayOffset, mask};
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, payload, NUM_WORDS(payload));
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, payload, NUM_WORDS(payload));
     const unsigned response_packet_len = 16;
     unsigned int response_packet[response_packet_len] = {0};
-    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, response_packet, response_packet_len);
+    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, response_packet, response_packet_len);
+    lock_release(g_xAWETuningInstance.l_api_lock);
     DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
 
     for(int i = 0; i < length; i++){
@@ -303,12 +305,14 @@ INT32 xawe_ctrlGetValueMask(UINT32 handle, void *value, INT32 arrayOffset, UINT3
 
 /*---------------------------------------Profiling Functions----------------------------------------------------*/
 INT32 xawe_getAverageLayoutCycles(UINT32 *average_cycles){
+    lock_acquire(g_xAWETuningInstance.l_api_lock);
     const int layout_idx = -1; // -1 is all layouts
     UINT32 payload[] = {PACKET_HEADER(2, coreID, PFID_GetProfileValues), layout_idx};
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, payload, NUM_WORDS(payload));
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, payload, NUM_WORDS(payload));
     const unsigned response_packet_len = 5;
     unsigned int response_packet[response_packet_len] = {0};
-    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, response_packet, response_packet_len);
+    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, response_packet, response_packet_len);
+    lock_release(g_xAWETuningInstance.l_api_lock);
     DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
 
     *average_cycles = response_packet[2];
@@ -317,11 +321,13 @@ INT32 xawe_getAverageLayoutCycles(UINT32 *average_cycles){
 }
 
 INT32 xawe_GetHeapSize(UINT32 *heap_free){
+    lock_acquire(g_xAWETuningInstance.l_api_lock);
     UINT32 payload[] = {PACKET_HEADER(1, coreID, PFID_GetHeapSize)};
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, g_xAWETuningInstance.l_api_lock, payload, NUM_WORDS(payload));
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, payload, NUM_WORDS(payload));
     const unsigned response_packet_len = 9;
     unsigned int response_packet[response_packet_len] = {0};
-    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, g_xAWETuningInstance.l_api_lock, response_packet, response_packet_len);
+    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, response_packet, response_packet_len);
+    lock_release(g_xAWETuningInstance.l_api_lock);
     DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
 
     *heap_free = response_packet[2];
@@ -343,8 +349,8 @@ INT32 xawe_loadAWBfromArray(const UINT32 *pCommands, UINT32 arraySize, UINT32 *p
     // Send audio stop command
     const unsigned len = 2; // Whole packet length inc CRC
     const unsigned int stop_audio = (len << 16) + PFID_StopAudio;
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, &stop_audio, len - 1); // -1 because CRC appended
-    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, response_packet, response_packet_len);
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, &stop_audio, len - 1); // -1 because CRC appended
+    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, response_packet, response_packet_len);
     DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
     int err = response_packet[1];
     if(err != E_SUCCESS){
@@ -368,8 +374,8 @@ INT32 xawe_loadAWBfromArray(const UINT32 *pCommands, UINT32 arraySize, UINT32 *p
 
         unsigned int num_words_tx = PACKET_LENGTH_WORDS(msg_payload);
         *pPos += num_words_tx - 1;
-        _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, msg_payload, num_words_tx - 1); // -1 because CRC appended
-        unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, response_packet, response_packet_len);
+        _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, msg_payload, num_words_tx - 1); // -1 because CRC appended
+        unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, response_packet, response_packet_len);
         DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
         if(num_words_rx == 4){
             err = response_packet[2];
@@ -385,8 +391,8 @@ INT32 xawe_loadAWBfromArray(const UINT32 *pCommands, UINT32 arraySize, UINT32 *p
 
     // Check valid
     const unsigned int layout_valid = (len << 16) + 130; // PFID_GetLayoutCoreAffinity missing from ProxyIds.h
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, &layout_valid, len - 1); // -1 because CRC appended
-    num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, response_packet, response_packet_len);
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, &layout_valid, len - 1); // -1 because CRC appended
+    num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, response_packet, response_packet_len);
     DEBUG_PRINT_RESPONSE(num_words_rx, response_packet);
 
     if(response_packet[1] == 0xffffffff){
@@ -408,8 +414,8 @@ INT32 xawe_loadAWBfromFFS(const char *fileName){
     // Send audio stop command
     const unsigned len = 2; // Whole packet length inc CRC
     unsigned int stop_audio = (len << 16) + PFID_StopAudio;
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, &stop_audio, len - 1); // -1 because CRC appended
-    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, packet, packet_len);
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, &stop_audio, len - 1); // -1 because CRC appended
+    unsigned num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, packet, packet_len);
     DEBUG_PRINT_RESPONSE(num_words_rx, packet);
 
     int err = packet[1];
@@ -425,8 +431,8 @@ INT32 xawe_loadAWBfromFFS(const char *fileName){
 
     // Check for FFS being enabled
     const unsigned int target_info = (len << 16) + PFID_GetTargetInfo;
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, &target_info, len - 1); // -1 because CRC appended
-    num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, packet, packet_len);
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, &target_info, len - 1); // -1 because CRC appended
+    num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, packet, packet_len);
     DEBUG_PRINT_RESPONSE(num_words_rx, packet);
 
     int isFlashSupported = (packet[5] & 0b10000) != 0;
@@ -441,8 +447,8 @@ INT32 xawe_loadAWBfromFFS(const char *fileName){
     const unsigned int get_next_file = (len << 16) + PFID_GetNextFile;
 
     // Get first filename
-    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, &get_first_file, len - 1); // -1 because CRC appended
-    num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, packet, packet_len);
+    _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, &get_first_file, len - 1); // -1 because CRC appended
+    num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, packet, packet_len);
     DEBUG_PRINT_RESPONSE(num_words_rx, packet);
 
     err = packet[1];
@@ -475,19 +481,20 @@ INT32 xawe_loadAWBfromFFS(const char *fileName){
             int num_words_filename = 1 + (char_count >> 2) + 1; // padding 0 word, string + least one byte (up to 4) zero padding to a word
             const unsigned int execute_file_cmd = ((1 + num_words_filename + 1) << 16) + PFID_ExecuteFile; // CMD + filename + CRC
 
-            _send_packet_to_awe_dual_array(g_xAWETuningInstance.c_tuning_from_host, 0, &execute_file_cmd, 1, packet, num_words_filename);
-            num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, packet, packet_len);
+            _send_packet_to_awe_dual_array(g_xAWETuningInstance.c_tuning_from_host, &execute_file_cmd, 1, packet, num_words_filename);
+            num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, packet, packet_len);
             DEBUG_PRINT_RESPONSE(num_words_rx, packet);
 
             err = packet[1];
             if(err != E_SUCCESS){
+                lock_release(g_xAWETuningInstance.l_api_lock);
                 return err;
             }
 
             // Check valid
             const unsigned int layout_valid = (len << 16) + 130; // PFID_GetLayoutCoreAffinity missing from ProxyIds.h
-            _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, &layout_valid, len - 1); // -1 because CRC appended
-            num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, packet, packet_len);
+            _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, &layout_valid, len - 1); // -1 because CRC appended
+            num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, packet, packet_len);
             DEBUG_PRINT_RESPONSE(num_words_rx, packet);
 
             if(packet[1] == 0xffffffff){
@@ -500,8 +507,8 @@ INT32 xawe_loadAWBfromFFS(const char *fileName){
         }
 
         // Not found, try again. Get next filename
-        _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, 0, &get_next_file, len - 1); // -1 because CRC appended
-        num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, 0, packet, packet_len);
+        _send_packet_to_awe(g_xAWETuningInstance.c_tuning_from_host, &get_next_file, len - 1); // -1 because CRC appended
+        num_words_rx = _get_packet_from_awe(g_xAWETuningInstance.c_tuning_to_host, packet, packet_len);
         DEBUG_PRINT_RESPONSE(num_words_rx, packet);
 
         err = packet[1];
