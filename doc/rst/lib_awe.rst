@@ -182,7 +182,7 @@ AWE supports multi-threaded operation meaning that a large pipeline may be split
 
 The CPU usage metric in ``AWE Server`` (part of the AWE Designer software) allows tracking of processor loading as does the firmware API ``xawe_getAverageLayoutCycles(UINT32 *average_cycles)`` call.
 
-By default, two threads are allocated to ``lib_awe`` for DSP work. The amount of MIPS available per thread in the device is dependent on the core clock frequency and the maximum number of active threads. For designs using 5 or fewer threads the maximum number of MIPS is f / 5 (which is 140 MIPS per thread for a 700 MHz core clock) or f / n for 6 to 8 active threads. Hence for AWE designs not exploiting the multi-threaded capability, setting ``AWE_DSP_THREAD_NUM`` to two or one will maximise the available performance.
+By default, two threads are allocated to ``lib_awe`` for DSP work. The amount of MIPS available per thread in the device is dependent on the core clock frequency and the maximum number of active threads. For designs using 5 or fewer threads the maximum number of MIPS is f / 5, which is 160 MIPS per thread for a 800MHz core clock (i.e. 32 speed grade) part,  or f / n for 6 to 8 active threads. Hence for AWE designs not exploiting the multi-threaded capability, setting ``AWE_DSP_THREAD_NUM`` to two or one will maximise the available performance.
 
 
 How much HEAP to allocate?
