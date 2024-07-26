@@ -30,7 +30,7 @@ use:
   design
 
 .. note::
-    The ``lib_awe.a`` file is not provided as part of the lib_awe repository for comercial reasons.
+    The ``lib_awe.a`` file is not provided as part of the lib_awe repository for commercial reasons.
     Please obtain this file from your XMOS or DSPC contact directly.
 
 Architecture
