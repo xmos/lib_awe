@@ -25,6 +25,7 @@ Features
   * Implementation of AWE Control Interface using the above
   * Example implementation of run-time selection of AWE layouts that are compiled into an application
   * Example integration into the XMOS USB Audio Reference Design
+  * Supports 48000 Hz sample rate (will be extended in future releases)
 
 Host System Requirements
 ========================
