@@ -1,7 +1,7 @@
 ---
 project: lib_awe
 title: AWE Library for XMOS
-version: 0.1.0
+version: 1.0.0
 
 documentation:
   exclude_patterns_path: doc/exclude_patterns.inc
