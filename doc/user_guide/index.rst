@@ -5,7 +5,7 @@ AWE Library User Guide
 Introduction
 ------------
 
-Audio Weaver is a tool and libraries for implementing Digital Signal Processing algorithms. It comprises a GUI and a set of libraries. Standard building blocks such as filters, equalisers, echo cancellers, can be assembled in the GUI and then executed on a device. A control library is available that enables on-line tuning of the processing blocks.
+Audio Weaver is a tool and libraries for implementing Digital Signal Processing algorithms. It comprises a GUI and a set of libraries. Standard building blocks such as filters, equalisers and many more can be assembled in the GUI and then executed on a device. A control library is available that enables on-line tuning of the processing blocks.
 
 XCORE is a programmable multi-core device with flexible DSP and IO interfaces. The IO interfaces can be programmed to, for example, I2S, TDM, USB, ADAT or S/PDIF interfaces (or indeed any other interface), and the DSP capability can be used to operate on data that is received from or sent to these interfaces. In addition to interfaces and DSP, XCORE devices can also execute control code or even ML inference engines.
 
@@ -16,8 +16,7 @@ It utilises xcore.ai's multi-threaded architecture and vector processing unit to
 .. note::
     This document refers to the XMOS specific implementation details. DSP Concepts provide several documents on the usage and integration of Audio Weaver into user system. Please refer to https://documentation.dspconcepts.com for documentation specific to Audio Weaver.
 
-For reference, we refer to the following repositories that you may want to
-use:
+For reference, we refer to the following repositories that you may want to use:
 
 * <https://github.com/xmos/lib_awe.git> for the library that integrates
   Audio Weaver and XCORE.
@@ -26,7 +25,7 @@ use:
   design
 
 .. note::
-    The ``lib_awe.a`` file is not provided as part of the lib_awe repository for security reasons. Please obtain this file from your XMOS contact directly.
+    The ``lib_awe.a`` file is not provided as part of the lib_awe repository for commercial reasons. This version has been tested with AWE Core version 8.D.8. Please obtain this file from your DSP Concepts contact directly.
 
 Architecture
 ------------
@@ -68,7 +67,7 @@ In order to use the functions, one needs to configure the library to use the cor
 
 The ``AWE_BLOCK_SIZE`` value may be adjusted and designs can be created according to this setting however a block size of 32 is recommended as a good trade-off between system latency, memory usage and CPU efficiency which is higher for larger block sizes.
 
-``AWE_HEAP_SIZE_LONG_WORDS`` is dependent on your particular design requirements. Even in maximal configurations, AWE on XCORE allows for at least 40 k long words of heap size.
+``AWE_HEAP_SIZE_LONG_WORDS`` is dependent on your particular design requirements. Even in maximal configurations, AWE on XCORE allows for at least 50 k long words of heap size.
 
 Some values are, at present, pre-set:
 
@@ -173,7 +172,7 @@ How much HEAP to allocate?
 
 Again this is design dependent. Large delay lines or filters with large numbers of coefficients will significantly increase the required heap size. Simple biquad filtering designs may only require a few hundred words of heap whereas a large FIR or reverb block may take tens of thousands of long words of HEAP. 
 
-A default implementation in lib_awe will provide at least 40 k words of HEAP which is sufficient for many cases. The ``AWE_HEAP_SIZE_LONG_WORDS`` define (described in API section) controls this and is statically allocated at compile time.
+A default implementation in lib_awe will provide at least 50 k words of HEAP which is sufficient for many cases. The ``AWE_HEAP_SIZE_LONG_WORDS`` define (described in API section) controls this and is statically allocated at compile time.
 
 How to reduce lib_awe memory usage and allow for more memory of the AWE tile?
 .............................................................................

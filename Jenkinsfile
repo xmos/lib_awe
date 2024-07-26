@@ -27,7 +27,7 @@ pipeline {
     EXAMPLE = 'an02016'
     PIP_VERSION = "24.0"
     PYTHON_VERSION = "3.11"
-    XMOSDOC_VERSION = "v5.4"
+    XMOSDOC_VERSION = "v5.5.2"
     XTAGCTL_VERSION = "v2.0.0"
     AWE_CORE_VERSION = "DSPCAWE_8.D.8"
   }
