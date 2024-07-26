@@ -18,7 +18,7 @@ xcore is a programmable multi-core device with flexible DSP and IO interfaces. T
 It utilises xcore.ai's multi-threaded architecture and vector processing unit to provide very high performance and predictable timing required by embedded systems.
 
 .. note::
-    This document refers to the XMOS specific implementation details. DSP Concepts provide several documents on the usage and integration of Audio Weaver into user system. Please refer to https://documentation.dspconcepts.com for documentation specific to Audio Weaver.
+    This document refers to the XMOS specific implementation details. DSP Concepts provide several documents on the usage and integration of Audio Weaver into the user's system. Please refer to https://documentation.dspconcepts.com for documentation specific to Audio Weaver.
 
 For reference, we refer to the following repositories that you may want to
 use:
