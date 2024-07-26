@@ -94,7 +94,7 @@ Some values are, at present, pre-set:
 
 A single function is provided to wrap the entire ``lib_awe`` implementation and automatically spawns all of the worker and helper threads. If the FFS is used then this thread must be started by the user, as shown in the application example. In addition, where USB/HID is used as the control interface, an API is provided which takes care of translating messages to and from the HID endpoint and to and from the lib_awe tuning thread.
 
-``lib_awe`` also provides a number of remote tuning function APIs which allow loading of AWB designs, profiling and the setting and getting and getting of tuning parameters from firmware. The external USB/HID interface may co-exist with internal tuning functions. Other interfaces may be used such as UART or I2C although these are not currently implemented.
+``lib_awe`` also provides a number of remote tuning function APIs which allow loading of AWB designs, profiling and the setting and getting of tuning parameters from firmware. The external USB/HID interface may co-exist with internal tuning functions. Other interfaces may be used such as UART or I2C although these are not currently implemented.
 
 API Listing
 ~~~~~~~~~~~
