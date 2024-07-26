@@ -487,6 +487,7 @@ INT32 xawe_loadAWBfromFFS(const char *fileName){
 
             err = packet[1];
             if(err != E_SUCCESS){
+                lock_release(g_xAWETuningInstance.l_api_lock);
                 return err;
             }
 
