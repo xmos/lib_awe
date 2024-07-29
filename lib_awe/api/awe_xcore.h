@@ -64,20 +64,18 @@ extern void awe_xcore_main(chanend_t c_tuning_from_host,
  * AWE stack. This function may be avoided and instead data can be pushed
  * directly onto the channelend.
  *
- * NOTE: THIS DESCRIPTION IS WRONG AT PRESENT
+ * \param c_data       Channelend for audio communication
  *
- * \param c_data      Channelend for audio communication
+ * \param sampsToAWE   frame of data destined for AWE. This frame should be
+ *                     AWE_INPUT_CHANNELS in size
  *
- * \param toAWE       frame of data destined for AWE. This frame should be
- *                    AWE_INPUT_CHANNELS in size
- *
- * \param fromAWE     frame of data from AWE. This array should be
- *                    AWE_OUTPUT_CHANNELS in size and will be filled by the
- *                    function
+ * \param sampsFromAWE frame of data from AWE. This array should be
+ *                     AWE_OUTPUT_CHANNELS in size and will be filled by the
+ *                     function
  */
 extern void awe_offload_data_to_dsp_engine(chanend_t c_to_awe,
-                                           unsigned toAWE[],
-                                           unsigned fromAWE[]);
+                                           unsigned sampsToAWE[],
+                                           unsigned sampFromAWE[]);
 
 /**
  * @brief Initialise the client side of the tuning interface which will typically connect to the host.
