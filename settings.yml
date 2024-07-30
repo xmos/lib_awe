@@ -16,8 +16,10 @@ documentation:
     doc/rst/lib_awe.rst:
       pdf_title: '{{title}}'
       pdf_filename: '{{lib_name}}_v{{version}}'
+      pdf_short: yes
     README.rst:
       pdf_title: '{{title}} (README)'
       pdf_filename: '{{lib_name}}_v{{version}}_readme'
+      pdf_short: yes
 software:
   cognidox_part_number: XM-015095-SM
