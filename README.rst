@@ -1,11 +1,14 @@
 :orphan:
 
-XCORE Audio Weaver Interface
-############################
+lib_awe: AWE Core
+#################
 
-:Version: 1.0.0
-:Vendor: XMOS
-:Scope: Demonstration
+:vendor: XMOS
+:version: 1.0.0
+:scope: Example
+:description: Audio Weaver (AWE) Core for xcore
+:keywords: AudioWeaver, AWE, DSP, Audio
+:devices: xcore.ai
 
 Summary
 =======
