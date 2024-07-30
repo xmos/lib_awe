@@ -162,7 +162,7 @@ However, the finer details of these protocols is normally not required to be und
     - Getting and setting of control parameters
     - Profiling the system CPU usage and stack usage
 
-In addition to the firmware API, a USB/HID tuning interface task is provided which allows direct connection of the firmware to the AWE designer software. The code defining the task (normally run on a dedicated thread) can be found in ``awe_tuning_usb_hid.c`` in lib_awe. A fixed HID report length and AWE packet sized is required to meet the protocol from AWE designer and these requirements are all handled by that task. The application examples in `AN02016 <https://github.com/xmosnotes/an02016>`_ utilise the USB/HID tuning interface and are the suggested entry point for users who are new to ``lib_awe``.
+In addition to the firmware API, a USB/HID tuning interface task is provided which allows direct connection of the firmware to the AWE designer software. The code defining the task (normally run on a dedicated thread) can be found in ``awe_tuning_usb_hid.c`` in lib_awe. A fixed HID report length and AWE packet sized is required to meet the protocol from AWE designer and these requirements are all handled by that task. The application examples in `AN02016 <http://www.xmos.com/file/an02016-integrating-audio-weaver-awe-core-into-usb-audio/>`_ utilise the USB/HID tuning interface and are the suggested entry point for users who are new to ``lib_awe``.
 
 The firmware provides a locking mechanism to ensure that messages are atomic when multiple tuning interfaces are used.
 
