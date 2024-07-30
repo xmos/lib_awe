@@ -1,7 +1,7 @@
 :orphan:
 
-lib_awe: AWE Core
-#################
+lib_awe: AWE Core for xcore
+###########################
 
 :vendor: XMOS
 :version: 1.0.0
