@@ -18,7 +18,6 @@ documentation:
       pdf_filename: '{{lib_name}}_v{{version}}'
     README.rst:
       pdf_title: '{{title}} (README)'
-      pdf_filename: 'readme'
-
+      pdf_filename: '{{lib_name}}_v{{version}}_readme'
 software:
   cognidox_part_number: XM-015095-SM
