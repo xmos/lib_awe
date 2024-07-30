@@ -7,19 +7,21 @@ lib_awe: AWE Core for xcore
 :version: 1.0.0
 :scope: General Use
 :description: Audio Weaver (AWE) Core for xcore
-:keywords: AudioWeaver, AWE, DSP, Audio
+:category: Audio
+:keywords: Audio Weaver, AWE, DSP, Audio
 :devices: xcore.ai
 
 Summary
 =======
 
-Lib_awe is a port of Audio Weaver for XMOS's powerful xcore.ai device. It contains code for
-software threads which wrap the core library and provide easy interfacing to both audio streaming
-components such as I2S and USB Audio as well as control interfacing to allow control and loading
-of pre-built Audio Weaver designs from a host or internally from the device.
+lib_awe is a port of Audio Weaver Embedded (AWE) Core for XMOS's powerful xcore.ai device. It 
+contains code for software threads which wrap the core library and provide easy interfacing to 
+both audio streaming components such as I2S and USB Audio as well as control interfacing to 
+allow control and loading of pre-built Audio Weaver designs from a host or internally from the 
+device.
 
 .. note::
-    You must manually obtain the lib_awe.a file and place in the lib_awe/lib/xs3 directory in
+    You must manually obtain the lib_awe.a file and place in the lib_awe/lib/xs3a directory in
     able to build applications with this software.
 
 Features
