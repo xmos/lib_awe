@@ -1,1 +1,1 @@
-Please add the file lib_awe.a here
+Please add the file libAWECore.a here
