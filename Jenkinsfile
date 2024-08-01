@@ -59,6 +59,20 @@ pipeline {
           } // steps
         } // Get sandbox
 
+        stage('Library checks part 1') {
+          steps {
+            dir("${REPO}") {
+              withTools(params.TOOLS_VERSION) {
+                withVenv {
+                  // Need to run this test on the repo source only before we do a build and grab the .a
+                  sh "python -m pytest -m lib --junitxml=junit_lib.xml"
+                  junit "junit_lib.xml"
+                } // with Venv
+              } // tools
+            } // dir
+          } //step
+        }  // Library checks
+
         stage('Build examples xcommon_cmake') {
           steps {
             withTools(params.TOOLS_VERSION) {
@@ -80,7 +94,7 @@ pipeline {
             } // withTools
           } // steps
         }  // Build examples XCCM
-        stage('Library checks') {
+        stage('Library checks part 2') {
           steps {
             dir("${REPO}") {
               withTools(params.TOOLS_VERSION) {
