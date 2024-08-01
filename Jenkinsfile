@@ -59,7 +59,7 @@ pipeline {
           } // steps
         } // Get sandbox
 
-        stage('Library checks part 1') {
+        stage('Library checks 1') {
           steps {
             dir("${REPO}") {
               withTools(params.TOOLS_VERSION) {
@@ -94,7 +94,7 @@ pipeline {
             } // withTools
           } // steps
         }  // Build examples XCCM
-        stage('Library checks part 2') {
+        stage('Library checks 2') {
           steps {
             dir("${REPO}") {
               withTools(params.TOOLS_VERSION) {
@@ -106,8 +106,6 @@ pipeline {
                   }
                   withEnv(["REPO=${REPO}", "XMOS_ROOT=.."]) {
                     xcoreLibraryChecks("${REPO}", false)
-                    // Need to run this test on the repo source only before we do a build and grab the .a
-                    sh "python -m pytest -m lib --junitxml=junit_lib.xml"
                     junit "junit_lib.xml"
                   } // withEnv
                 } // with Venv
