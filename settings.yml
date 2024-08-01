@@ -1,0 +1,25 @@
+---
+lib_name: lib_awe
+project: '{{lib_name}}'
+title: '{{lib_name}}: AWE Core for xcore'
+version: 1.0.0
+
+documentation:
+  exclude_patterns_path: doc/exclude_patterns.inc
+  root_doc: doc/rst/lib_awe.rst
+  linkcheck_ignore_regex: ['.*lib_awe.*', '.*an02016.*']
+  cognidox_part_number: XM-015096-UG
+  doxygen_projects:
+    lib_xcore_math:
+      doxyfile_path: doc/Doxyfile.inc
+  pdfs:
+    doc/rst/lib_awe.rst:
+      pdf_title: '{{title}}'
+      pdf_filename: '{{lib_name}}_v{{version}}'
+      pdf_short: yes
+    README.rst:
+      pdf_title: '{{title}} (README)'
+      pdf_filename: '{{lib_name}}_v{{version}}_readme'
+      pdf_short: yes
+software:
+  cognidox_part_number: XM-015095-SM

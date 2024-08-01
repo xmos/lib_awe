@@ -1,3 +1,5 @@
+// Copyright 2023-2024 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public Licence: Version 1.
     // This replaces some dodgy typing
     
 // Standard Modules
@@ -232,7 +234,7 @@
     .globl awe_modZeroCrossingDetectorFract32Class
     .globl awe_modZeroSourceClass
 
-
+#ifndef MINSIZEREL
 // Advanced Modules
     .globl awe_modAGCAttackReleaseClass
     .globl awe_modAGCAttackReleaseFract32Class
@@ -510,6 +512,7 @@
     .globl awe_modTableInterpRuntimeClass
     .globl awe_modTwoPieceInterpClass
 
+#endif // not defined MINSIZEREL
 
 // Internal Modules
     .globl awe_modCompiledSubsystemClass
@@ -666,16 +669,34 @@
 		awe_modWhiteNoiseClass, \
 		awe_modWithinRangeClass, \
 		awe_modZeroCrossingDetectorClass, \
+        awe_modFifoInClass, \
+		awe_modFifoOutClass, \
+        awe_modZeroPaddingClass, \
+        awe_modComplexModulateClass, \
+        awe_modCfftClass, \
+        awe_modSbAttackReleaseClass, \
+		awe_modSbComplexFIRClass, \
+		awe_modSbComplexFIRvlClass, \
+        awe_modComplexToPolarClass, \
+		awe_modComplexToRealImagClass, \
+        awe_modBlockExtractClass, \
+		awe_modBlockFlipClass, \
+        awe_modBlockConcatenateClass, \
+		awe_modBlockDelayClass, \
+		awe_modBlockDelayV2Class, \
+        awe_modOverlapAddClass, \
+		awe_modRepWinOverlapClass, \
+        awe_modRandiClass, \
+        awe_modAllpassDelayClass, \
+		awe_modAllpassDelay16Class, \
+		awe_modAllpassDelayciClass, \
+		awe_modAllpassDelayiClass, \
 		awe_modZeroSourceClass
 
 #define ADVANCED_LIST \
 	.word	awe_modAGCAttackReleaseClass, \
 		awe_modAGCCompressorCoreClass, \
 		awe_modAGCVariableAttackReleaseClass, \
-		awe_modAllpassDelayClass, \
-		awe_modAllpassDelay16Class, \
-		awe_modAllpassDelayciClass, \
-		awe_modAllpassDelayiClass, \
 		awe_modArraysetClass, \
 		awe_modAttackDecaySustainReleaseClass, \
 		awe_modAudioWeightingClass, \
@@ -692,23 +713,16 @@
 		awe_modBiquadSparseV4Class, \
 		awe_modBiquadSparseV5Class, \
 		awe_modBiquadSparseV6Class, \
-		awe_modBlockConcatenateClass, \
-		awe_modBlockDelayClass, \
-		awe_modBlockDelayV2Class, \
-		awe_modBlockExtractClass, \
-		awe_modBlockFlipClass, \
 		awe_modBlockMedianClass, \
 		awe_modBlockStatisticsClass, \
 		awe_modBlockStatisticsNClass, \
 		awe_modButterworthFilterHPClass, \
-		awe_modCfftClass, \
 		awe_modCoeffTableClass, \
 		awe_modComplexAngleClass, \
 		awe_modComplexConjugateClass, \
 		awe_modComplexDivideClass, \
 		awe_modComplexMagnitudeClass, \
 		awe_modComplexMagnitudeSquaredClass, \
-		awe_modComplexModulateClass, \
 		awe_modComplexMultiplierClass, \
 		awe_modComplexMultiplierV2Class, \
 		awe_modComplexToPolarClass, \
@@ -747,8 +761,6 @@
 		awe_modFIRSparseReaderFract16Class, \
 		awe_modFOFControlClass, \
 		awe_modFftClass, \
-		awe_modFifoInClass, \
-		awe_modFifoOutClass, \
 		awe_modFilterbankFIRNChanClass, \
 		awe_modFilterbankFIRNChanV2Class, \
 		awe_modFractionalDelayV2Class, \
@@ -772,7 +784,6 @@
 		awe_modMuteLinearFadeClass, \
 		awe_modMuteSyncClass, \
 		awe_modOscillatorClass, \
-		awe_modOverlapAddClass, \
 		awe_modOverwriteControlClass, \
 		awe_modPDFClass, \
 		awe_modParamSetTableV2Class, \
@@ -781,10 +792,8 @@
 		awe_modPolarToComplexClass, \
 		awe_modPresetArrayHandlerClass, \
 		awe_modPresetArrayHandlerV2Class, \
-		awe_modRandiClass, \
 		awe_modRealImagToComplexClass, \
 		awe_modRebufferClass, \
-		awe_modRepWinOverlapClass, \
 		awe_modRunningMinMaxClass, \
 		awe_modRunningStatisticsClass, \
 		awe_modRunningStatisticsNClass, \
@@ -798,9 +807,6 @@
 		awe_modSampleMultiplexorControlClass, \
 		awe_modSampleRateClass, \
 		awe_modSampleStatisticsClass, \
-		awe_modSbAttackReleaseClass, \
-		awe_modSbComplexFIRClass, \
-		awe_modSbComplexFIRvlClass, \
 		awe_modSbDerivativeClass, \
 		awe_modSbNLMSClass, \
 		awe_modSbNLMSV2Class, \
@@ -841,15 +847,18 @@
 		awe_modWindowAliasClass, \
 		awe_modWindowCustomClass, \
 		awe_modWindowOverlapClass, \
-		awe_modWindowV2Class, \
-		awe_modZeroPaddingClass \
+		awe_modWindowV2Class \
+		
 
 #define INTERNAL_LIST \
 	.word	awe_modCompiledSubsystemClass, \
 		awe_modProxyGetSetClass
 
 
-
+#ifdef MINSIZEREL
+#undef DEPRECATED_LIST
+#undef ADVANCED_LIST
+#endif // defined MINSIZEREL
 
 
 
@@ -861,7 +870,9 @@
     .align 4
 g_module_descriptor_table:  
     STANDARD_LIST
+    #ifndef MINSIZEREL
     ADVANCED_LIST
+    #endif
     INTERNAL_LIST
 g_module_descriptor_table_end:  
 
