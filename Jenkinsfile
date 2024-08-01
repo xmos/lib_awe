@@ -59,27 +59,6 @@ pipeline {
           } // steps
         } // Get sandbox
 
-        stage('Library checks') {
-          steps {
-            dir("${REPO}") {
-              withTools(params.TOOLS_VERSION) {
-                withVenv {
-                  // creation of tools_released and REPO environment variable are workarounds
-                  // to allow xcoreLibraryChecks to run without a viewfile-based sandbox
-                  dir("tools_released") {
-                    sh "echo ${params.TOOLS_VERSION} > REQUIRED_TOOLS_VERSION"
-                  }
-                  withEnv(["REPO=${REPO}"]) {
-                    xcoreLibraryChecks("${REPO}", false)
-                    // Need to run this test on the repo source only before we do a build and grab the .a
-                    sh "python -m pytest -m lib --junitxml=junit_lib.xml"
-                    junit "junit_lib.xml"
-                  } // withEnv
-                } // with Venv
-              } // tools
-            } // dir
-          } //step
-        }  // Library checks
         stage('Build examples xcommon_cmake') {
           steps {
             withTools(params.TOOLS_VERSION) {
@@ -101,6 +80,27 @@ pipeline {
             } // withTools
           } // steps
         }  // Build examples XCCM
+        stage('Library checks') {
+          steps {
+            dir("${REPO}") {
+              withTools(params.TOOLS_VERSION) {
+                withVenv {
+                  // creation of tools_released and REPO environment variable are workarounds
+                  // to allow xcoreLibraryChecks to run without a viewfile-based sandbox
+                  dir("tools_released") {
+                    sh "echo ${params.TOOLS_VERSION} > REQUIRED_TOOLS_VERSION"
+                  }
+                  withEnv(["REPO=${REPO}", "XMOS_ROOT=.."]) {
+                    xcoreLibraryChecks("${REPO}", false)
+                    // Need to run this test on the repo source only before we do a build and grab the .a
+                    sh "python -m pytest -m lib --junitxml=junit_lib.xml"
+                    junit "junit_lib.xml"
+                  } // withEnv
+                } // with Venv
+              } // tools
+            } // dir
+          } //step
+        }  // Library checks
       } // stages
       post {
         cleanup {
