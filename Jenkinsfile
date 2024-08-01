@@ -94,7 +94,7 @@ pipeline {
             } // withTools
           } // steps
         }  // Build examples XCCM
-        stage('Library checks 2') {
+        stage('Library checks 2') { // This has to be done after build so we have all of the deps fetched 
           steps {
             dir("${REPO}") {
               withTools(params.TOOLS_VERSION) {
