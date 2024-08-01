@@ -9,4 +9,6 @@ set(LIB_DEPENDENT_MODULES   "lib_xud(2.3.1)"
                             "lib_xassert(4.2.0)"
                             )
 
+set(LIB_ARCHIVES libAWECore)
+
 XMOS_REGISTER_STATIC_LIB()
