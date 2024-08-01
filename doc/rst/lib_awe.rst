@@ -219,5 +219,5 @@ Application Examples
 
 A number of sample applications are provided to help you get up and running quickly. These are based on the XK-AUDIO-316-MC hardware and standard USB Audio Reference Design provided by XMOS in ``sw_usb_audio``.
 
-The application example source code and documentation may be found in application note `AN02016: Integrating Audio Weaver (AWE) Core into USB Audio <https://github.com/xmosnotes/an02016>`_.
+The application example source code and documentation may be found in application note `AN02016: Integrating Audio Weaver (AWE) Core into USB Audio <http://www.xmos.com/file/an02016-integrating-audio-weaver-awe-core-into-usb-audio/>`_.
 
