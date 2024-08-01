@@ -1,22 +1,27 @@
 :orphan:
 
-XCORE Audio Weaver Interface
-############################
+lib_awe: AWE Core for xcore
+###########################
 
-:Version: 1.0.0
-:Vendor: XMOS
-:Scope: Demonstration
+:vendor: XMOS
+:version: 1.0.0
+:scope: General Use
+:description: Audio Weaver (AWE) Core for xcore
+:category: Audio
+:keywords: Audio Weaver, AWE, DSP, Audio
+:devices: xcore.ai
 
 Summary
 =======
 
-Lib_awe is a port of Audio Weaver for XMOS's powerful xcore.ai device. It contains code for
-software threads which wrap the core library and provide easy interfacing to both audio streaming
-components such as I2S and USB Audio as well as control interfacing to allow control and loading
-of pre-built Audio Weaver designs from a host or internally from the device.
+lib_awe is a port of Audio Weaver Embedded (AWE) Core for XMOS's powerful xcore.ai device. It 
+contains code for software threads which wrap the core library and provide easy interfacing to 
+both audio streaming components such as I2S and USB Audio as well as control interfacing to 
+allow control and loading of pre-built Audio Weaver designs from a host or internally from the 
+device.
 
 .. note::
-    You must manually obtain the lib_awe.a file and place in the lib_awe/lib/xs3 directory in
+    You must manually obtain the lib_awe.a file and place in the lib_awe/lib/xs3a directory in
     able to build applications with this software.
 
 Features
@@ -32,11 +37,12 @@ Features
 Known Issues
 ============
 
-  * The DSP Concepts AWE Flash File System assumes that erase sectors are of a constant size. The FFS uses the data partition which is beyond the boot partition and so this is generally the case, however please check your chosen flash device for this property if enabling the FFS.
-  * AWE_DSP_THREAD_NUM counts of less than 3 are not currently supported. This will be fixed in a future release. https://github.com/xmos/lib_awe/issues/44
-  * Lib_awe requires the xcore.ai device to be run with a CPU clock of at least 700 MHz. Please use the appropriate silicon grade to support this.
-  * Audio Weaver code-generation produces mis-matched declaration (const) between .h and c files (https://github.com/xmos/lib_awe/issues/39)
+  * The DSP Concepts AWE Flash File System assumes that erase sectors are of a constant size. The FFS uses the data partition which is beyond the boot partition and so this is generally the case, however please check your chosen flash device for this property if enabling the FFS
   * This release is known to be incompatible with versions of AWE core previous to 8.D.8
+  * AWE_DSP_THREAD_NUM counts of less than 3 are not currently supported `(#44) <https://github.com/xmos/lib_awe/issues/44>`_
+  * Lib_awe requires the xcore.ai device to be run with a CPU clock of at least 700 MHz. Please use the appropriate silicon grade to support this `(#63) <https://github.com/xmos/lib_awe/issues/63>`_
+  * Audio Weaver Designer code-generation produces mis-matched declaration (const) between .h and c files `(#39) <https://github.com/xmos/lib_awe/issues/39>`_
+  * Currently xscope cannot be using alongside lib_awe `(#55) <https://github.com/xmos/lib_awe/issues/55>`_
 
 Host System Requirements
 ========================

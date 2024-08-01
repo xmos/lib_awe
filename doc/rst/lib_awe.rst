@@ -54,7 +54,7 @@ The channel-based tuning interface supports multiple clients. The USB/HID and in
 
 All of the described threads for lib_awe need to be placed on the same tile. Since the majority of one tile's RAM and many of the threads are typically used by lib_awe it is typical to dedicate one tile to lib_awe and use the other tile for application logic. However, low-memory usage tasks such as I2S may also be placed on the lib_awe tile (when required by hardware IO constraints) and this is demonstrated in the USB Audio Example.
 
-An additional thread may be used in the case where the AWE Flash File System (FFS) is enabled. The FFS can be used to store compiled AWE design files. The flash server thread provides a remote flash memory access server meaning that the AWE Core and the flash memory IO may exist on different tiles. Use of the FFS is optional and can be enabled or disabled using defines (see API). The flash server makes use of the flash access API provided in the XMOS tools ``quadflashlib.h``. Documentation regarding this can be found in the `XTC Tools Manual <https://www.xmos.com/documentation/XM-014363-PC-9/html/tools-guide/tools-ref/libraries/libflash-api/libflash-api.html>`_.
+An additional thread may be used in the case where the AWE Flash File System (FFS) is enabled. The FFS can be used to store compiled AWE design files. The flash server thread provides a remote flash memory access server meaning that the AWE Core and the flash memory IO may exist on different tiles. Use of the FFS is optional and can be enabled or disabled using defines (see API). The flash server makes use of the flash access API provided in the XMOS tools ``quadflashlib.h``. Documentation regarding this can be found in the `XTC Tools Manual <https://www.xmos.com/documentation/XM-014363-PC-LATEST/html/tools-guide/tools-ref/libraries/libflash-api/libflash-api.html>`_.
 
 .. _sec_lib_awe_api:
 
@@ -77,9 +77,13 @@ In order to use the functions, one needs to configure the library to use the cor
     AWE_HEAP_SIZE_LONG_WORDS        1024 or more
     =============================== ============
 
-The ``AWE_BLOCK_SIZE`` value may be adjusted and designs can be created according to this setting however a block size of 32 is recommended as a good trade-off between system latency, memory usage and CPU efficiency which is higher for larger block sizes.
+The ``AWE_BLOCK_SIZE`` value may be adjusted and designs can be created according to this setting,
+however, a block size of 32 is recommended as a good trade-off between system latency, memory usage
+and CPU efficiency which is higher for larger block sizes.
 
-``AWE_HEAP_SIZE_LONG_WORDS`` is dependent on your particular design requirements. Even in maximal configurations, AWE on xcore allows for at least 50 k long words of heap size.
+``AWE_HEAP_SIZE_LONG_WORDS`` is dependent on your particular design requirements. In configurations
+with a large number of modules, one may have no more space than 50k 32-bit words of heap size.
+In configurations with fewer modules, one can make heaps of 100k 32-bit words.
 
 Some values are, at present, pre-set:
 
@@ -102,7 +106,7 @@ API Listing
 .. doxygengroup:: lib_awe
     :content-only:
 
-Integrating lib_awe into your Design
+Integrating lib_awe into your design
 ------------------------------------
 
 There are two main APIs for ``lib_awe``; audio data path and control.
@@ -116,7 +120,7 @@ The data xcore-channel handles the passing of audio samples to and from lib_awe.
 
 This function passes a frame of samples over the channel to ``lib_awe`` and receives processed samples back from ``lib_awe``. It is `sample based` meaning that it should be called at the native sample rate of the system which is nominally 48 kHz. The frame size is the number of audio channels supported by the system. Processing of a block of samples (typically 32 for AWE) is handled by a user design loaded into ``lib_awe`` which is why a ``buffer up`` block is the first and last part of a pipeline. For a block size of 32, the minimum latency for pushing samples into AWE and pulling them out is 64 which represents the two buffer stages at the front and back of the user pipeline.
 
-This convenience function is typically called from an isochronous streaming audio task within the user design. For the case of the `XMOS USB Audio Design <https://www.xmos.com/download/sw_usb_audio:-sw_usb_audio-(user-guide)(v8_1_0).pdf>`_ it is called from the I2S thread which acts as the audio hub in USB Audio systems. The USB audio callback function in USB Audio is::
+This convenience function is typically called from an isochronous streaming audio task within the user design. For the case of the `XMOS USB Audio Design <https://www.xmos.com/file/sw_usb_audio-sw_usb_audio-design-guide/?version=latest)>`_ it is called from the I2S thread which acts as the audio hub in USB Audio systems. The USB audio callback function in USB Audio is::
 
     void UserBufferManagement(unsigned sampsFromUsbToAudio[], unsigned sampsFromAudioToUsb[])
 
@@ -158,7 +162,7 @@ However, the finer details of these protocols is normally not required to be und
     - Getting and setting of control parameters
     - Profiling the system CPU usage and stack usage
 
-In addition to the firmware API, a USB/HID tuning interface task is provided which allows direct connection of the firmware to the AWE designer software. The code defining the task (normally run on a dedicated thread) can be found in ``awe_tuning_usb_hid.c`` in lib_awe. A fixed HID report length and AWE packet sized is required to meet the protocol from AWE designer and these requirements are all handled by that task. The application examples in `AN02016 <https://github.com/xmosnotes/an02016>`_ utilise the USB/HID tuning interface and are the suggested entry point for users who are new to ``lib_awe``.
+In addition to the firmware API, a USB/HID tuning interface task is provided which allows direct connection of the firmware to the AWE designer software. The code defining the task (normally run on a dedicated thread) can be found in ``awe_tuning_usb_hid.c`` in lib_awe. A fixed HID report length and AWE packet sized is required to meet the protocol from AWE designer and these requirements are all handled by that task. The application examples in `AN02016 <http://www.xmos.com/file/an02016-integrating-audio-weaver-awe-core-into-usb-audio/>`_ utilise the USB/HID tuning interface and are the suggested entry point for users who are new to ``lib_awe``.
 
 The firmware provides a locking mechanism to ensure that messages are atomic when multiple tuning interfaces are used.
 
@@ -173,7 +177,7 @@ How many threads to define for lib_awe?
 .......................................
 
 AWE supports multi-threaded operation meaning that a large pipeline may be split across multiple threads.
-``lib_awe`` implements this capability by offering multiple hardware threads which can be used as stages for the user design. Simple designs may only require one thread, however, complex user designs may need to be split across multiple threads. An AWE block, available in AWE Designer, called ``Buffer Up V2`` is available to explicitly move the downstream blocks onto the next thread in ``lib_awe``.
+``lib_awe`` implements this capability by offering multiple hardware threads which can be used as stages for the user design. Simple designs may only require one thread, however, complex user designs may need to be split across multiple threads. An AWE block, available in AWE Designer, called ``BufferUpV2`` is available to explicitly move the downstream blocks onto the next thread in ``lib_awe``.
 
 .. figure:: ../images/bufferup.png
    :width: 20%
@@ -182,13 +186,15 @@ AWE supports multi-threaded operation meaning that a large pipeline may be split
 
 The CPU usage metric in ``AWE Server`` (part of the AWE Designer software) allows tracking of processor loading as does the firmware API ``xawe_getAverageLayoutCycles(UINT32 *average_cycles)`` call.
 
-By default, two threads are allocated to ``lib_awe`` for DSP work. The amount of MIPS available per thread in the device is dependent on the core clock frequency and the maximum number of active threads. For designs using 5 or fewer threads the maximum number of MIPS is f / 5, which is 160 MIPS per thread for a 800MHz core clock (i.e. 32 speed grade) part,  or f / n for 6 to 8 active threads. Hence for AWE designs not exploiting the multi-threaded capability, setting ``AWE_DSP_THREAD_NUM`` to two or one will maximise the available performance.
+By default, two threads are allocated to ``lib_awe`` for DSP work. The amount of MIPS available per thread in the device is dependent on the core clock frequency and the maximum number of active threads. For designs using 5 or fewer threads the maximum number of MIPS is f / 5, which is 160 MIPS per thread for a 800MHz core clock (i.e. 32 speed grade) part,  or f / n for 6 to 8 active threads. Hence for AWE designs not exploiting the multi-threaded capability, setting ``AWE_DSP_THREAD_NUM`` to to one, two, or three will maximise the available
+performance for the single threads. Setting it to four or five will maximise the throughput of the
+system as a whole.
 
 
 How much HEAP to allocate?
 ..........................
 
-Again this is design dependent. Large delay lines or filters with large numbers of coefficients will significantly increase the required heap size. Simple biquad filtering designs may only require a few hundred words of heap whereas a large FIR or reverb block may take tens of thousands of long words of HEAP.
+This is design dependent. Large delay lines or filters with large numbers of coefficients will significantly increase the required heap size. Simple biquad filtering designs may only require a few hundred words of heap whereas a large FIR or reverb block may take tens of thousands of 32-bit words of HEAP.
 
 A default implementation in lib_awe will provide at least 50 k words of HEAP which is sufficient for many cases. The ``AWE_HEAP_SIZE_LONG_WORDS`` define (described in API section) controls this and is statically allocated at compile time.
 
