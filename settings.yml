@@ -16,7 +16,6 @@ documentation:
     doc/rst/lib_awe.rst:
       pdf_title: '{{title}}'
       pdf_filename: '{{lib_name}}_v{{version}}'
-      pdf_short: yes
     README.rst:
       pdf_title: '{{title}} (README)'
       pdf_filename: '{{lib_name}}_v{{version}}_readme'
