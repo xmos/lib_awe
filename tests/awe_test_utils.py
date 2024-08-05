@@ -17,7 +17,7 @@ xe_cmd = "test_basic/bin/test_awe_basic.xe"
 xe_xawe = "test_xawe_if/bin/test_xawe_if.xe"
 xe_ffs_rpc = "test_ffs_rpc/bin/test_ffs_rpc.xe"
 xe_ffs_rpc_device = "test_ffs_awb_device/bin/test_ffs_awb_device.xe"
-xe_demo_ffs_host = "../../an02016/app_usb_audio_awe/bin/UA_FFS/app_usb_audio_awe_UA_FFS.xe"
+xe_demo_ffs_host = "../../an02016/app_an02016/bin/UA_FFS/app_an02016_UA_FFS.xe"
 dp_with_ffs = "../examples/audioweaver/awb_files/data_partition_ffs.bin" # This is a pre-formatted and populated FFS with 2 x AWBs on it
 boot_partition_size = 0x80000
 
