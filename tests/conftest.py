@@ -34,10 +34,10 @@ class AweDut(UaDut):
         fw_path = (
             Path(__file__).parents[2]
             / "an02016"
-            / "app_usb_audio_awe"
+            / "app_an02016"
             / "bin"
             / config
-            / f"app_usb_audio_awe_{config}.xe"
+            / f"app_an02016_{config}.xe"
         )
         assert fw_path.exists()
 
