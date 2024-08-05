@@ -17,7 +17,7 @@ from hardware_test_tools.check_analyzer_output import check_analyzer_output
 @pytest.mark.hw
 @pytest.mark.parametrize("awb_load_method", ["HID", "FFS"])
 @pytest.mark.parametrize("audio_transport", ["UA", "I2S"])
-def test_stream_out(pytestconfig, awb_load_method, flash_ua_with_ffs):
+def test_stream_out(pytestconfig, awb_load_method, audio_transport, flash_ua_with_ffs):
     adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
 
     if audio_transport == "I2S" and awb_load_method == "FFS":
@@ -48,7 +48,10 @@ def test_stream_out(pytestconfig, awb_load_method, flash_ua_with_ffs):
         with AudioAnalyzerHarness(
             adapter_harness, analyzer_dir, attach="xscope"
         ) as harness:
-            xsig_config = Path(__file__).parent / "output_sine_2ch.json"
+            if audio_transport == "UA":
+                xsig_config = Path(__file__).parent / "output_sine_2ch.json"
+            else:
+                xsig_config = Path(__file__).parent / "input_sine_2ch.json"
             assert xsig_config.exists()
 
             with XsigOutput(fs, None, xsig_config, dut.dev_name) as xsig_proc:
