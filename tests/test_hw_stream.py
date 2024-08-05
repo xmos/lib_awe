@@ -15,14 +15,20 @@ from hardware_test_tools.check_analyzer_output import check_analyzer_output
 
 
 @pytest.mark.hw
-@pytest.mark.parametrize("awb_load_method", ["hid", "ffs"])
+@pytest.mark.parametrize("awb_load_method", ["HID", "FFS"])
+@pytest.mark.parametrize("audio_transport", ["UA", "I2S"])
 def test_stream_out(pytestconfig, awb_load_method, flash_ua_with_ffs):
     adapter_dut, adapter_harness = get_xtag_ids(pytestconfig)
 
-    with AweDut(adapter_dut, "UA" if awb_load_method == "hid" else "UA_FFS") as dut:
+    if audio_transport == "I2S" and awb_load_method == "FFS":
+        pytest.skip() # FFS/I2S not a supported build config yet
+
+    config = audio_transport + "" if awb_load_method == "HID" else "_FFS"
+
+    with AweDut(adapter_dut, config) as dut:
         awe = awe_hid_comms()
 
-        if awb_load_method == "ffs":
+        if awb_load_method == "FFS":
             awe.load_awb_from_ffs("playBasic_3thread.awb")
         else:
             awb = (
