@@ -75,21 +75,20 @@ def test_stream_i2s_loop(pytestconfig, awb_load_method):
     config = "I2S" + ("" if awb_load_method == "HID" else "_FFS")
 
     with AweDutNoUA(adapter_dut, config) as dut:
-        # THIS ISNT WORKING DUE TO FW SO SKIP FOR NOW
-        # awe = awe_hid_comms()
+        awe = awe_hid_comms()
 
-        # if awb_load_method == "FFS":
-        #     awe.load_awb_from_ffs("playBasic_3thread.awb")
-        # else:
-        #     awb = (
-        #         Path(__file__).parents[1]
-        #         / "examples"
-        #         / "audioweaver"
-        #         / "awb_files"
-        #         / "playBasic_3thread.awb"
-        #     )
-        #     assert awb.exists()
-        #     awe.send_awb(awb)
+        if awb_load_method == "FFS":
+            awe.load_awb_from_ffs("playBasic_3thread.awb")
+        else:
+            awb = (
+                Path(__file__).parents[1]
+                / "examples"
+                / "audioweaver"
+                / "awb_files"
+                / "playBasic_3thread.awb"
+            )
+            assert awb.exists()
+            awe.send_awb(awb)
 
         fs = 48000
         duration = 30
