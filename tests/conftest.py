@@ -5,7 +5,7 @@ from pathlib import Path
 import platform
 import pytest
 import time
-
+import shutil
 
 from hardware_test_tools.UaDut import UaDut
 from hardware_test_tools.XcoreApp import XcoreApp
