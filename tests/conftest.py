@@ -2,8 +2,10 @@
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 from pathlib import Path
+import platform
 import pytest
 import time
+
 
 from hardware_test_tools.UaDut import UaDut
 from hardware_test_tools.XcoreApp import XcoreApp
