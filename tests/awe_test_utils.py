@@ -94,7 +94,7 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
     resp_b = 0x40000
     delay_after_stop_audio_s = 0.01 # This has been tested to be stable at 6ms and above over 5000 iterations. Set to 10ms for margin
 
-    def __init__(self, VID=0x20b1, PID=0x18, debug=False):
+    def __init__(self, VID=0x20b1, PID=0x18, debug=False, timeout=30):
         np.set_printoptions(formatter={'int':hex})
         self.awe_hid_len = 56 # Bytes
 
@@ -109,8 +109,19 @@ class awe_hid_comms(awe_error_codes, awe_cmd_list):
         self.debug = debug
 
         self.dev = hid.device()
-        self.dev.open(VID, PID)
+        attempt = 0
+        connected = False
+        while not connected:
+            try:
+                attempt += 1
+                self.dev.open(VID, PID)
 
+                connected = True
+            except OSError:
+                print(f"HID connection failed, retrying...{attempt}")
+                time.sleep(1)
+                if attempt == timeout:
+                    raise RuntimeError(f"unable to open HID 0x{VID:x} 0x{PID:x} after {timeout}s") 
         if debug:
             print(f"Connected to 0x{VID:x} 0x{PID:x}")
 

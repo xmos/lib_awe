@@ -2,10 +2,13 @@
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 from pathlib import Path
+import platform
 import pytest
 import time
+import shutil
 
 from hardware_test_tools.UaDut import UaDut
+from hardware_test_tools.XcoreApp import XcoreApp
 from awe_test_utils import flash_xe, xe_demo_ffs_host, boot_partition_size, dp_with_ffs
 
 def pytest_addoption(parser):
@@ -55,6 +58,55 @@ class AweDut(UaDut):
             chans_out,
             xflash=xflash,
         )
+
+class AweDutNoUA(XcoreApp):
+    def __init__(self, adapter_id, config, pid=0x18, timeout=60, xflash=False):
+        fw_path = (
+            Path(__file__).parents[2]
+            / "an02016"
+            / "app_an02016"
+            / "bin"
+            / config
+            / f"app_an02016_{config}.xe"
+        )
+        assert fw_path.exists(), f"Firmware not present at {fw_path}"
+
+        prod_str = "XMOS xCORE.ai AWE (UAC2.0)" # Currently unused - TODO remove?
+        self.pid = pid
+
+        super().__init__(fw_path, adapter_id, timeout=timeout, xflash=xflash)
+
+    def __enter__(self):
+        super().__enter__()
+
+        if platform.system() == "Windows":
+            # Delay to allow the Windows to set up the new device
+            time.sleep(40)
+
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+
+        super().__exit__(exc_type, exc_val, exc_tb)
+
+        if platform.system() == "Windows":
+            # Delay to allow the Windows services to settle after the device is removed
+            time.sleep(15)
+
+            # If usbdeview program is present on Windows, uninstall the device to force
+            # re-enumeration next time and avoid caching of device features by the OS
+            usbdeview_path = shutil.which("usbdeview")
+            if usbdeview_path:
+                subprocess.run(
+                    [
+                        usbdeview_path,
+                        "/RunAsAdmin",
+                        "/remove_by_pid",
+                        f"0x20b1;{hex(self.pid)}",
+                    ],
+                    timeout=10,
+                )
+
 
 
 def get_xtag_ids(pytestconfig):
