@@ -65,7 +65,7 @@ def test_stream_out(pytestconfig, awb_load_method, flash_ua_with_ffs):
             assert len(failures) == 0, f"Failures: {fail_str}"
 
 
-# Hard-coded analyser I2S output check
+# Hard-coded for I2S build analyser output check
 def check_analyzer_output_i2s(xscope_lines):
     regex_matches = [r"Channel 0: Frequency 1000",
                     r"Channel 1: Frequency 2000"]
