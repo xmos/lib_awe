@@ -74,7 +74,7 @@ def check_analyzer_output_i2s(xscope_lines):
     for regex_match in regex_matches:
         found = False
         for line in xscope_lines:
-            match = re.search(expected, line)
+            match = re.search(regex_match, line)
             if match:
                 found = True
         if not found:
