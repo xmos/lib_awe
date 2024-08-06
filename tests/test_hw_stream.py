@@ -7,12 +7,11 @@ import pytest
 import time
 
 from awe_test_utils import awe_hid_comms, xe_demo_ffs_host, boot_partition_size, dp_with_ffs
-from conftest import AweDut, get_xtag_ids
+from conftest import AweDut, AweDutNoUA, get_xtag_ids
 
 from hardware_test_tools.AudioAnalyzerHarness import AudioAnalyzerHarness
 from hardware_test_tools.Xsig import XsigOutput
 from hardware_test_tools.check_analyzer_output import check_analyzer_output
-
 
 @pytest.mark.hw
 @pytest.mark.parametrize("awb_load_method", ["HID", "FFS"])
@@ -74,7 +73,7 @@ def test_stream_i2s_loop(pytestconfig, awb_load_method):
 
     config = "I2S" + ("" if awb_load_method == "HID" else "_FFS")
 
-    with AweDut(adapter_dut, config) as dut:
+    with AweDutNoUA(adapter_dut, config) as dut:
         awe = awe_hid_comms()
 
         if awb_load_method == "FFS":
@@ -98,24 +97,23 @@ def test_stream_i2s_loop(pytestconfig, awb_load_method):
             adapter_harness, analyzer_dir, attach="xscope"
         ) as harness:
 
-            xsig_config = Path(__file__).parent / "input_sine_2ch.json"
-            assert xsig_config.exists()
+            # xsig_config = Path(__file__).parent / "input_sine_2ch.json"
+            # assert xsig_config.exists()
 
-            with XsigOutput(fs, None, xsig_config, dut.dev_name) as xsig_proc:
-                time.sleep(duration)
-                harness.terminate()
-                xscope_lines = harness.proc_stdout + harness.proc_stderr
+            # NO xsig as we have no audio device
+            time.sleep(duration)
+            harness.terminate()
+            xscope_lines = harness.proc_stdout + harness.proc_stderr
 
-            with open(xsig_config) as file:
-                xsig_json = json.load(file)
-
-            failures = check_analyzer_output(xscope_lines, xsig_json["out"])
-            fail_str = (
-                "\n".join(failures)
-                + f"\n\nxscope output:\n{xscope_lines}\n"
-                + f"xsig output:\n{xsig_proc.proc_output}"
-            )
+            # failures = check_analyzer_output(xscope_lines, xsig_json["out"])
+            # fail_str = (
+            #     "\n".join(failures)
+            #     + f"\n\nxscope output:\n{xscope_lines}\n"
+            #     + f"xsig output:\n{xsig_proc.proc_output}"
+            # )
 
             print(xscope_lines, file=sys.stderr)
 
-            assert len(failures) == 0, f"Failures: {fail_str}"
+            assert False
+
+            # assert len(failures) == 0, f"Failures: {fail_str}"
