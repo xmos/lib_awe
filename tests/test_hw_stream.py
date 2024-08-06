@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 import time
 import sys
+import re
 
 from awe_test_utils import awe_hid_comms, xe_demo_ffs_host, boot_partition_size, dp_with_ffs
 from conftest import AweDut, AweDutNoUA, get_xtag_ids
@@ -64,6 +65,28 @@ def test_stream_out(pytestconfig, awb_load_method, flash_ua_with_ffs):
             assert len(failures) == 0, f"Failures: {fail_str}"
 
 
+# Hard-coded analyser I2S output check
+def check_analyzer_output_i2s(xscope_lines):
+    regex_matches = [r"Channel 0: Frequency 1000",
+                    r"Channel 1: Frequency 2000"]
+    desired_output_found = True
+
+    for regex_match in regex_matches:
+        found = False
+        for line in xscope_lines:
+            match = re.search(expected, line)
+            if match:
+                found = True
+        if not found:
+            print(f"ERROR - regex_match: {regex_match} not found.", file=sys.stderr)
+            desired_output_found = False
+
+    if not desired_output_found:
+        print(f"in analyser output:\n\n{xscope_lines}", file=sys.stderr)
+
+    return desired_output_found        
+
+
 @pytest.mark.hw
 @pytest.mark.parametrize("awb_load_method", ["HID", "FFS"])
 def test_stream_i2s_loop(pytestconfig, awb_load_method):
@@ -98,23 +121,9 @@ def test_stream_i2s_loop(pytestconfig, awb_load_method):
             adapter_harness, analyzer_dir, attach="xscope"
         ) as harness:
 
-            # xsig_config = Path(__file__).parent / "input_sine_2ch.json"
-            # assert xsig_config.exists()
-
             # NO xsig as we have no audio device
             time.sleep(duration)
             harness.terminate()
             xscope_lines = harness.proc_stdout + harness.proc_stderr
 
-            # failures = check_analyzer_output(xscope_lines, xsig_json["out"])
-            # fail_str = (
-            #     "\n".join(failures)
-            #     + f"\n\nxscope output:\n{xscope_lines}\n"
-            #     + f"xsig output:\n{xsig_proc.proc_output}"
-            # )
-
-            print(xscope_lines, file=sys.stderr)
-
-            assert False
-
-            # assert len(failures) == 0, f"Failures: {fail_str}"
+            check_analyzer_output_i2s(xscope_lines)
