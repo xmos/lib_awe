@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import pytest
 import time
+import sys
 
 from awe_test_utils import awe_hid_comms, xe_demo_ffs_host, boot_partition_size, dp_with_ffs
 from conftest import AweDut, AweDutNoUA, get_xtag_ids
