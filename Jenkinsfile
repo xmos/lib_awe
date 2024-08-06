@@ -236,7 +236,9 @@ pipeline {
               withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
                 withVenv {
                   withTools(params.TOOLS_VERSION) {
-                    sh "pip install -e ${WORKSPACE}/xtagctl"
+                    dir("${WORKSPACE}/xtagctl") {
+                      sh "pip install -e ."
+                    }
 
                     // Get pre-built application example XEs
                     unstash "xe_files"
