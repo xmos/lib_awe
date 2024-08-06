@@ -247,11 +247,11 @@ pipeline {
                     withTools(params.TOOLS_VERSION) {
                       dir("test_ffs_rpc"){
                         sh "cmake -G \"Unix Makefiles\" -B build"
-                        sh "xmake -C build -j"
+                        sh "xmake -C build"
                       }
                       dir("test_ffs_awb_device"){
                         sh "cmake -G \"Unix Makefiles\" -B build"
-                        sh "xmake -C build -j"
+                        sh "xmake -C build"
                       }
                     }
 
