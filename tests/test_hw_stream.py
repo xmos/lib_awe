@@ -66,6 +66,12 @@ def test_stream_out(pytestconfig, awb_load_method, flash_ua_with_ffs):
 
 
 # Hard-coded for I2S build analyser output check
+"""
+The is a limitation in the test: it checks whether the analyser ever sees the expected frequencies or not,
+but it doesn't check for other issues that could occur (changing frequencies, glitches).
+To catch all of that would probably need more work to use the generic checker function from hardware_test_tools.
+Something we should consider in terms of how comprehensive this test needs to be.
+"""
 def check_analyzer_output_i2s(xscope_lines):
     regex_matches = [r"Channel 0: Frequency 1000",
                     r"Channel 1: Frequency 2000"]
@@ -94,6 +100,9 @@ def test_stream_i2s_loop(pytestconfig, awb_load_method):
 
     if awb_load_method == "FFS":
         pytest.skip() # FFS/I2S not a supported build config yet
+
+    if awb_load_method == "HID":
+        pytest.skip() # Can uncomment when https://github.com/xmos/lib_awe/issues/69 addressed
 
     config = "I2S" + ("" if awb_load_method == "HID" else "_FFS")
 

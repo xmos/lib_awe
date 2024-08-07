@@ -75,7 +75,6 @@ class AweDutNoUA(XcoreApp):
         )
         assert fw_path.exists(), f"Firmware not present at {fw_path}"
 
-        prod_str = "XMOS xCORE.ai AWE (UAC2.0)" # Currently unused - TODO remove?
         self.pid = pid
 
         super().__init__(fw_path, adapter_id, timeout=timeout, xflash=xflash)
