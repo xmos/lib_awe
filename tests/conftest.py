@@ -6,6 +6,7 @@ import platform
 import pytest
 import time
 import shutil
+import subprocess
 
 from hardware_test_tools.UaDut import UaDut
 from hardware_test_tools.XcoreApp import XcoreApp
