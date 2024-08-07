@@ -44,7 +44,7 @@ Known Issues
   * Audio Weaver Designer code-generation produces mis-matched declaration (const) between .h and c files `(#39) <https://github.com/xmos/lib_awe/issues/39>`_
   * Currently xscope cannot be using alongside lib_awe `(#55) <https://github.com/xmos/lib_awe/issues/55>`_
   * Currently the USB HID tuning interface cannot be used if the Thesycon TUSBAudio driver is
-    installed against the device `(#69) <https://github.com/xmos/lib_awe/issues/69>`_
+    installed against the device that doesn't expose a UAC interface `(#69) <https://github.com/xmos/lib_awe/issues/69>`_
 
 Host System Requirements
 ========================
