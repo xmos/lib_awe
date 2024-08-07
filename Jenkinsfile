@@ -122,7 +122,7 @@ pipeline {
     } // on linux
     stage('Tests and docs') {
       parallel {
-        stage('HW tests') {
+        stage('HW tests Mac') {
           agent {
             label 'usb_audio && macos && arm64 && xcore.ai-mcab'
           }
@@ -195,7 +195,83 @@ pipeline {
               xcoreCleanSandbox()
             }
           }
-        } // HW tests
+        } // HW tests win
+        stage('HW tests Win') {
+          agent {
+            label 'usb_audio && windows11 && xcore.ai-mcab'
+          }
+          steps {
+            println "Stage running on ${env.NODE_NAME}"
+            sh "git clone git@github0.xmos.com:xmos-int/xtagctl"
+            sh "git -C xtagctl checkout ${env.XTAGCTL_VERSION}"
+
+            dir("sw_audio_analyzer") {
+              copyArtifacts filter: '**/*.xe', fingerprintArtifacts: true, projectName: 'xmos-int/sw_audio_analyzer/master', selector: lastSuccessful()
+              copyArtifacts filter: 'host_xscope_controller/bin_windows/xscope_controller.exe', fingerprintArtifacts: true, projectName: 'xmos-int/sw_audio_analyzer/master', selector: lastSuccessful()
+            }
+
+            dir("${REPO}") {
+              checkout scm
+              sh "git submodule update --init"
+              createVenv()
+              withVenv {
+                sh 'pip install -r requirements.txt'
+              }
+              withCredentials([file(credentialsId: "${AWE_CORE_VERSION}", variable: 'DSPC_AWE_LIB')]) {
+                sh 'cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a/libAWECore.a' // Bring AWE library in
+              }
+            }
+
+            dir("${EXAMPLE}") {
+              unstash "xe_files"
+            }
+
+            get_xcommon_cmake()
+
+            dir("${REPO}/tests") {
+              dir("hardware_test_tools/xsig") {
+                copyArtifacts filter: 'bin-windows-x86/xsig.exe', fingerprintArtifacts: true, projectName: 'xmos-int/xsig/master', flatten: true, selector: lastSuccessful()
+              }
+
+              withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
+                withVenv {
+                  withTools(params.TOOLS_VERSION) {
+                    dir("${WORKSPACE}/xtagctl") {
+                      sh "pip install -e ."
+                    }
+
+                    // Get pre-built application example XEs
+                    unstash "xe_files"
+
+                    // Build test XEs
+                    withTools(params.TOOLS_VERSION) {
+                      dir("test_ffs_rpc"){
+                        sh "cmake -G \"Unix Makefiles\" -B build"
+                        sh "xmake -C build"
+                      }
+                      dir("test_ffs_awb_device"){
+                        sh "cmake -G \"Unix Makefiles\" -B build"
+                        sh "xmake -C build"
+                      }
+                    }
+
+                    withXTAG(["usb_audio_mc_xcai_dut", "usb_audio_mc_xcai_harness"]) { xtagIds ->
+                      sh "pytest -v -m hw --junitxml=pytest_result_hw.xml -o xtag_dut=${xtagIds[0]} -o xtag_harness=${xtagIds[1]}"
+                    }
+                  } // Tools
+                } // Venv
+              } // XCCM
+            } // dir
+          } // steps
+          post {
+            always {
+              junit "${REPO}/tests/pytest_result_hw.xml"
+            }
+            cleanup {
+              xcoreCleanSandbox()
+            }
+          }
+        } // HW tests win
         stage('Sim Tests') {
           agent {
             label 'x86_64 && linux'

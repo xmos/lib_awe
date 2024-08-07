@@ -6,6 +6,7 @@ import platform
 import pytest
 import time
 import shutil
+import subprocess
 
 from hardware_test_tools.UaDut import UaDut
 from hardware_test_tools.XcoreApp import XcoreApp
@@ -45,7 +46,11 @@ class AweDut(UaDut):
         assert fw_path.exists()
 
         pid = 0x18
-        prod_str = "XMOS xCORE.ai AWE (UAC2.0)"
+        # Thesycon don't use the product string and build thier own device name
+        if platform.system() == "Windows":
+            prod_str = "XMOS USB Audio Device"
+        else:
+            prod_str = "XMOS xCORE.ai AWE (UAC2.0)"
         chans_in = 2
         chans_out = 2
 
@@ -71,7 +76,6 @@ class AweDutNoUA(XcoreApp):
         )
         assert fw_path.exists(), f"Firmware not present at {fw_path}"
 
-        prod_str = "XMOS xCORE.ai AWE (UAC2.0)" # Currently unused - TODO remove?
         self.pid = pid
 
         super().__init__(fw_path, adapter_id, timeout=timeout, xflash=xflash)
