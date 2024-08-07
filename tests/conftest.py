@@ -45,7 +45,11 @@ class AweDut(UaDut):
         assert fw_path.exists()
 
         pid = 0x18
-        prod_str = "XMOS xCORE.ai AWE (UAC2.0)"
+        # Thesycon don't use the product string and build thier own device name
+        if platform.system() == "Windows":
+            prod_str = "XMOS USB Audio Device"
+        else:
+            prod_str = "XMOS xCORE.ai AWE (UAC2.0)"
         chans_in = 2
         chans_out = 2
 
