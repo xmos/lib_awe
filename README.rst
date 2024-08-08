@@ -66,7 +66,7 @@ Related Application Notes
 
 The following application notes use this library:
 
-  * AN020016: Integrating Audio Weaver (AWE) Core into USB Audio
+  * `AN020016: Integrating Audio Weaver (AWE) Core into USB Audio <https://www.xmos.com/file/an02016>`_
 
 Support
 =======
