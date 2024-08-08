@@ -21,8 +21,8 @@ allow control and loading of pre-built Audio Weaver designs from a host or inter
 device.
 
 .. note::
-    You must manually obtain the libAWWCore.a file and place in the lib_awe/lib/xs3a directory in
-    able to build applications with this software.
+    You must manually obtain the `libAWECore.a <https://www.xmos.com/file/libawecore_a>`_ file and
+    place in the lib_awe/lib/xs3a directory inable to build applications with this software.
 
 Features
 ========
