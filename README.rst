@@ -4,7 +4,7 @@ lib_awe: AWE Core for xcore
 ###########################
 
 :vendor: XMOS
-:version: 1.0.0
+:version: 1.0.1
 :scope: General Use
 :description: Audio Weaver (AWE) Core for xcore
 :category: Audio
