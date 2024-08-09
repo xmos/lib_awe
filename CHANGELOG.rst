@@ -4,7 +4,7 @@ lib_awe Change Log
 1.0.1
 -----
 
-  * Documentation improvements
+  * CHANGED: Documentation improvements
 
 1.0.0
 -----
