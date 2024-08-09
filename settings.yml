@@ -7,7 +7,7 @@ version: 1.0.0
 documentation:
   exclude_patterns_path: doc/exclude_patterns.inc
   root_doc: doc/rst/lib_awe.rst
-  linkcheck_ignore_regex: ['.*lib_awe.*', '.*an02016.*']
+  linkcheck_ignore_regex: ['.*lib_awe.*', '.*an02016.*', '.*libawecore.*']
   cognidox_part_number: XM-015096-UG
   doxygen_projects:
     lib_xcore_math:

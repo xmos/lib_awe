@@ -1,6 +1,11 @@
 lib_awe Change Log
 ==================
 
+1.0.1
+-----
+
+  * Documentation improvements
+
 1.0.0
 -----
 
