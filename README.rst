@@ -1,5 +1,6 @@
 :orphan:
 
+###########################
 lib_awe: AWE Core for xcore
 ###########################
 
@@ -48,7 +49,7 @@ Known Issues
 Host System Requirements
 ************************
 
-For development a installation (and licence) of AudioWeaver is required
+  * For development a installation (and licence) of Audio Weaver Designer is required
 
 Required Tools
 **************
