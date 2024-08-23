@@ -1,40 +1,39 @@
+
+###########################
 lib_awe: AWE Core for xcore
-===========================
+###########################
 
+************
 Introduction
-------------
+************
 
-Audio Weaver comprises GUI tools (Designer) and libraries (Core) for implementing audio Digital
+`Audio Weaver` comprises GUI tools (Designer) and libraries (Core) for implementing audio Digital
 Signal Processing (DSP) algorithms. Developed by DSP Concepts (DSPC), it delivers signal processing
 building blocks, referred to as "modules". Module capabilties range from simple filtering to data
 type conversions all the way to much more specialised processing. These can be assembled, deleted
 and rearranged in the Designer GUI and then executed on a device. A control library is available
 that enables on-line control of the blocks.
 
-xcore is a programmable multi-core device with flexible DSP and IO interfaces. The IO interfaces can be programmed to, for example, I2S, TDM, USB, ADAT or S/PDIF interfaces (or indeed any other interface), and the DSP capability can be used to operate on data that is received from or sent to these interfaces. In addition to interfaces and DSP, xcore devices can also execute control code or even ML inference engines.
+`xcore` is a programmable multi-core device with flexible DSP and IO interfaces. The IO interfaces can be programmed to, for example, I2S, TDM, USB, ADAT or S/PDIF interfaces (or indeed any other interface), and the DSP capability can be used to operate on data that is received from or sent to these interfaces. In addition to interfaces and DSP, xcore devices can also execute control code or even ML inference engines.
 
-``Lib_awe`` is a port of Audio Weaver Core for XMOS's powerful xcore.ai device. It contains code for software threads which wrap the core library and provide easy interfacing to both audio streaming components such as I2S and USB Audio as well as tuning interfacing to allow control and loading of pre-built designs from a host or internally from the device.
+``Lib_awe`` is a port of `Audio Weaver Core` for `XMOS`'s powerful `xcore.ai` device. It contains code for software threads which wrap the core library and provide easy interfacing to both audio streaming components such as I2S and USB Audio as well as tuning interfacing to allow control and loading of pre-built designs from a host or internally from the device.
 
-It utilises xcore.ai's multi-threaded architecture and vector processing unit to provide very high performance and predictable timing required by embedded systems.
+It utilises `xcore.ai`'s multi-threaded architecture and vector processing unit to provide very high performance and predictable timing required by embedded systems.
 
 .. note::
-    This document refers to the XMOS specific implementation details. DSP Concepts provide several documents on the usage and integration of Audio Weaver into the user's system. Please refer to https://documentation.dspconcepts.com for documentation specific to Audio Weaver.
+    This document refers to the `XMOS` specific implementation details. DSP Concepts provide several documents on the usage and integration of Audio Weaver into the user's system. Please refer to https://documentation.dspconcepts.com for documentation specific to Audio Weaver.
 
-For reference, we refer to the following repositories that you may want to
-use:
+This document makes reference to the following `XMOS` libraries;
 
-* <https://github.com/xmos/lib_awe.git> for the library that integrates
-  Audio Weaver and xcore.
-
-* <https://github.com/xmos/lib_xua.git> for the USB Audio library
-  design
+* `lib_xua <https://github.com/xmos/lib_xua.git>`_: the USB Audio library
 
 .. note::
     The ``libAWECore.a`` file is not provided as part of the lib_awe repository for commercial reasons.
-    Please obtain this file from your XMOS or DSPC contact directly.
+    Please obtain this file from a `XMOS` or `DSPC` contact directly.
 
+************
 Architecture
-------------
+************
 
 ``Lib_awe`` provides an interface to the audio streaming and tuning functions using xcore channels which allow placement of the application blocks on different tiles from lib_awe.
 
@@ -46,7 +45,7 @@ Architecture
 
 ``lib_awe`` consists of a group of threads. There are a statically defined number (maximum 5) of DSP worker threads which perform the AWE core functionality within the Audio Weaver runtime core.
 
-To support audio streaming an audio transport thread provides a channel interface to the Audio Weaver ``awe_audioImportSamples()`` and ``awe_audioExportSamples()`` functions. The purpose of this thread is to simplify connection to XMOS audio streaming components and user application logic and allows placement of the user application logic on a different tile.
+To support audio streaming an audio transport thread provides a channel interface to the Audio Weaver ``awe_audioImportSamples()`` and ``awe_audioExportSamples()`` functions. The purpose of this thread is to simplify connection to `XMOS` audio streaming components and user application logic and allows placement of the user application logic on a different tile.
 
 Finally, a tuning thread is provided which abstracts away the ``awe_packetProcess()``` function calls and provides a channel API and also presents a channel interface allowing placement of control to be on a different tile. In AWE nomenclature, this provides a ``tuning interface`` which is different from a ``control interface`` in that the control interface uses function calls whereas tuning is a remote operation. The same functionality is available for both AWE control approaches however, for the xcore port, the ``tuning interface`` method is default since it allows control logic to be placed on a remote tile that does not share memory space with the AWE tile.
 
@@ -54,18 +53,21 @@ The channel-based tuning interface supports multiple clients. The USB/HID and in
 
 All of the described threads for lib_awe need to be placed on the same tile. Since the majority of one tile's RAM and many of the threads are typically used by lib_awe it is typical to dedicate one tile to lib_awe and use the other tile for application logic. However, low-memory usage tasks such as I2S may also be placed on the lib_awe tile (when required by hardware IO constraints) and this is demonstrated in the USB Audio Example.
 
-An additional thread may be used in the case where the AWE Flash File System (FFS) is enabled. The FFS can be used to store compiled AWE design files. The flash server thread provides a remote flash memory access server meaning that the AWE Core and the flash memory IO may exist on different tiles. Use of the FFS is optional and can be enabled or disabled using defines (see API). The flash server makes use of the flash access API provided in the XMOS tools ``quadflashlib.h``. Documentation regarding this can be found in the `XTC Tools Manual <https://www.xmos.com/documentation/XM-014363-PC-LATEST/html/tools-guide/tools-ref/libraries/libflash-api/libflash-api.html>`_.
+An additional thread may be used in the case where the AWE Flash File System (FFS) is enabled. The FFS can be used to store compiled AWE design files. The flash server thread provides a remote flash memory access server meaning that the AWE Core and the flash memory IO may exist on different tiles. Use of the FFS is optional and can be enabled or disabled using defines (see API). The flash server makes use of the flash access API provided in the `XMOS` tools ``quadflashlib.h``. Documentation regarding this can be found in the `XTC Tools Manual <https://www.xmos.com/documentation/XM-014363-PC-LATEST/html/tools-guide/tools-ref/libraries/libflash-api/libflash-api.html>`_.
 
 .. _sec_lib_awe_api:
 
 lib_awe API
------------
+===========
 
-In order to use the functions, one needs to configure the library to use the correct number of audio channels, threads, and heaps. To this effect, create a file ``awe_conf.h`` in your project that defines the values in :numref:`tab_defines`. Note, the ``xcommon-cmake`` build system will automatically find and use this header file.
+In order to use the functions, the library needs to be configured to use the correct number of audio
+channels, threads, and heaps. To this effect, a  ``awe_conf.h`` file shoudl be created in the
+project that defines the values in :numref:`tab_defines`. Note, the ``xcommon-cmake`` build system
+will automatically find and use this header file.
 
 .. _tab_defines:
 
-.. table:: User defines
+.. table:: User
 
     =============================== ============
     Define                          Values
@@ -81,7 +83,7 @@ The ``AWE_BLOCK_SIZE`` value may be adjusted and designs can be created accordin
 however, a block size of 32 is recommended as a good trade-off between system latency, memory usage
 and CPU efficiency which is higher for larger block sizes.
 
-``AWE_HEAP_SIZE_LONG_WORDS`` is dependent on your particular design requirements. In configurations
+``AWE_HEAP_SIZE_LONG_WORDS`` is dependent on the particular design requirements. In configurations
 with a large number of modules, one may have no more space than 50k 32-bit words of heap size.
 In configurations with fewer modules, one can make heaps of 100k 32-bit words.
 
@@ -101,18 +103,19 @@ A single function is provided to wrap the entire ``lib_awe`` implementation and 
 ``lib_awe`` also provides a number of remote tuning function APIs which allow loading of AWB designs, profiling and the setting and getting of tuning parameters from firmware. The external USB/HID interface may co-exist with internal tuning functions. Other interfaces may be used such as UART or I2C although these are not currently implemented.
 
 API Listing
-~~~~~~~~~~~
+-----------
 
 .. doxygengroup:: lib_awe
     :content-only:
 
-Integrating lib_awe into your design
-------------------------------------
+*********************************
+Integrating lib_awe into a design
+*********************************
 
 There are two main APIs for ``lib_awe``; audio data path and control.
 
 Data (Audio interface)
-~~~~~~~~~~~~~~~~~~~~~~
+======================
 
 The data xcore-channel handles the passing of audio samples to and from lib_awe. It consists of a single channel which allows a bi-directional exchange of samples. A convenience function which is called from the user thread handling audio samples is provided by the API::
 
@@ -124,7 +127,7 @@ This convenience function is typically called from an isochronous streaming audi
 
     void UserBufferManagement(unsigned sampsFromUsbToAudio[], unsigned sampsFromAudioToUsb[])
 
-However, if USB audio is not required in your application then the ``awe_offload_data_to_dsp_engine()`` function may be called from any isochronous task running at 48 kHz. For example the following task is a minimal example which sends zeros through the AWE stack::
+However, if USB audio is not required in the target application then the ``awe_offload_data_to_dsp_engine()`` function may be called from any isochronous task running at 48 kHz. For example the following task is a minimal example which sends zeros through the AWE stack::
 
     DECLARE_JOB(data_path, (chanend_t));
     void data_path(chanend_t c_data){
@@ -148,7 +151,7 @@ However, if USB audio is not required in your application then the ``awe_offload
 This example task allocates a hardware timer (which are clocked at 100 MHz) and then calls ``awe_offload_data_to_dsp_engine()`` once every 20.830 microseconds which equates to a sample rate of 48008 Hz.
 
 Control (Tuning interface)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+==========================
 
 A tuning interface is always required in the normal use of ``lib_awe``. At a minimum, it is needed for loading the user design into AWE. The tuning interface can be internal to the firmware, external via a communications interface to a host or both.
 
@@ -169,12 +172,12 @@ The firmware provides a locking mechanism to ensure that messages are atomic whe
 Please refer to :ref:`sec_lib_awe_api` for more details.
 
 Common Questions
-~~~~~~~~~~~~~~~~
+================
 
 Below is a list of common questions that typically arise before integrating ``lib_awe`` into a design.
 
 How many threads to define for lib_awe?
-.......................................
+---------------------------------------
 
 AWE supports multi-threaded operation meaning that a large pipeline may be split across multiple threads.
 ``lib_awe`` implements this capability by offering multiple hardware threads which can be used as stages for the user design. Simple designs may only require one thread, however, complex user designs may need to be split across multiple threads. An AWE block, available in AWE Designer, called ``BufferUpV2`` is available to explicitly move the downstream blocks onto the next thread in ``lib_awe``.
@@ -190,18 +193,18 @@ By default, two threads are allocated to ``lib_awe`` for DSP work. The amount of
 performance for the single threads. Setting it to four or five will maximise the throughput of the
 system as a whole.
 
-
 How much HEAP to allocate?
-..........................
+--------------------------
 
 This is design dependent. Large delay lines or filters with large numbers of coefficients will significantly increase the required heap size. Simple biquad filtering designs may only require a few hundred words of heap whereas a large FIR or reverb block may take tens of thousands of 32-bit words of HEAP.
 
 A default implementation in lib_awe will provide at least 50 k words of HEAP which is sufficient for many cases. The ``AWE_HEAP_SIZE_LONG_WORDS`` define (described in API section) controls this and is statically allocated at compile time.
 
 How to reduce lib_awe memory usage and allow for more memory of the AWE tile?
-.............................................................................
+-----------------------------------------------------------------------------
 
-There are a number of ways to reduce the memory usage on the xcore tile where lib_awe is placed and consequently allow more HEAP for AWE:
+There are a number of ways to reduce the memory usage on the `xcore` tile where ``lib_awe`` is
+placed and consequently allow more HEAP for AWE:
 
 - Disable the Flash File System. This saves around 10 kB on the AWE tile.
 - Reduce number of threads. Each DSP worker thread requires around 4 kB of supporting memory.
@@ -213,11 +216,14 @@ The last point can potentially save a lot of memory, however, it limits the pool
 .. note::
     Removing supported modules from ``awe_module_list.S`` precludes their use in future designs when updated compiled AWB files are downloaded. If a new module is needed then a full DFU, including the required DSP modules, must be performed.
 
-
+********************
 Application Examples
---------------------
+********************
 
-A number of sample applications are provided to help you get up and running quickly. These are based on the XK-AUDIO-316-MC hardware and standard USB Audio Reference Design provided by XMOS in ``sw_usb_audio``.
+A number of sample applications are provided to assist the developer to get up and running quickly.
+These are based on the ``XK-AUDIO-316-MC`` hardware and standard `USB Audio Reference Design` provided by
+`XMOS`.
 
-The application example source code and documentation may be found in application note `AN02016: Integrating Audio Weaver (AWE) Core into USB Audio <http://www.xmos.com/file/an02016-integrating-audio-weaver-awe-core-into-usb-audio/>`_.
+Application example source code and documentation may be found in application note `AN02016:
+Integrating Audio Weaver (AWE) Core into USB Audio <http://www.xmos.com/file/an02016/>`_.
 
