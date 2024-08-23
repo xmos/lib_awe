@@ -2,12 +2,6 @@
 
 getApproval()
 
-// Get XCommon CMake and log a record of the git commit
-def get_xcommon_cmake() {
-  sh 'git clone -b v1.2.0 git@github.com:xmos/xcommon_cmake'
-  sh 'git -C xcommon_cmake rev-parse HEAD'
-}
-
 pipeline {
   agent none
 
@@ -18,7 +12,7 @@ pipeline {
   parameters {
     string(
       name: 'TOOLS_VERSION',
-      defaultValue: '15.2.1',
+      defaultValue: '15.3.0',
       description: 'The XTC tools version'
     )
   }
@@ -44,7 +38,6 @@ pipeline {
             sh "git clone -b v1.2.1 git@github.com:xmos/infr_scripts_py"
             sh "git clone -b v1.5.0 git@github.com:xmos/infr_apps"
             sh "git clone git@github.com:xmosnotes/${EXAMPLE}.git"
-            get_xcommon_cmake()
 
             dir("${REPO}") {
               checkout scm
@@ -76,25 +69,23 @@ pipeline {
         stage('Build examples xcommon_cmake') {
           steps {
             withTools(params.TOOLS_VERSION) {
-              withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
-                dir("${REPO}") {
-                  withCredentials([file(credentialsId: "${AWE_CORE_VERSION}", variable: 'DSPC_AWE_LIB')]) {
-                    sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a/libAWECore.a" // Bring AWE library in
-                  }
+              dir("${REPO}") {
+                withCredentials([file(credentialsId: "${AWE_CORE_VERSION}", variable: 'DSPC_AWE_LIB')]) {
+                  sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a/libAWECore.a" // Bring AWE library in
                 }
-                dir("${EXAMPLE}") {
-                  // Build all example apps
-                  sh "cmake  -G \"Unix Makefiles\" -B build"
-                  archiveArtifacts artifacts: "build/manifest.txt", allowEmptyArchive: false
-                  sh "xmake -C build -j"
-                  archiveArtifacts artifacts: "**/*.xe", allowEmptyArchive: false
-                  stash name: "xe_files", includes: "**/*.xe"
-                } // dir
-              } // withEnv
+              }
+              dir("${EXAMPLE}") {
+                // Build all example apps
+                sh "cmake  -G \"Unix Makefiles\" -B build"
+                archiveArtifacts artifacts: "build/manifest.txt", allowEmptyArchive: false
+                sh "xmake -C build -j"
+                archiveArtifacts artifacts: "**/*.xe", allowEmptyArchive: false
+                stash name: "xe_files", includes: "**/*.xe"
+              } // dir
             } // withTools
           } // steps
         }  // Build examples XCCM
-        stage('Library checks 2') { // This has to be done after build so we have all of the deps fetched 
+        stage('Library checks 2') { // This has to be done after build so we have all of the deps fetched
           steps {
             dir("${REPO}") {
               withTools(params.TOOLS_VERSION) {
@@ -152,14 +143,11 @@ pipeline {
               unstash "xe_files"
             }
 
-            get_xcommon_cmake()
-
             dir("${REPO}/tests") {
               dir("hardware_test_tools/xsig") {
                 copyArtifacts filter: 'bin-macos-arm/xsig', fingerprintArtifacts: true, projectName: 'xmos-int/xsig/master', flatten: true, selector: lastSuccessful()
               }
 
-              withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
                 withVenv {
                   withTools(params.TOOLS_VERSION) {
                     sh "pip install -e ${WORKSPACE}/xtagctl"
@@ -184,7 +172,6 @@ pipeline {
                     }
                   } // Tools
                 } // Venv
-              } // XCCM
             } // dir
           } // steps
           post {
@@ -225,8 +212,6 @@ pipeline {
             dir("${EXAMPLE}") {
               unstash "xe_files"
             }
-
-            get_xcommon_cmake()
 
             dir("${REPO}/tests") {
               dir("hardware_test_tools/xsig") {
@@ -289,10 +274,8 @@ pipeline {
                 sh "cp ${DSPC_AWE_LIB} lib_awe/lib/xs3a/libAWECore.a" // Bring AWE library in
               }
             }
-            get_xcommon_cmake()
 
             dir("${REPO}/tests") {
-              withEnv(["XMOS_CMAKE_PATH=${WORKSPACE}/xcommon_cmake"]) {
                 withVenv {
                   withTools(params.TOOLS_VERSION) {
                     dir("test_basic"){
@@ -307,7 +290,6 @@ pipeline {
                     junit "junit_main.xml"
                   } // withTools
                 } // withVenv
-              } // withEnv
             } // dir
           } // steps
           post {
