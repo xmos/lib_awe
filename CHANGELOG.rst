@@ -1,6 +1,11 @@
 lib_awe Change Log
 ==================
 
+UNRELEASED
+----------
+
+  * FIXED:   Missing header inclusion
+
 1.0.1
 -----
 
