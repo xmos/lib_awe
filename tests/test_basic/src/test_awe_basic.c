@@ -82,6 +82,7 @@ void awe_test(uint32_t *msg_to_awe_buffer, int msg_len, chanend_t c_tuning_from_
 
 DECLARE_JOB(awe_main_wrapper, (chanend_t, chanend_t, chanend_t));
 #pragma stackfunction 5000
+__attribute__((noinline))
 void awe_main_wrapper(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_t c_data){
     awe_xcore_main(c_tuning_from_host, c_tuning_to_host, c_data);
 }

@@ -5,6 +5,7 @@ UNRELEASED
 ----------
 
   * FIXED:   Missing header inclusion
+  * FIXED:   Linker failure with XTC 15.3.0
 
 1.0.1
 -----
