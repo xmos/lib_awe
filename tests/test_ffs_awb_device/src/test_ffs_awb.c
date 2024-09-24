@@ -61,6 +61,7 @@ void awe_test(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host){
 
 DECLARE_JOB(awe_main_wrapper, (chanend_t, chanend_t, chanend_t, chanend_t));
 #pragma stackfunction 5000
+__attribute__((noinline))
 void awe_main_wrapper(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_t c_data, chanend_t c_ffs_rpc){
     init_ffs_rpc_client_chanend(c_ffs_rpc);
     awe_xcore_main(c_tuning_from_host, c_tuning_to_host, c_data);

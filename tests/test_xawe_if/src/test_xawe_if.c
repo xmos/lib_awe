@@ -124,6 +124,7 @@ void awe_test(chanend_t c_data){
 
 DECLARE_JOB(awe_main_wrapper, (chanend_t, chanend_t, chanend_t));
 #pragma stackfunction 5000
+__attribute__((noinline))
 void awe_main_wrapper(chanend_t c_tuning_from_host, chanend_t c_tuning_to_host, chanend_t c_data){
     awe_xcore_main(c_tuning_from_host, c_tuning_to_host, c_data);
 }
